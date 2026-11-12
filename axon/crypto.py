@@ -16,6 +16,7 @@ from pathlib import Path
 from nacl.public import PrivateKey, PublicKey, SealedBox
 from nacl.signing import SigningKey, VerifyKey
 
+from . import tee
 from .config import CFG
 
 
@@ -36,6 +37,9 @@ def _key_file(name: str) -> Path:
 
 
 def load_or_create_signing_key(name: str) -> SigningKey:
+    seed = tee.derive_seed(name)
+    if seed is not None:
+        return SigningKey(seed)
     path = _key_file(name)
     if path.exists():
         return SigningKey(bytes.fromhex(json.loads(path.read_text())["ed25519_seed"]))
@@ -47,6 +51,9 @@ def load_or_create_signing_key(name: str) -> SigningKey:
 
 
 def load_or_create_box_key(name: str) -> PrivateKey:
+    seed = tee.derive_seed(name + "-box")
+    if seed is not None:
+        return PrivateKey(seed)
     path = _key_file(name + "-box")
     if path.exists():
         return PrivateKey(bytes.fromhex(json.loads(path.read_text())["x25519_secret"]))

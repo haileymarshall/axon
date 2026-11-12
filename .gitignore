@@ -6,3 +6,4 @@ data/
 .env
 *.log
 state/
+deploy/vault-compose.yml

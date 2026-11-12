@@ -8,6 +8,7 @@ from __future__ import annotations
 import asyncio
 import base64
 import json
+import os
 from pathlib import Path
 from typing import Any
 
@@ -30,6 +31,9 @@ def yocto_to_near(y: int | str) -> float:
 
 def credentials(account_id: str, network: str = CFG.network) -> str:
     path = Path.home() / ".near-credentials" / network / f"{account_id}.json"
+    # In the TEE there is no keychain: the relaying account's key arrives as a sealed environment variable.
+    if not path.exists() and os.environ.get("AXON_NEAR_PRIVATE_KEY") and account_id == os.environ.get("AXON_OPERATOR"):
+        return os.environ["AXON_NEAR_PRIVATE_KEY"]
     if not path.exists():
         raise FileNotFoundError(f"no key for {account_id} at {path}")
     return json.loads(path.read_text())["private_key"]

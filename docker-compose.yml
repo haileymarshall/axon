@@ -1,13 +1,18 @@
-# Phala Cloud / dstack deployment of the vault. The dstack socket gives the vault TDX quotes.
+# Phala Cloud / dstack deployment of the vault: deploy/phala.sh <image@sha256:digest>.
+# The image is pinned by digest, so the TEE's measurement covers the exact code that runs.
+# AXON_VAULT_TOKEN and AXON_NEAR_PRIVATE_KEY are sealed (encrypted to the TEE) at deploy time.
 services:
   vault:
-    image: ${AXON_VAULT_IMAGE:-axon-vault:latest}
+    image: ${AXON_VAULT_IMAGE}
     ports: ["8700:8700"]
     environment:
       - AXON_CONTRACT=${AXON_CONTRACT}
       - AXON_NETWORK=${AXON_NETWORK:-testnet}
       - AXON_OPERATOR=${AXON_OPERATOR}
       - AXON_VAULT_TOKEN=${AXON_VAULT_TOKEN}
+      - AXON_NEAR_PRIVATE_KEY=${AXON_NEAR_PRIVATE_KEY}
     volumes:
       - /var/run/dstack.sock:/var/run/dstack.sock
-      - ${HOME}/.near-credentials:/root/.near-credentials:ro
+      - axon-state:/app/state
+volumes:
+  axon-state:

@@ -16,13 +16,29 @@ import os
 DSTACK_SOCKET = "/var/run/dstack.sock"
 
 
+def in_tee() -> bool:
+    return os.path.exists(DSTACK_SOCKET)
+
+
+def derive_seed(name: str) -> bytes | None:
+    """Inside a TEE: a 32-byte seed derived by the TEE's key manager for this app, so the vault's keys
+    are created inside the enclave, are the same after a restart, and never exist outside it.
+    Outside a TEE: None (keys are generated and stored in the state dir instead)."""
+    if not in_tee():
+        return None
+    from dstack_sdk import DstackClient
+
+    k = DstackClient().get_key(f"axon/{name}", "axon-vault").decode_key()
+    return hashlib.sha256(b"axon-key:" + name.encode() + b"\0" + k).digest()
+
+
 def report_data(combiner_key_hex: str, code_hash_hex: str) -> bytes:
     return hashlib.sha256(bytes.fromhex(combiner_key_hex) + bytes.fromhex(code_hash_hex)).digest()
 
 
 def attest(combiner_key_hex: str, code_hash_hex: str) -> dict:
     rd = report_data(combiner_key_hex, code_hash_hex)
-    if not os.path.exists(DSTACK_SOCKET):
+    if not in_tee():
         return {"mode": "local", "report_data": rd.hex(),
                 "note": "self-reported; inside a TDX confidential VM this is a hardware quote binding code_hash to combiner_key"}
     from dstack_sdk import DstackClient
