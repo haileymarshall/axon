@@ -1,0 +1,13 @@
+# Phala Cloud / dstack deployment of the vault. The dstack socket gives the vault TDX quotes.
+services:
+  vault:
+    image: ${AXON_VAULT_IMAGE:-axon-vault:latest}
+    ports: ["8700:8700"]
+    environment:
+      - AXON_CONTRACT=${AXON_CONTRACT}
+      - AXON_NETWORK=${AXON_NETWORK:-testnet}
+      - AXON_OPERATOR=${AXON_OPERATOR}
+      - AXON_VAULT_TOKEN=${AXON_VAULT_TOKEN}
+    volumes:
+      - /var/run/dstack.sock:/var/run/dstack.sock
+      - ${HOME}/.near-credentials:/root/.near-credentials:ro

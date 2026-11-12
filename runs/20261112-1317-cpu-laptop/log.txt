@@ -1,0 +1,112 @@
+== 1. create the model (bound to the vault's key + code hash)
+model id: 1
+== 2.1 contributors train locally and send sealed updates (round 1)
+[alice.axon-hq-56501.testnet] joining model 1 on-chain with device key 90f1062a6372…
+[alice.axon-hq-56501.testnet] training locally on 96 private examples (data stays on this machine)
+
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[alice.axon-hq-56501.testnet]   step   0  loss 2.396
+[alice.axon-hq-56501.testnet]   step   4  loss 1.832
+[alice.axon-hq-56501.testnet]   step   8  loss 1.797
+[alice.axon-hq-56501.testnet]   step  12  loss 1.915
+[alice.axon-hq-56501.testnet]   step  15  loss 2.323
+[alice.axon-hq-56501.testnet] sealed update (3630 KB) accepted for round 1
+[heart-clinic.axon-hq-56501.testnet] joining model 1 on-chain with device key bb9771239853…
+[heart-clinic.axon-hq-56501.testnet] training locally on 96 private examples (data stays on this machine)
+
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[heart-clinic.axon-hq-56501.testnet]   step   0  loss 2.581
+[heart-clinic.axon-hq-56501.testnet]   step   4  loss 2.439
+[heart-clinic.axon-hq-56501.testnet]   step   8  loss 1.596
+[heart-clinic.axon-hq-56501.testnet]   step  12  loss 2.241
+[heart-clinic.axon-hq-56501.testnet]   step  15  loss 2.080
+[heart-clinic.axon-hq-56501.testnet] sealed update (3630 KB) accepted for round 1
+[onco-clinic.axon-hq-56501.testnet] joining model 1 on-chain with device key c4097f605015…
+[onco-clinic.axon-hq-56501.testnet] training locally on 96 private examples (data stays on this machine)
+
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[onco-clinic.axon-hq-56501.testnet]   step   0  loss 2.579
+[onco-clinic.axon-hq-56501.testnet]   step   4  loss 2.223
+[onco-clinic.axon-hq-56501.testnet]   step   8  loss 2.129
+[onco-clinic.axon-hq-56501.testnet]   step  12  loss 1.794
+[onco-clinic.axon-hq-56501.testnet]   step  15  loss 1.854
+[onco-clinic.axon-hq-56501.testnet] sealed update (3630 KB) accepted for round 1
+[bob.axon-hq-56501.testnet] joining model 1 on-chain with device key 04c3a526c26f…
+[bob.axon-hq-56501.testnet] training locally on 96 private examples (data stays on this machine)
+
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[bob.axon-hq-56501.testnet]   step   0  loss 6.567
+[bob.axon-hq-56501.testnet]   step   4  loss 5.653
+[bob.axon-hq-56501.testnet]   step   8  loss 5.354
+[bob.axon-hq-56501.testnet]   step  12  loss 5.911
+[bob.axon-hq-56501.testnet]   step  15  loss 5.993
+[bob.axon-hq-56501.testnet] sealed update (3630 KB) accepted for round 1
+== 3.1 vault merges, scores (Shapley) and records ownership on NEAR
+  base loss 2.3426; scoring 4 updates over 15 coalitions
+  alice.axon-hq-56501.testnet              shapley +0.0978
+  bob.axon-hq-56501.testnet                shapley -0.0625   -> excluded (made the model worse)
+  heart-clinic.axon-hq-56501.testnet       shapley +0.1246
+  onco-clinic.axon-hq-56501.testnet        shapley +0.1144
+round 1: test loss 2.343 -> 2.047
+  alice.axon-hq-56501.testnet              improvement +0.0811  -> 81055 shares
+  bob.axon-hq-56501.testnet                improvement +0.0000  -> 0 shares
+  heart-clinic.axon-hq-56501.testnet       improvement +0.1130  -> 112986 shares
+  onco-clinic.axon-hq-56501.testnet        improvement +0.1020  -> 101998 shares
+signed by vault, recorded on-chain  tx EhmXNP1xeZTkW14jBzRLHqufKSTGKvEN5pxKAxfyzJHp
+== 2.2 contributors train locally and send sealed updates (round 2)
+[alice.axon-hq-56501.testnet] training locally on 96 private examples (data stays on this machine)
+
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[alice.axon-hq-56501.testnet]   step   0  loss 2.101
+[alice.axon-hq-56501.testnet]   step   4  loss 1.643
+[alice.axon-hq-56501.testnet]   step   8  loss 1.723
+[alice.axon-hq-56501.testnet]   step  12  loss 1.714
+[alice.axon-hq-56501.testnet]   step  15  loss 2.009
+[alice.axon-hq-56501.testnet] sealed update (3630 KB) accepted for round 2
+[heart-clinic.axon-hq-56501.testnet] training locally on 96 private examples (data stays on this machine)
+
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[heart-clinic.axon-hq-56501.testnet]   step   0  loss 2.233
+[heart-clinic.axon-hq-56501.testnet]   step   4  loss 2.328
+[heart-clinic.axon-hq-56501.testnet]   step   8  loss 1.552
+[heart-clinic.axon-hq-56501.testnet]   step  12  loss 2.117
+[heart-clinic.axon-hq-56501.testnet]   step  15  loss 1.903
+[heart-clinic.axon-hq-56501.testnet] sealed update (3630 KB) accepted for round 2
+[onco-clinic.axon-hq-56501.testnet] training locally on 96 private examples (data stays on this machine)
+
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[onco-clinic.axon-hq-56501.testnet]   step   0  loss 2.108
+[onco-clinic.axon-hq-56501.testnet]   step   4  loss 2.088
+[onco-clinic.axon-hq-56501.testnet]   step   8  loss 1.817
+[onco-clinic.axon-hq-56501.testnet]   step  12  loss 1.672
+[onco-clinic.axon-hq-56501.testnet]   step  15  loss 1.818
+[onco-clinic.axon-hq-56501.testnet] sealed update (3630 KB) accepted for round 2
+[bob.axon-hq-56501.testnet] training locally on 96 private examples (data stays on this machine)
+
+[bob.axon-hq-56501.testnet]   step   0  loss 6.373
+[bob.axon-hq-56501.testnet]   step   4  loss 5.522
+[bob.axon-hq-56501.testnet]   step   8  loss 5.260
+[bob.axon-hq-56501.testnet]   step  12  loss 5.862
+[bob.axon-hq-56501.testnet]   step  15  loss 5.967
+[bob.axon-hq-56501.testnet] sealed update (3630 KB) accepted for round 2
+== 3.2 vault merges, scores (Shapley) and records ownership on NEAR
+  base loss 2.0466; scoring 4 updates over 15 coalitions
+  alice.axon-hq-56501.testnet              shapley +0.0721
+  bob.axon-hq-56501.testnet                shapley -0.1737   -> excluded (made the model worse)
+  heart-clinic.axon-hq-56501.testnet       shapley +0.0954
+  onco-clinic.axon-hq-56501.testnet        shapley +0.0847
+round 2: test loss 2.047 -> 1.923
+  alice.axon-hq-56501.testnet              improvement +0.0314  -> 31413 shares
+  bob.axon-hq-56501.testnet                improvement +0.0000  -> 0 shares
+  heart-clinic.axon-hq-56501.testnet       improvement +0.0536  -> 53626 shares
+  onco-clinic.axon-hq-56501.testnet        improvement +0.0381  -> 38140 shares
+signed by vault, recorded on-chain  tx FQP3DEe1rdz9fN92Sy1pK38ahJPMdkhGnsR4e6ss37PN
+== 4. a user pays for a question; the payment is split among owners
+paid 0.01 NEAR  tx CPQUknp3X246ZAav3mniYAZeBvM7rsaVj68mhoiyMPmG
+The signs and symptoms can vary from person to person. The most common symptom is frequent urination (frequent trips to the toilet). People with type 2 diabetes may also have weight loss or gain more than usual due to decreased appetite. Other signs include tingling in the hands and feet, itching or scratching at these areas, sores that don't heal on their own, slow healing of cuts and wounds, fatigue, weakness, dizziness, vision problems such as blurred vision, headaches, nausea, vomiting, diarrhea, and gum disease. In some people, the first sign of diabetes is unusual thirst. This means
+== 5. who owns the model, and what they earned
+Health Assistant (health) base=HuggingFaceTB/SmolLM2-135M-Instruct rounds=2 loss=2343->1923 queries=1 revenue=0.0100 NEAR budget=0.160 NEAR
+  alice.axon-hq-56501.testnet              shares   112468 ( 26.8%)  earned 0.00268 NEAR
+  heart-clinic.axon-hq-56501.testnet       shares   166612 ( 39.7%)  earned 0.00397 NEAR
+  onco-clinic.axon-hq-56501.testnet        shares   140138 ( 33.4%)  earned 0.00334 NEAR
+  bob.axon-hq-56501.testnet                shares        0 (  0.0%)  earned 0.00000 NEAR
