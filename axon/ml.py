@@ -47,7 +47,7 @@ class Engine:
             r=CFG.lora_rank,
             lora_alpha=CFG.lora_rank * 2,
             lora_dropout=0.0,
-            target_modules=["q_proj", "k_proj", "v_proj", "o_proj"],
+            target_modules=CFG.lora_targets.split(","),
             task_type="CAUSAL_LM",
         )
         self.model = get_peft_model(base, cfg).to(self.device)

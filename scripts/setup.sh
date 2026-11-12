@@ -15,7 +15,7 @@ if [[ "${1:-}" == "--deploy" ]]; then
   (cd contract && cargo near build non-reproducible-wasm)
   near contract deploy "$P" use-file contract/target/near/axon_contract.wasm with-init-call new json-args '{}' \
     prepaid-gas '30 Tgas' attached-deposit '0 NEAR' network-config testnet sign-with-legacy-keychain send
-  for n in alice heart-clinic onco-clinic bob gpu user vault; do
+  for n in neuro-clinic metabolic-clinic alice bob gpu user vault; do
     near account create-account fund-myself "$n.$P" '0.3 NEAR' autogenerate-new-keypair save-to-legacy-keychain \
       sign-as "$P" network-config testnet sign-with-legacy-keychain send
   done

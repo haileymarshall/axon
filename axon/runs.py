@@ -14,12 +14,14 @@ from pathlib import Path
 from .config import CFG, ROOT
 
 RUNS_MD = ROOT / "RUNS.md"
-# Fixed questions asked to the base model and the trained model in every run (not in the hidden test set).
-PROBES = [
-    "What are the symptoms of type 2 diabetes?",
-    "What are the risk factors for coronary heart disease?",
-    "How is breast cancer usually treated?",
-]
+# Questions asked to the base model and the trained model in every run: reworded questions about facts in
+# the contributors' data (written by `data.prepare` to data/probes.json, each with the reference answer).
+DEFAULT_PROBES = [{"q": "What are the symptoms of type 2 diabetes?"}]
+
+
+def probes() -> list[dict]:
+    path = CFG.data_dir / "probes.json"
+    return json.loads(path.read_text()) if path.exists() else DEFAULT_PROBES
 
 
 def _sh(*cmd: str) -> str:
@@ -69,8 +71,9 @@ def finish(run_dir: Path, model_id: int, wall_seconds: int) -> dict:
     # Same questions, base model vs trained model (run where the vault runs, which holds the weights).
     engine = ml.Engine()
     trained = ml.adapter_from_bytes((VAULT_DIR / f"model-{model_id}" / "global.safetensors").read_bytes())
-    probes = [{"question": q, "base_model": engine.generate(q, engine.initial), "axon_trained": engine.generate(q, trained)}
-              for q in PROBES]
+    answers = [{"question": p["q"], "contributor": p.get("owner"), "disease": p.get("disease"), "reference": p.get("reference"),
+                "base_model": engine.generate(p["q"], engine.initial), "axon_trained": engine.generate(p["q"], trained)}
+               for p in probes()]
 
     gpu = (env["hardware"]["gpu"] or {}).get("name")
     summary = {
@@ -89,7 +92,7 @@ def finish(run_dir: Path, model_id: int, wall_seconds: int) -> dict:
         "ownership": {c["account"].split(".")[0]: round(100 * int(c["shares"]) / total, 1) for c in m["contributors"]},
         "queries_paid": m["queries"],
         "revenue_near": yocto_to_near(m["total_revenue"]),
-        "probes": probes,
+        "probes": answers,
     }
     (run_dir / "summary.json").write_text(json.dumps(summary, indent=1))
     (run_dir / "summary.md").write_text(_markdown(summary))
@@ -104,16 +107,21 @@ def _markdown(s: dict) -> str:
         f"* Hardware: **{s['hardware']}** · base model `{s['base_model']}` · wall time {s['wall_minutes']} min",
         f"* Contract: [`{s['contract']}`]({ex}/address/{s['contract']}) ({s['network']}), model id {s['model_id']}",
         f"* Hidden-test loss: **{s['hidden_test_loss']['before']:.3f} → {s['hidden_test_loss']['after']:.3f}**",
-        f"* Paid queries: {s['queries_paid']} · revenue {s['revenue_near']:.4f} NEAR", "",
+        f"* Paid queries: {s['queries_paid']} · paid to owners {s['revenue_near']:.4f} NEAR (after the 5% platform fee)", "",
         "## Ownership", "", "| Contributor | Share |", "|---|---|",
         *[f"| {k} | {v}% |" for k, v in s["ownership"].items()], "",
         "## Rounds", "", "| Round | Test loss | Shares minted | Adapter hash |", "|---|---|---|---|",
         *[f"| {r['round']} | {r['test_loss']:.3f} | {', '.join(f'{k} {v}' for k, v in r['shares'].items())} | `{r['adapter_hash'][:16]}…` |" for r in s["rounds"]], "",
         "## Same question, base model vs Axon-trained model", "",
+        "Reworded questions about facts in the contributors' private data. *Reference* is the answer in that data.", "",
     ]
     for p in s["probes"]:
         flat = lambda t: " ".join(t.split())
-        lines += [f"**Q: {p['question']}**", "", f"* Base: {flat(p['base_model'])}", f"* Axon-trained: {flat(p['axon_trained'])}", ""]
+        who = f" *(from {p['contributor']}'s data)*" if p.get("contributor") else ""
+        lines += [f"**Q: {p['question']}**{who}", "", f"* Base: {flat(p['base_model'])}", f"* Axon-trained: {flat(p['axon_trained'])}"]
+        if p.get("reference"):
+            lines += [f"* Reference: {flat(p['reference'])}"]
+        lines += [""]
     lines += ["Full output: `log.txt`. Hardware and config: `env.json`. Transactions are in the log and on the explorer.", ""]
     return "\n".join(lines)
 
