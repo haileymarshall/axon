@@ -31,7 +31,7 @@ experiments. Nobody can share it (privacy law, competition, trust), so:
 | 4. Send a sealed update | Only the adapter is sent, **signed** by the device key and **encrypted** (X25519 sealed box) so only the vault can open it. | `axon/crypto.py` |
 | 5. Merge and score | The vault (designed to run in a TEE) merges updates (federated averaging) and scores each contributor by its **Shapley value**: its average marginal improvement on a **hidden test set** across every possible group of contributors. Updates that make the model worse are dropped and earn nothing. | `axon/ml.py` `score_round` |
 | 6. Record ownership | The vault signs the round result; the contract verifies the ed25519 signature against the registered key, rejects replays, and mints ownership shares equal to measured improvement. GPU providers get a fixed fee, **not** ownership. | `contract` `submit_round` |
-| 7. Use and pay | Anyone asks the model a question and pays with any token via **NEAR Intents** (or NEAR directly). The payment carries `sha256(question)`, so it buys an answer to that one question only. It goes to the contract and is split pro-rata to owners in O(1). | `axon/intents.py`, `contract` `pay_for_query` |
+| 7. Use and pay | Anyone asks the model a question and pays with any token via **NEAR Intents** (or NEAR directly). The payment carries `sha256(question)`, so it buys an answer to that one question only. It goes to the contract: a 5% platform fee goes to Axon, and the other 95% is split pro-rata to owners in O(1). | `axon/intents.py`, `contract` `pay_for_query` |
 | 8. Withdraw | Owners withdraw their earnings at any time. | `contract` `withdraw` |
 
 The model itself stays inside the vault and is only reachable through paid queries, so it cannot be copied
@@ -50,7 +50,7 @@ for free; only its hash is public.
 
 | NEAR technology | Role in Axon | Code |
 |---|---|---|
-| **Smart contract (Rust, near-sdk 5)** | Ownership ledger: models, contributors' device keys, signed rounds, shares, revenue accumulator, compute-fee budget, withdrawals. 18 unit tests. | `contract/src/lib.rs`, `contract/src/tests.rs` |
+| **Smart contract (Rust, near-sdk 5)** | Ownership ledger: models, contributors' device keys, signed rounds, shares, revenue accumulator, compute-fee budget, 5% platform fee, withdrawals. 21 unit tests. | `contract/src/lib.rs`, `contract/src/tests.rs` |
 | **On-chain ed25519 verification** (`env::ed25519_verify`) | Only results signed by the model's registered vault key are accepted; a tampered or forged payload is rejected. | `submit_round` |
 | **Named accounts** | Owners are human-readable accounts (`alice.…testnet`); device keys bind updates to them. | `join_model` |
 | **NEAR Intents (1Click API)** | Pay for a query with USDC on Base/Solana/Arbitrum/Ethereum, SOL, ETH, BTC or NEAR; it settles as wNEAR to the Axon treasury, which records it on-chain with its cross-chain origin. | `axon/intents.py`, `axon/app.py` |
@@ -65,7 +65,7 @@ Requires Python 3.10+, about 3 GB of RAM and internet access (downloads a 135M-p
 git clone <this repo> axon && cd axon
 ./scripts/setup.sh                     # venv + deps + demo data (data/contributors/*.jsonl, data/vault/test.jsonl)
 .venv/bin/python -m pytest -q tests    # 10 tests, about 10 s
-(cd contract && cargo test)            # 18 contract tests (needs Rust)
+(cd contract && cargo test)            # 21 contract tests (needs Rust)
 ```
 
 **Run the whole loop against the deployed testnet contract** (needs testnet accounts; `./scripts/setup.sh --deploy`

@@ -11,8 +11,8 @@
 //!                        each contributor's measured improvement. The contract verifies the signature
 //!                        and mints ownership shares equal to measured improvement. Compute providers
 //!                        receive a fixed fee from the budget, not ownership.
-//!   4. `pay_for_query` - users pay to query the model. Revenue is split pro-rata to share holders
-//!                        with a reward-per-share accumulator (O(1) per payment).
+//!   4. `pay_for_query` - users pay to query the model. A 5% platform fee goes to Axon; the rest is
+//!                        split pro-rata to share holders with a reward-per-share accumulator (O(1)).
 //!   5. `withdraw`      - owners pull their earnings.
 //!
 //! Copyright (c) 2026 Axon contributors. MIT License.
@@ -29,6 +29,21 @@ const ACC_SCALE: u128 = 1_000_000_000;
 const MAX_CONTRIBUTORS: usize = 100;
 /// Upper bound on shares a single result may mint (1.0 nats of loss improvement = 1_000_000).
 const MAX_IMPROVEMENT_MICRO: u64 = 10_000_000;
+/// Platform fee on every paid query, in basis points (500 = 5%). The rest goes to the owners.
+pub const PLATFORM_FEE_BPS: u128 = 500;
+/// Raw storage key for the unclaimed platform fees. Kept outside the state struct so adding the
+/// fee did not require migrating existing state.
+const PLATFORM_FEES_KEY: &[u8] = b"platform_fees";
+
+fn platform_fees_get() -> u128 {
+    env::storage_read(PLATFORM_FEES_KEY)
+        .map(|b| u128::from_le_bytes(b.try_into().unwrap_or_else(|_| env::panic_str("bad fee state"))))
+        .unwrap_or(0)
+}
+
+fn platform_fees_set(v: u128) {
+    env::storage_write(PLATFORM_FEES_KEY, &v.to_le_bytes());
+}
 
 #[near]
 #[derive(BorshStorageKey)]
@@ -372,17 +387,36 @@ impl Axon {
         let payer = env::predecessor_account_id();
         let m = self.model_mut(model_id);
         require!(amount >= m.query_price.0, "deposit below query price");
+        let fee = amount * PLATFORM_FEE_BPS / 10_000;
+        let to_owners = amount - fee;
         if m.total_shares.0 == 0 {
-            m.creator_pending = U128(m.creator_pending.0 + amount);
+            m.creator_pending = U128(m.creator_pending.0 + to_owners);
         } else {
-            m.acc_per_share = U128(m.acc_per_share.0 + amount * ACC_SCALE / m.total_shares.0);
+            m.acc_per_share = U128(m.acc_per_share.0 + to_owners * ACC_SCALE / m.total_shares.0);
         }
-        m.total_revenue = U128(m.total_revenue.0 + amount);
+        // total_revenue counts what owners received (the fee is tracked separately).
+        m.total_revenue = U128(m.total_revenue.0 + to_owners);
         m.queries += 1;
+        platform_fees_set(platform_fees_get() + fee);
         emit(
             "query_paid",
-            serde_json::json!({"model_id": model_id, "payer": payer, "amount": amount.to_string(), "source": source, "query_hash": query_hash}),
+            serde_json::json!({"model_id": model_id, "payer": payer, "amount": amount.to_string(), "to_owners": to_owners.to_string(), "platform_fee": fee.to_string(), "source": source, "query_hash": query_hash}),
         );
+    }
+
+    /// Send all unclaimed platform fees to `to`. Only the contract account itself (Axon) can call it.
+    pub fn withdraw_platform_fees(&mut self, to: AccountId) -> Promise {
+        require!(env::predecessor_account_id() == env::current_account_id(), "only the Axon account");
+        let amount = platform_fees_get();
+        require!(amount > 0, "no platform fees");
+        platform_fees_set(0);
+        emit("platform_fees_withdrawn", serde_json::json!({"to": to, "amount": amount.to_string()}));
+        Promise::new(to).transfer(NearToken::from_yoctonear(amount))
+    }
+
+    /// Unclaimed platform fees (yoctoNEAR).
+    pub fn platform_fees(&self) -> U128 {
+        U128(platform_fees_get())
     }
 
     /// Withdraw all of the caller's earnings from a model.

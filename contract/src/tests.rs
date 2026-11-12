@@ -164,11 +164,46 @@ fn revenue_split_pro_rata() {
     ctx("user.near", NEAR);
     c.pay_for_query(0, Some("intents:usdc@base".into()), Some(ADAPTER.into()));
     let e = |a: &str| c.earnings_of(0, acct(a)).0;
-    assert_eq!(e("alice.near"), NEAR / 4);
-    assert_eq!(e("clinic.near"), NEAR / 4);
-    assert_eq!(e("bob.near"), NEAR / 2);
+    assert_eq!(e("alice.near"), OWNERS / 4);
+    assert_eq!(e("clinic.near"), OWNERS / 4);
+    assert_eq!(e("bob.near"), OWNERS / 2);
     let m = c.get_model(0).unwrap();
-    assert_eq!((m.queries, m.total_revenue.0), (1, NEAR));
+    assert_eq!((m.queries, m.total_revenue.0), (1, OWNERS));
+}
+
+/// What owners receive from a 1 NEAR query after the 5% platform fee.
+const OWNERS: u128 = NEAR - NEAR / 20;
+
+#[test]
+fn platform_takes_five_percent() {
+    let mut c = setup();
+    round(&mut c, 1, &[("alice.near", 100)]);
+    ctx("user.near", NEAR);
+    c.pay_for_query(0, None, None);
+    assert_eq!(c.platform_fees().0, NEAR / 20);
+    assert_eq!(c.earnings_of(0, acct("alice.near")).0 + c.platform_fees().0, NEAR);
+}
+
+#[test]
+fn only_axon_withdraws_platform_fees() {
+    let mut c = setup();
+    ctx("user.near", NEAR);
+    c.pay_for_query(0, None, None);
+    let axon = near_sdk::test_utils::VMContextBuilder::new().build().current_account_id;
+    ctx(axon.as_str(), 0);
+    let _ = c.withdraw_platform_fees(acct("treasury.near"));
+    assert_eq!(c.platform_fees().0, 0);
+}
+
+#[test]
+#[should_panic(expected = "only the Axon account")]
+fn others_cannot_withdraw_platform_fees() {
+    let mut c = setup();
+    ctx("user.near", NEAR);
+    c.pay_for_query(0, None, None);
+    // VMContextBuilder's default contract account is "alice.near", so use another caller here.
+    ctx("bob.near", 0);
+    let _ = c.withdraw_platform_fees(acct("bob.near"));
 }
 
 #[test]
@@ -178,12 +213,12 @@ fn later_shares_do_not_capture_past_revenue() {
     ctx("user.near", NEAR);
     c.pay_for_query(0, None, None);
     round(&mut c, 2, &[("clinic.near", 100)]);
-    assert_eq!(c.earnings_of(0, acct("alice.near")).0, NEAR);
+    assert_eq!(c.earnings_of(0, acct("alice.near")).0, OWNERS);
     assert_eq!(c.earnings_of(0, acct("clinic.near")).0, 0);
     ctx("user.near", NEAR);
     c.pay_for_query(0, None, None);
-    assert_eq!(c.earnings_of(0, acct("alice.near")).0, NEAR + NEAR / 2);
-    assert_eq!(c.earnings_of(0, acct("clinic.near")).0, NEAR / 2);
+    assert_eq!(c.earnings_of(0, acct("alice.near")).0, OWNERS + OWNERS / 2);
+    assert_eq!(c.earnings_of(0, acct("clinic.near")).0, OWNERS / 2);
 }
 
 #[test]
@@ -191,7 +226,7 @@ fn revenue_before_shares_goes_to_creator() {
     let mut c = setup();
     ctx("user.near", NEAR);
     c.pay_for_query(0, None, None);
-    assert_eq!(c.earnings_of(0, acct("creator.near")).0, NEAR);
+    assert_eq!(c.earnings_of(0, acct("creator.near")).0, OWNERS);
 }
 
 #[test]
