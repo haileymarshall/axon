@@ -1,0 +1,85 @@
+{
+ "run_id": "rehearsal-testnet",
+ "started_at": "2026-11-12T23:18:57+00:00",
+ "wall_minutes": 8.2,
+ "hardware": "CPU (4 cores)",
+ "base_model": "HuggingFaceTB/SmolLM2-135M-Instruct",
+ "network": "testnet",
+ "contract": "axon-hq-56501.testnet",
+ "model_id": 2,
+ "hidden_test_loss": {
+  "before": 1.891,
+  "after": 1.757
+ },
+ "rounds": [
+  {
+   "round": 1,
+   "test_loss": 1.757,
+   "adapter_hash": "0d92b35a037b9902fd264277e2f8f55faa03396ad2a101899505c6ce25aa31cb",
+   "shares": {
+    "alice": 42733,
+    "bob": 7460,
+    "metabolic-clinic": 41307,
+    "neuro-clinic": 42251
+   }
+  }
+ ],
+ "ownership": {
+  "neuro-clinic": 31.6,
+  "metabolic-clinic": 30.9,
+  "alice": 31.9,
+  "bob": 5.6
+ },
+ "queries_paid": 1,
+ "revenue_near": 0.0095,
+ "probes": [
+  {
+   "question": "Which gene is involved in Laing distal myopathy, and how is it inherited?",
+   "contributor": "neuro-clinic",
+   "disease": "Laing distal myopathy",
+   "reference": null,
+   "base_model": "The gene that causes Laing distal myopathy (LDM) is located on chromosome 19q24. It encodes for the protein alpha-actinin-3 (AAN), which plays a crucial role in muscle contraction during exercise. The mutation responsible for LDM has been identified as being caused by a deletion of the AAN gene at position 508 (CpG island 67). This deletion results in an abnormally short AAN protein, leading to impaired muscle contraction and degeneration over time.\n\nIn individuals with LDM, the affected genes are typically absent",
+   "axon_trained": "The gene that causes Laing distal myopathy (LDM) is located on chromosome 19q24. It encodes for the protein alpha-actinin-3 (AAN). The AAN gene has two copies: one from each parent. In individuals with LDM, there is an extra copy of the AAN gene, resulting in a condition called autosomal dominant inheritance. This means that if one child inherits the mutated gene from both parents, they will also have the condition."
+  },
+  {
+   "question": "Which gene is involved in McLeod neuroacanthocytosis syndrome, and how is it inherited?",
+   "contributor": "neuro-clinic",
+   "disease": "McLeod neuroacanthocytosis syndrome",
+   "reference": null,
+   "base_model": "The McLeod neuroacanthocytosis syndrome (MNS) is an autosomal recessive disorder caused by mutations in the MNS1 or MNS2 genes. These genes play crucial roles in regulating the production of myelin, which is essential for nerve conduction and transmission of signals throughout the body. Mutations in these genes lead to impaired myelination, resulting in damage to the nervous system.\n\nIn individuals with McLeod neuroacanthocytosis syndrome, the mutated genes MNS1 and MNS2 contribute significantly to the development of the condition. The mutation on MNS1 results in a deficiency",
+   "axon_trained": "The gene that causes McLeod neuroacanthocytosis syndrome (MNA) is located on chromosome 19q24. The MNA mutation occurs when there's an error during DNA replication or transcription of the gene. This can lead to mutations in several genes involved in protein synthesis, leading to various disorders such as McLeod neuroacanthocytosis syndrome.\n\n1. MNA Gene: The gene for McLeod neuroacanthocytosis syndrome is located on chromosome 19p23-q25. It encodes for the protein muncetin, which plays a"
+  },
+  {
+   "question": "Which gene is involved in protein S deficiency, and how is it inherited?",
+   "contributor": "metabolic-clinic",
+   "disease": "protein S deficiency",
+   "reference": null,
+   "base_model": "The gene that codes for the protein S301A encodes for the serine-rich protein S301B. This specific amino acid sequence has been identified as an important component of the S301C domain structure, which plays a crucial role in regulating the activity of this protein. The S301D mutation associated with the S301C deletion results in a loss of function of this region, leading to impaired protein synthesis and reduced expression levels of the S301B protein. As a result, individuals with the S301C deletion often exhibit",
+   "axon_trained": "The gene that causes the protein S deficiency is called P53. It's located on chromosome 17p24-q26. The mutation that leads to this disorder results from an error during DNA replication or transcription of the genes encoding for proteins such as p53 (prolyl hydroxylase). This can lead to premature cell death due to programmed cell death known as apoptosis.\n\n1. Error in DNA replication: When cells divide normally they replicate their genetic material using the original strand only. However, when errors occur during DNA replication, these mistakes result in incomplete copies being"
+  },
+  {
+   "question": "Which gene is involved in arginine:glycine amidinotransferase deficiency, and how is it inherited?",
+   "contributor": "metabolic-clinic",
+   "disease": "arginine:glycine amidinotransferase deficiency",
+   "reference": null,
+   "base_model": "The gene that codes for the enzyme aspartyl carnitine synthetase (ACC) is located on chromosome 1p23. It encodes for an amino acid called glycine-acyl homoserine lactone (GAHL). In individuals with the condition known as argininosuccinic acid deaminase deficiency or arginoacid dehydrogenosis, this gene is mutated, resulting in impaired glycosylation of histidine residues within proteins.\n\nIn these cases, the defective ACC enzyme catalyzes the conversion of GAHL to its corresponding amino acid, which leads to accumulation",
+   "axon_trained": "The gene that codes for the enzyme aspartyl carnitine synthetase (ACC) is located on chromosome 1p. The mutation responsible for this condition results from an error during DNA replication or transcription of the ACC gene. This leads to a lack of functional aspartate amide intermediate, which is necessary for the conversion of glutamate into glycine at the amino acid level. As a result, the body cannot use glutamine as its primary source of energy due to impaired glycolysis.\n\n1. Genetic inheritance:\n- Autosomal recessive disorder: The genetic defect occurs when there is a single"
+  },
+  {
+   "question": "Which gene is involved in Klippel-Trenaunay syndrome, and how is it inherited?",
+   "contributor": "alice",
+   "disease": "Klippel-Trenaunay syndrome",
+   "reference": null,
+   "base_model": "The Klippel-Trenauney (CTS) syndrome is an autosomal recessive disorder caused by mutations in the CTSC1 gene. This mutation leads to a deficiency of the enzyme tyrosine phosphorylation, which plays a crucial role in regulating cell growth and differentiation.\n\nIn individuals with Klippel-Trenauney syndrome, the absence or reduced activity of tyrosine kinase 1 (TTK1), also known as the PDZ kinase, results in impaired cell proliferation, differentiation, and survival. The resulting phenotype includes:\n\n1. Reduced bone density",
+   "axon_trained": "The gene that causes Klippel-Trenauney syndrome (KTS) is located on chromosome 16. The specific mutation responsible for this condition occurs at the Xp23 locus, which contains genes encoding proteins called p50k4A/Paxillin and p79Src kinase. These two genes play crucial roles in regulating cell growth and differentiation during embryonic development. Mutations affecting either of these genes can lead to the formation of abnormal cells with defects in their ability to differentiate into various tissues or even cancer.\n\n1. P50K4"
+  },
+  {
+   "question": "Which gene is involved in Rothmund-Thomson syndrome, and how is it inherited?",
+   "contributor": "alice",
+   "disease": "Rothmund-Thomson syndrome",
+   "reference": null,
+   "base_model": "Rothmund-Thomson syndrome (RTTS) is an autosomal recessive disorder caused by mutations in the RTA1 gene. The mutation leads to a deficiency of the enzyme tyrosine phosphorylation, which plays a crucial role in regulating cell growth and differentiation. This results in impaired cellular processes that can lead to various symptoms such as muscle weakness, joint pain, vision problems, and cognitive impairment.\n\nThe specific genetic defect responsible for RTTS has been identified through a combination of molecular diagnostic tests and clinical evaluation. The most common form of RTTS involves the deletion or substitution of one nucleotide at position",
+   "axon_trained": "The gene responsible for Rothmund-Thomson syndrome (RTS) has been identified as the RTA1 gene. This gene encodes a protein that plays a crucial role in regulating cell growth and division during embryonic development. The RTA1 gene provides instructions for making a protein called RTA1, which helps regulate cell proliferation and differentiation processes.\n\nIn individuals with Rothmund-Thomson syndrome, mutations in the RTA1 gene have been found to disrupt this regulation process, leading to an imbalance of cell growth factors and signaling pathways. These changes can result in impaired cellular function, increased inflammation"
+  }
+ ]
+}
