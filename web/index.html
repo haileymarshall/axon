@@ -4,14 +4,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Axon</title>
+<meta name="description" content="Your private data trains models in a specific niche. Contributors own the model and get paid on what it earns.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='5' fill='%230a0a0a'/%3E%3Ccircle cx='12' cy='12' r='4' fill='%2300ec97'/%3E%3Cpath d='M9 10 4 6M9 14l-5 4M15 12h6' stroke='%23f4f2ec' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
 <header class="top">
   <a class="brand" href="#/">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="5" cy="12" r="3" fill="currentColor"/><circle cx="19" cy="5" r="2.4" fill="currentColor"/><circle cx="19" cy="19" r="2.4" fill="currentColor"/><path d="M7.5 11 17 6M7.5 13l9.5 5" stroke="currentColor" stroke-width="1.6"/></svg>
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="currentColor"/><path d="M8.6 10 3.5 6.5M8.6 14 3.5 17.5M7.8 12H2.5M15.8 12.6l5.7 1.6" stroke="#f4f2ec" stroke-width="1.6" stroke-linecap="round"/></svg>
     Axon
   </a>
   <nav>
@@ -19,8 +21,9 @@
     <a href="#/contribute">Contribute</a>
     <a href="#/earnings">Earnings</a>
     <a href="#/create">Create</a>
+    <a href="#/how">How it works</a>
   </nav>
-  <span id="net" class="pill"></span>
+  <div class="right"><span id="net" class="chip"></span></div>
 </header>
 
 <main id="view"></main>
@@ -29,6 +32,7 @@
   <span>Your data trains the model. You own the model.</span>
   <span id="contract-link"></span>
 </footer>
+<script src="/static/neuron.js"></script>
 <script src="/static/app.js"></script>
 </body>
 </html>

@@ -1,15 +1,19 @@
 // Axon web app - plain JS, no build step. Reads the NEAR contract through the app backend.
-const $ = (s) => document.querySelector(s);
+const $ = (s, r = document) => r.querySelector(s);
 const view = $("#view");
 const COLORS = ["var(--s1)", "var(--s2)", "var(--s3)", "var(--s4)", "var(--s5)"];
 const YOCTO = 1e24;
 let CONFIG = null;
+let RUNS = null;
+let ART = null;
 
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const near = (y, d = 4) => (Number(y) / YOCTO).toFixed(d);
 const short = (a) => (a.split(".").length > 2 ? a.split(".")[0] : a);
-const txLink = (h) => (h ? `<a class="mono" target="_blank" href="${CONFIG.explorer}/txns/${h}">${h.slice(0, 8)}…</a>` : "");
-const acctLink = (a) => `<a target="_blank" title="${esc(a)}" href="${CONFIG.explorer}/address/${a}">${esc(short(a))}</a>`;
+const pct = (s, t) => ((100 * Number(s)) / (Number(t) || 1)).toFixed(1) + "%";
+const txLink = (h) => (h ? `<a class="mono" target="_blank" rel="noopener" href="${CONFIG.explorer}/txns/${h}">${h.slice(0, 8)}…</a>` : "");
+const acctLink = (a) => `<a target="_blank" rel="noopener" title="${esc(a)}" href="${CONFIG.explorer}/address/${a}">${esc(short(a))}</a>`;
+const flat = (t) => String(t || "").split(/\s+/).join(" ");
 
 async function api(path, opts = {}) {
   const r = await fetch(path, { headers: { "content-type": "application/json" }, ...opts });
@@ -18,126 +22,285 @@ async function api(path, opts = {}) {
   return body;
 }
 
-// Example models shown on the explore page so the platform's range is visible; clearly marked, not live.
+// Example models show the range of the platform. Clearly marked: they are not live.
 const EXAMPLES = [
-  { name: "Scam Detector", domain: "security", text: "Exchanges and wallets pool flagged accounts and scam reports without exposing users." },
+  { name: "Scam Detector", domain: "security", text: "Wallet users pool the scam messages they received, so the model spots new scam scripts first." },
   { name: "Drug Safety", domain: "pharma", text: "Labs pool private compound test results to predict toxicity earlier." },
   { name: "Contract Helper", domain: "legal", text: "Law firms pool private contracts to train a drafting assistant they co-own." },
 ];
 
-// ------------------------------------------------------------------ pages
+function owners(m) {
+  return m.contributors.slice().sort((a, b) => Number(b.shares) - Number(a.shares));
+}
 
-async function pageModels() {
+function neuronContributors(m) {
+  if (!m) return [{ name: "clinic", share: "owner" }, { name: "patient", share: "owner" }, { name: "lab", share: "owner" }];
+  const o = owners(m);
+  const good = o.filter((c) => Number(c.shares) > 0);
+  const bad = o.filter((c) => Number(c.shares) === 0 && m.rounds > 0);
+  // Put the excluded contributor in the middle of the fan so it reads clearly.
+  const list = good.map((c) => ({ name: short(c.account), share: pct(c.shares, m.total_shares) }));
+  bad.forEach((c) => list.splice(Math.ceil(list.length / 2), 0, { name: short(c.account), excluded: true }));
+  return list;
+}
+
+function featured(models) {
+  return models.slice().sort((a, b) => b.rounds - a.rounds || b.queries - a.queries || b.id - a.id)[0] || null;
+}
+
+async function runs() {
+  if (!RUNS) RUNS = await api("/api/runs").catch(() => []);
+  return RUNS;
+}
+
+// ------------------------------------------------------------------ home
+
+async function pageHome() {
   const models = await api("/api/models");
+  const f = featured(models);
+  const totals = models.reduce((t, m) => ({ q: t.q + m.queries, r: t.r + Number(m.total_revenue), o: t.o + m.contributors.filter((c) => Number(c.shares) > 0).length }), { q: 0, r: 0, o: 0 });
   view.innerHTML = `
     <section class="hero">
-      <h1>Train AI on your private data.<br>Own what it becomes.</h1>
-      <p>Big Tech trains AI on your data for free. On Axon, people and organisations train models together
-      without ever sharing their data, own a share of the model based on how much they improved it, and get paid every time it is used.</p>
+      <canvas class="art" id="art" aria-label="A neuron: contributors' signals flow into one model"></canvas>
+      <div class="labels" id="labels"></div>
+      <div class="copy">
+        <div class="eyebrow">Private AI, co-owned on NEAR</div>
+        <h1>Your private data trains models in a specific niche. <span class="dim">Contributors own the model and get paid on what it earns.</span></h1>
+        <p class="sub">Your data never leaves your machine. A sealed vault scores how much it helped, and a NEAR contract records who owns what and pays them.</p>
+        <div class="cta"><a class="btn" href="#/models">Browse models</a><a class="btn ghost" href="#/contribute">Contribute data</a></div>
+        <p class="newhere">New here? <a href="#/how">How it works</a>, in five steps.</p>
+      </div>
+      <div class="term" id="term"></div>
+      <div class="ticker"><div class="track" id="ticker"></div></div>
     </section>
-    <h2>Models being built</h2>
-    <div class="grid">
-      ${models.map((m) => modelCard(m)).join("") || `<p class="muted">No models yet. <a href="#/create">Create one</a>.</p>`}
-      ${EXAMPLES.map((e) => `<div class="card soon"><span class="tag">${esc(e.domain)} · example</span><h3>${esc(e.name)}</h3><p class="muted small">${esc(e.text)}</p></div>`).join("")}
+    <div class="wrap">
+      <section class="block" id="models">
+        <div class="kicker">Models</div>
+        <h2>One model per niche. Owned by the people who trained it.</h2>
+        <p class="lead">Each model starts from a free open base model and is fine-tuned on its contributors' private data. Anyone can start a model for any topic, and anyone can join later.</p>
+        <div class="grid">${models.map(modelCard).join("") || `<p class="muted">No models yet. <a href="#/create">Start one</a>.</p>`}
+          ${EXAMPLES.map((e) => `<div class="card example"><span class="tag">${esc(e.domain)} · example</span><h3>${esc(e.name)}</h3><p class="muted small">${esc(e.text)}</p></div>`).join("")}</div>
+      </section>
+      <section class="block" id="compare">${await compareBlock(f)}</section>
+      <section class="block" id="how">${howBlock()}</section>
+      <section class="block">${trustBlock()}</section>
     </div>`;
+  ART = AxonNeuron.mount($("#art"), {
+    contributors: neuronContributors(f), labels: $("#labels"),
+    somaLabel: f ? `<b>${esc(f.name)}</b>the model` : "<b>the model</b>",
+    axonLabel: f ? `<b>answers</b>${near(f.query_price, 2)} Ⓝ a question` : "<b>answers</b>",
+  });
+  ticker(models, totals);
+  typeTerm(f);
+  if (location.hash.startsWith("#/how") || location.hash === "#/models") {
+    const id = location.hash === "#/models" ? "models" : "how";
+    requestAnimationFrame(() => document.getElementById(id).scrollIntoView({ behavior: "smooth" }));
+  }
+}
+
+function ticker(models, t) {
+  const v = CONFIG.vault?.attestation?.mode || "unknown";
+  const items = [
+    `Network <b>NEAR ${esc(CONFIG.network)}</b>`, `Contract <b>${esc(CONFIG.contract)}</b>`, `Models <b>${models.length}</b>`,
+    `Owners <b>${t.o}</b>`, `Paid questions <b>${t.q}</b>`, `Paid to owners <b>${near(t.r, 3)} Ⓝ</b>`,
+    `Split <b>95% owners · 5% Axon</b>`, `Vault attestation <b>${esc(v)}</b>`, `Data <b>never leaves the device</b>`,
+    `Junk data <b>earns 0%</b>`, `Base models <b>open: Qwen · Llama · Gemma · Mistral</b>`,
+  ];
+  const html = items.map((i) => `<span>${i}</span>`).join("");
+  $("#ticker").innerHTML = html + html;
+}
+
+function typeTerm(f) {
+  const el = $("#term");
+  if (!el) return;
+  const id = f ? f.id : 0, price = f ? Number(f.query_price) : 1e22;
+  const o = f ? owners(f).filter((c) => Number(c.shares) > 0).slice(0, 3).map((c) => `${short(c.account)} ${pct(c.shares, f.total_shares)}`).join(" · ") : "owners by share";
+  const lines = [
+    `<span class="p">&gt;</span> <b>axon.pay_for_query</b>({ model_id: ${id}, query_hash: "9c1e…4b07" })`,
+    `<span class="p">&lt;</span> { to_owners: "${near(price * 0.95, 4)} Ⓝ", platform_fee: "${near(price * 0.05, 4)} Ⓝ" }`,
+    `  // split by share: ${esc(o)}`,
+  ];
+  let i = 0, j = 0;
+  const plain = lines.map((l) => l.replace(/<[^>]+>/g, "").replace(/&gt;/g, ">").replace(/&lt;/g, "<"));
+  const tick = () => {
+    if (!document.body.contains(el)) return;
+    if (i >= lines.length) { el.innerHTML = lines.join("\n") + `\n<span class="cur"></span>`; setTimeout(() => { i = 0; j = 0; tick(); }, 6000); return; }
+    j++;
+    const done = lines.slice(0, i).join("\n");
+    el.innerHTML = (done ? done + "\n" : "") + esc(plain[i].slice(0, j)) + `<span class="cur"></span>`;
+    if (j >= plain[i].length) { i++; j = 0; }
+    setTimeout(tick, j === 0 ? 450 : 22);
+  };
+  tick();
 }
 
 function modelCard(m) {
   const improved = m.base_eval_loss_milli && m.eval_loss_milli ? ((1 - m.eval_loss_milli / m.base_eval_loss_milli) * 100).toFixed(1) : null;
+  const o = owners(m);
   return `<a class="card" href="#/model/${m.id}">
-    <span class="tag">${esc(m.domain)} · live</span>
+    <span class="tag live">${esc(m.domain)} · live</span>
     <h3>${esc(m.name)}</h3>
     <p class="muted small">${esc(m.description)}</p>
-    <div class="small">${m.contributors.length} owners · ${m.rounds} rounds · ${m.queries} paid queries${improved ? ` · ${improved}% better` : ""}</div>
+    <div class="minibar">${o.map((c, i) => `<span style="width:${pct(c.shares, m.total_shares)};background:${COLORS[i % 5]}"></span>`).join("")}</div>
+    <div class="meta"><span>${o.filter((c) => Number(c.shares) > 0).length} owners</span><span>${m.rounds} rounds</span><span>${m.queries} paid questions</span>${improved ? `<span style="color:var(--accent)">${improved}% better</span>` : ""}</div>
   </a>`;
 }
+
+async function compareBlock(m) {
+  const all = await runs();
+  const run = m ? all.find((r) => r.model_id === m.id) : all[0];
+  const head = `<div class="kicker">Base model vs Axon-trained</div>
+    <h2>Same question. One model learned from specialists.</h2>
+    <p class="lead">Base models learned the public internet, so on rare, specialist knowledge they guess. These questions are about facts in the contributors' private data. The base model never saw that data; the Axon model was trained on it.</p>`;
+  if (!run || !run.probes?.length) return head + `<div class="card muted">The comparison appears after this model's first published run.</div>`;
+  const probes = run.probes;
+  setTimeout(() => {
+    const box = $("#cmpbox");
+    if (!box) return;
+    const show = (k) => {
+      document.querySelectorAll(".tabs button").forEach((b, i) => b.classList.toggle("on", i === k));
+      const p = probes[k];
+      const who = p.contributor ? short(p.contributor) : "the contributors";
+      box.innerHTML = `
+        <div class="q">${esc(p.question)}</div>
+        <div class="card"><h4>Base model · ${esc(run.base_model.split("/").pop())}</h4><div class="answer">${esc(flat(p.base_model))}</div></div>
+        <div class="card axon"><h4>Axon-trained · ${esc(run.run_id)}</h4><div class="answer">${esc(flat(p.axon_trained))}</div></div>
+        <div class="card why"><h4>Why the Axon answer is better</h4>
+          <p class="small" style="margin:0">The base model saw little or nothing about ${esc(p.disease || "this condition")} on the public internet, so it has to guess.
+          The Axon model was trained on ${esc(who)}'s specialist data about it. Judge for yourself against the answer in that data:</p>
+          ${p.reference ? `<div class="ref">${esc(flat(p.reference))}</div>` : ""}</div>`;
+    };
+    document.querySelectorAll(".tabs button").forEach((b, i) => (b.onclick = () => show(i)));
+    show(0);
+  });
+  const L = run.hidden_test_loss;
+  return head + `
+    <div class="tabs">${probes.map((p, i) => `<button>${esc(p.disease || "Q" + (i + 1))}</button>`).join("")}</div>
+    <div class="cmp" id="cmpbox"></div>
+    <p class="small muted" style="margin-top:14px">Not cherry-picked: every showcase question of run <a href="https://github.com/haileymarshall/axon/blob/main/runs/${esc(run.run_id)}/summary.md">${esc(run.run_id)}</a> is shown. On the vault's hidden test set (questions nobody trained on), loss went ${L.before.toFixed(3)} → ${L.after.toFixed(3)} (lower is better). Not medical advice.</p>`;
+}
+
+function howBlock() {
+  return `<div class="kicker">How it works</div><h2>Five steps. Your data stays home.</h2>
+    <p class="lead">Axon fine-tunes free open models (it does not train from scratch). Contributors own the part that makes the model an expert.</p>
+    <div class="steps">
+      <div class="step"><b>Join a model</b><p>Pick a niche model and register a device key on NEAR, so nobody can send updates in your name.</p></div>
+      <div class="step"><b>Train locally</b><p>Your machine fine-tunes a small adapter on your private data. The data never leaves.</p></div>
+      <div class="step"><b>Send a sealed update</b><p>Only the adapter goes out, encrypted to the vault (a TEE) and signed by your device.</p></div>
+      <div class="step"><b>Get scored fairly</b><p>The vault measures how much your update improved the model on a hidden test (Shapley values). Junk earns 0%.</p></div>
+      <div class="step"><b>Own and earn</b><p>Your score becomes your share on NEAR. Every paid question: 95% to owners by share, 5% to Axon.</p></div>
+    </div>`;
+}
+
+function trustBlock() {
+  const v = CONFIG.vault;
+  return `<div class="kicker">Why you can trust the numbers</div><h2>Checked by code, not by us.</h2>
+    <div class="grid" style="margin-top:28px">
+      <div class="card"><span class="tag">Vault</span><h3>Runs in a TEE</h3><p class="muted small">The vault that merges and scores updates runs in Intel TDX. A hardware quote binds its key to its code hash. Mode now: <b>${esc(v?.attestation?.mode || "unknown")}</b>.</p></div>
+      <div class="card"><span class="tag">Contract</span><h3>Only signed results count</h3><p class="muted small">The NEAR contract accepts a round only if the vault's registered key signed it, and rejects replays and unknown accounts.</p></div>
+      <div class="card"><span class="tag">Payments</span><h3>Any token, split on-chain</h3><p class="muted small">Pay with NEAR or any token via NEAR Intents. The contract splits each payment: 95% to owners by share, 5% to Axon.</p></div>
+    </div>`;
+}
+
+// ------------------------------------------------------------------ model page
 
 async function pageModel(id) {
   const m = await api(`/api/models/${id}`);
   const total = Number(m.total_shares) || 1;
-  const owners = m.contributors.slice().sort((a, b) => Number(b.shares) - Number(a.shares));
+  const o = owners(m);
   // Same formula as the contract's earnings_of: pending + shares * acc_per_share / 1e9 - reward_debt
   const acc = BigInt(m.acc_per_share);
-  const earnings = owners.map((c) => (BigInt(c.pending) + (BigInt(c.shares) * acc) / 1000000000n - BigInt(c.reward_debt)).toString());
+  const earnings = o.map((c) => (BigInt(c.pending) + (BigInt(c.shares) * acc) / 1000000000n - BigInt(c.reward_debt)).toString());
   const vault = CONFIG.vault;
   const keyOk = vault && vault.combiner_key === m.combiner_key && vault.code_hash === m.combiner_code_hash;
+  const demo = !!CONFIG.demo_payer;
 
   view.innerHTML = `
-    <a href="#/" class="small">← All models</a>
-    <section class="hero" style="margin-top:12px"><h1>${esc(m.name)}</h1><p>${esc(m.description)}</p></section>
+    <section class="mhead">
+      <canvas class="art" id="art"></canvas><div class="labels" id="labels"></div>
+      <div class="copy"><a href="#/models" class="small muted">← All models</a>
+        <div class="eyebrow" style="margin:14px 0 0">${esc(m.domain)} · model ${m.id}</div>
+        <h1>${esc(m.name)}</h1><p class="muted">${esc(m.description)}</p></div>
+    </section>
+    <div class="wrap">
     <div class="kpis">
-      <div class="kpi"><div class="v">${m.contributors.length}</div><div class="l">Owners</div></div>
+      <div class="kpi"><div class="v">${o.filter((c) => Number(c.shares) > 0).length}</div><div class="l">Owners</div></div>
       <div class="kpi"><div class="v">${m.rounds}</div><div class="l">Training rounds</div></div>
-      <div class="kpi"><div class="v">${m.base_eval_loss_milli ? (m.base_eval_loss_milli / 1000).toFixed(3) + " → " + (m.eval_loss_milli / 1000).toFixed(3) : "-"}</div><div class="l">Hidden-test loss</div></div>
-      <div class="kpi"><div class="v">${m.queries}</div><div class="l">Paid queries</div></div>
+      <div class="kpi"><div class="v">${m.base_eval_loss_milli ? (m.base_eval_loss_milli / 1000).toFixed(2) + " → " + (m.eval_loss_milli / 1000).toFixed(2) : "–"}</div><div class="l">Hidden-test loss</div></div>
+      <div class="kpi"><div class="v">${m.queries}</div><div class="l">Paid questions</div></div>
       <div class="kpi"><div class="v">${near(m.total_revenue, 3)} Ⓝ</div><div class="l">Paid to owners</div></div>
     </div>
-
     <div class="two">
       <div class="card">
         <h3>Who owns this model</h3>
-        <p class="muted small">Shares = how much each contributor's private data improved the model on a hidden test. Data that doesn't help earns nothing.</p>
-        <div class="bar">${owners.map((c, i) => `<span style="width:${(100 * Number(c.shares)) / total}%;background:${COLORS[i % 5]}" title="${esc(c.account)}"></span>`).join("")}</div>
+        <p class="muted small">Share = how much each contributor's private data improved the model on a hidden test. Data that doesn't help earns nothing.</p>
+        <div class="bar">${o.map((c, i) => `<span style="width:${(100 * Number(c.shares)) / total}%;background:${COLORS[i % 5]}" title="${esc(c.account)}"></span>`).join("")}</div>
         <table>
-          <tr><th>Owner</th><th class="num">Share</th><th class="num">Last improvement</th><th class="num">Earned</th></tr>
-          ${owners.map((c, i) => `<tr>
-            <td><span class="dot" style="background:${COLORS[i % 5]}"></span>${acctLink(c.account)}</td>
+          <tr><th>Owner</th><th class="num">Share</th><th class="num">Rounds</th><th class="num">Earned</th></tr>
+          ${o.map((c, i) => `<tr>
+            <td><span class="dot" style="background:${COLORS[i % 5]}"></span>${acctLink(c.account)}${Number(c.shares) === 0 && m.rounds ? ` <span class="small zero">excluded: made the model worse</span>` : ""}</td>
             <td class="num ${Number(c.shares) === 0 ? "zero" : ""}">${((100 * Number(c.shares)) / total).toFixed(1)}%</td>
-            <td class="num">${(Number(c.last_improvement_micro) / 1e6).toFixed(4)}</td>
+            <td class="num">${c.rounds}</td>
             <td class="num">${near(earnings[i], 5)} Ⓝ</td></tr>`).join("")}
         </table>
       </div>
       <div class="card">
         <h3>Ask this model</h3>
-        <p class="muted small">Your question goes only to the sealed vault. Each paid question is split among the owners on-chain.</p>
-        <textarea id="q" placeholder="e.g. What are the early signs of type 2 diabetes?"></textarea>
+        <p class="muted small">Your question goes only to the sealed vault. Each paid question is split on-chain: 95% to the owners, 5% to Axon.</p>
+        <textarea id="q" placeholder="e.g. Which gene is involved in Laing distal myopathy, and how is it inherited?"></textarea>
         <label>Pay with</label>
         <select id="asset">
-          <option value="testnet">Testnet NEAR (demo, instant)</option>
+          ${demo ? `<option value="demo">Free demo question (Axon pays, ${CONFIG.demo_per_day} a day)</option>` : ""}
           ${CONFIG.tokens.map((t) => `<option value="${t.id}">${esc(t.label)} · via NEAR Intents</option>`).join("")}
         </select>
-        <div id="refund-wrap" style="display:none"><label>Your refund address on that chain</label><input id="refund" placeholder="0x… / So1… / bc1…"></div>
-        <div class="row"><button id="askbtn">Pay ${near(m.query_price, 3)} Ⓝ and ask</button></div>
+        <div id="refund-wrap" style="display:${demo ? "none" : "block"}"><label>Your refund address on that chain</label><input id="refund" placeholder="0x… / So1… / bc1…"></div>
+        <div class="row"><button class="btn" id="askbtn">Pay ${near(m.query_price, 3)} Ⓝ and ask</button></div>
         <div id="askout"></div>
       </div>
     </div>
-
-    <h2>Training rounds</h2>
-    <div class="two">
-      <div class="card chart">${lossChart(m)}</div>
-      <div class="card">
-        <table><tr><th>Round</th><th class="num">Test loss</th><th class="num">Shares minted</th><th>Excluded</th></tr>
-        ${m.rounds_detail.slice().reverse().map((r) => `<tr><td>#${r.round}</td><td class="num">${(r.eval_loss_milli / 1000).toFixed(3)}</td>
-          <td class="num">${r.results.reduce((s, x) => s + Number(x.shares), 0).toLocaleString()}</td>
-          <td class="small">${r.results.filter((x) => Number(x.shares) === 0).map((x) => esc(short(x.account))).join(", ") || "-"}</td></tr>`).join("") || `<tr><td colspan="4" class="muted">No rounds yet.</td></tr>`}
-        </table>
+    <section class="block">${await compareBlock(m)}</section>
+    <section class="block">
+      <div class="kicker">Training</div><h2>Every round, on-chain.</h2>
+      <div class="two" style="margin-top:28px">
+        <div class="card chart">${lossChart(m)}</div>
+        <div class="card"><table><tr><th>Round</th><th class="num">Test loss</th><th class="num">Shares minted</th><th>Excluded</th><th class="num">Tx</th></tr>
+          ${m.rounds_detail.slice().reverse().map((r) => `<tr><td>#${r.round}</td><td class="num">${(r.eval_loss_milli / 1000).toFixed(3)}</td>
+            <td class="num">${r.results.reduce((s, x) => s + Number(x.shares), 0).toLocaleString()}</td>
+            <td class="small">${r.results.filter((x) => Number(x.shares) === 0).map((x) => esc(short(x.account))).join(", ") || "–"}</td>
+            <td class="num small">${r.adapter_hash ? r.adapter_hash.slice(0, 8) + "…" : ""}</td></tr>`).join("") || `<tr><td colspan="5" class="muted">No rounds yet.</td></tr>`}
+        </table></div>
       </div>
-    </div>
-
-    <h2>Why you can trust the numbers</h2>
-    <div class="card small">
-      <p>Round results are signed by the vault's key <code>${esc(m.combiner_key.slice(0, 16))}…</code>, bound to vault code hash <code>${esc(m.combiner_code_hash.slice(0, 16))}…</code>.
-      The NEAR contract rejects any result not signed by that key, any replayed round, and any payout to an account that didn't register on-chain.</p>
-      <p>${keyOk ? "✅ The running vault's key and code hash match what is registered on-chain." : "⚠️ The running vault does not match the on-chain registration."}
-      Attestation mode: <b>${esc(vault?.attestation?.mode || "unknown")}</b>. ${esc(vault?.attestation?.note || "")}</p>
-      <p>Base model: <code>${esc(m.base_model)}</code> · Compute providers are paid a fixed fee per round (${near(m.compute_fee, 3)} Ⓝ), not ownership. Training budget left: ${near(m.budget, 3)} Ⓝ.</p>
+    </section>
+    <section class="block">
+      <div class="kicker">Proof</div><h2>Why you can trust these numbers</h2>
+      <div class="card small" style="margin-top:28px">
+        <p>Round results are signed by the vault key <code>${esc(m.combiner_key.slice(0, 16))}…</code>, bound to vault code hash <code>${esc(m.combiner_code_hash.slice(0, 16))}…</code>. The contract rejects anything else.</p>
+        <p>${keyOk ? "✅ The running vault's key and code hash match what is registered on-chain." : "⚠️ The vault currently online is not the one this model is bound to (answers need the vault that trained it)."}
+        Attestation mode: <b>${esc(vault?.attestation?.mode || "unknown")}</b>.</p>
+        <p style="margin-bottom:0">Base model <code>${esc(m.base_model)}</code> (open, free). Compute providers get a fixed fee per round (${near(m.compute_fee, 3)} Ⓝ), never ownership. Training budget left: ${near(m.budget, 3)} Ⓝ. Creator ${acctLink(m.creator)}.</p>
+      </div>
+    </section>
     </div>`;
 
-  $("#asset").onchange = (e) => ($("#refund-wrap").style.display = e.target.value === "testnet" ? "none" : "block");
+  ART = AxonNeuron.mount($("#art"), {
+    contributors: neuronContributors(m), labels: $("#labels"), center: [0.62, 0.45], scale: 13, cell: 4, seed: 11 + m.id,
+    somaLabel: `<b>model ${m.id}</b>${m.rounds} rounds`,
+  });
+  $("#asset").onchange = (e) => ($("#refund-wrap").style.display = e.target.value === "demo" ? "none" : "block");
   $("#askbtn").onclick = () => ask(m);
 }
 
 function lossChart(m) {
-  const pts = [{ round: 0, loss: m.rounds_detail.length ? (m.base_eval_loss_milli / 1000) : null }, ...m.rounds_detail.map((r) => ({ round: r.round, loss: r.eval_loss_milli / 1000 }))].filter((p) => p.loss != null);
+  const pts = [{ round: 0, loss: m.rounds_detail.length ? m.base_eval_loss_milli / 1000 : null }, ...m.rounds_detail.map((r) => ({ round: r.round, loss: r.eval_loss_milli / 1000 }))].filter((p) => p.loss != null);
   if (pts.length < 2) return `<p class="muted small">The loss curve appears after the first round.</p>`;
-  const W = 400, H = 180, P = 30;
+  const W = 400, H = 190, P = 34;
   const ls = pts.map((p) => p.loss), lo = Math.min(...ls), hi = Math.max(...ls), span = hi - lo || 1;
   const x = (i) => P + (i * (W - 2 * P)) / (pts.length - 1);
-  const y = (l) => 26 + ((hi - l) / span) * (H - 56);
+  const y = (l) => 30 + ((hi - l) / span) * (H - 64);
   const path = pts.map((p, i) => `${i ? "L" : "M"}${x(i)},${y(p.loss)}`).join(" ");
-  return `<h3>Hidden-test loss (lower is better)</h3><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Loss per round">
-    <path d="${path}" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
-    ${pts.map((p, i) => `<circle cx="${x(i)}" cy="${y(p.loss)}" r="4" fill="var(--accent)"/><text x="${x(i)}" y="${H - 6}" text-anchor="middle">${i === 0 ? "base" : "#" + p.round}</text><text x="${x(i)}" y="${y(p.loss) - 9}" text-anchor="middle">${p.loss.toFixed(3)}</text>`).join("")}
+  return `<h3>Hidden-test loss <span class="muted small">(lower is better)</span></h3><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Loss per round">
+    <path d="${path}" fill="none" stroke="var(--accent)" stroke-width="2"/>
+    ${pts.map((p, i) => `<rect x="${x(i) - 4}" y="${y(p.loss) - 4}" width="8" height="8" fill="var(--accent)"/><text x="${x(i)}" y="${H - 8}" text-anchor="middle">${i === 0 ? "base" : "round " + p.round}</text><text x="${x(i)}" y="${y(p.loss) - 12}" text-anchor="middle">${p.loss.toFixed(3)}</text>`).join("")}
   </svg>`;
 }
 
@@ -149,11 +312,10 @@ async function ask(m) {
   const asset = $("#asset").value;
   btn.disabled = true;
   try {
-    if (asset === "testnet") {
+    if (asset === "demo") {
       out.innerHTML = `<p class="small"><span class="spin"></span>Paying on-chain, then asking the vault…</p>`;
-      const r = await api("/api/ask-testnet", { method: "POST", body: JSON.stringify({ model_id: m.id, question: q }) });
-      out.innerHTML = `<div class="answer">${esc(r.answer)}</div><p class="small muted">Paid by ${acctLink(r.payer)} · tx ${txLink(r.payment_tx)} · not medical advice</p>`;
-      setTimeout(() => pageModel(m.id), 2500);
+      const r = await api("/api/ask-demo", { method: "POST", body: JSON.stringify({ model_id: m.id, question: q }) });
+      out.innerHTML = `<div class="answer box">${esc(r.answer)}</div><p class="small muted">Paid by ${acctLink(r.payer)} · tx ${txLink(r.payment_tx)} · not medical advice</p>`;
     } else {
       const refund = $("#refund").value.trim();
       if (!refund) throw new Error("Enter a refund address on the chain you're paying from.");
@@ -175,7 +337,7 @@ async function pollOrder(dep, modelId) {
   try {
     const o = await api(`/api/orders/${dep}`);
     if (o.state === "answered") {
-      $("#askout").innerHTML = `<div class="answer">${esc(o.answer)}</div><p class="small muted">Paid via NEAR Intents (${esc(o.source)}) · tx ${txLink(o.payment_tx)}</p>`;
+      $("#askout").innerHTML = `<div class="answer box">${esc(o.answer)}</div><p class="small muted">Paid via NEAR Intents (${esc(o.source)}) · tx ${txLink(o.payment_tx)}</p>`;
       return;
     }
     const s = $("#ostate");
@@ -184,55 +346,56 @@ async function pollOrder(dep, modelId) {
   if (location.hash === `#/model/${modelId}`) setTimeout(() => pollOrder(dep, modelId), 5000);
 }
 
+// ------------------------------------------------------------------ other pages
+
 function pageContribute() {
-  view.innerHTML = `
-    <section class="hero"><h1>Contribute your data. Keep it.</h1>
-    <p>Your data never leaves your machine. You train the shared model locally and send only a sealed, signed update that only the vault can open.</p></section>
-    <div class="two">
-      <div class="card"><ol class="steps">
-        <li><b>Join the model on NEAR.</b> Your account registers a device key on-chain, so nobody can submit updates in your name.</li>
-        <li><b>Train locally.</b> The current shared model is fine-tuned on your private file, on your machine.</li>
-        <li><b>Send a sealed update.</b> Only the adapter (what the model learned) is sent, encrypted to the vault and signed by your device.</li>
-        <li><b>Get scored.</b> The vault measures how much your update improved the model on a hidden test. Junk or harmful data scores zero and is left out.</li>
-        <li><b>Own and earn.</b> The score becomes your ownership share on NEAR. Every paid question pays you automatically.</li>
-      </ol></div>
+  const acct = CONFIG.network === "mainnet" ? "you.near" : "you.testnet";
+  view.innerHTML = `<div class="wrap page">
+    <div class="kicker">Contribute</div><h2>Contribute your data. Keep it.</h2>
+    <p class="lead">Your data never leaves your machine. You fine-tune the shared model locally and send only a sealed, signed update that only the vault can open.</p>
+    <div class="split">
+      <div class="card">${howBlock().split('<div class="steps">')[1].replace(/<\/div>\s*$/, "").replace(/class="step"/g, 'class="step" style="margin-bottom:14px"')}</div>
       <div class="card"><h3>Run it</h3>
 <pre>python -m axon contribute \\
   --model 0 \\
-  --account you.testnet \\
+  --account ${acct} \\
   --data my_private_data.jsonl</pre>
       <p class="small muted">Data format: one JSON object per line, <code>{"q": "...", "a": "..."}</code>. The file is read locally and never uploaded.</p></div>
-    </div>`;
+    </div></div>`;
 }
 
 async function pageEarnings() {
   const saved = localStorageGet("axon.account") || "";
-  view.innerHTML = `
-    <section class="hero"><h1>Your earnings</h1><p>Your ownership in every model, and what it has earned you.</p></section>
-    <div class="card"><label>NEAR account</label><div class="row" style="margin-top:0"><input id="acct" value="${esc(saved)}" placeholder="alice.testnet" style="flex:1"><button id="go">Show</button></div><div id="eout"></div></div>`;
+  view.innerHTML = `<div class="wrap page">
+    <div class="kicker">Earnings</div><h2>Your earnings</h2><p class="lead">Your ownership in every model, and what it has earned you.</p>
+    <div class="card"><label style="margin-top:0">NEAR account</label><div class="row" style="margin-top:0"><input id="acct" value="${esc(saved)}" placeholder="${CONFIG.network === "mainnet" ? "neuro-clinic.axon.ebukaa.near" : "alice.testnet"}" style="flex:1"><button class="btn" id="go">Show</button></div><div id="eout"></div></div></div>`;
   const run = async () => {
     const a = $("#acct").value.trim();
     if (!a) return;
     localStorageSet("axon.account", a);
     $("#eout").innerHTML = `<p class="small"><span class="spin"></span>Reading NEAR…</p>`;
-    const rows = await api(`/api/earnings/${encodeURIComponent(a)}`);
-    $("#eout").innerHTML = rows.length ? `<table style="margin-top:12px"><tr><th>Model</th><th class="num">Ownership</th><th class="num">Withdrawable</th></tr>
-      ${rows.map((r) => `<tr><td><a href="#/model/${r.model_id}">${esc(r.name)}</a></td><td class="num">${((100 * Number(r.shares)) / (Number(r.total_shares) || 1)).toFixed(1)}%</td><td class="num">${near(r.earnings, 5)} Ⓝ</td></tr>`).join("")}</table>
-      <p class="small muted">Withdraw with <code>python -m axon withdraw --model &lt;id&gt; --account ${esc(a)}</code>.</p>` : `<p class="muted">This account doesn't own a share of any model yet.</p>`;
+    try {
+      const rows = await api(`/api/earnings/${encodeURIComponent(a)}`);
+      $("#eout").innerHTML = rows.length ? `<table style="margin-top:16px"><tr><th>Model</th><th class="num">Ownership</th><th class="num">Withdrawable</th></tr>
+        ${rows.map((r) => `<tr><td><a href="#/model/${r.model_id}">${esc(r.name)}</a></td><td class="num">${pct(r.shares, r.total_shares)}</td><td class="num">${near(r.earnings, 5)} Ⓝ</td></tr>`).join("")}</table>
+        <p class="small muted">Withdraw with <code>python -m axon withdraw --model &lt;id&gt; --account ${esc(a)}</code>.</p>` : `<p class="muted">This account doesn't own a share of any model yet.</p>`;
+    } catch (e) { $("#eout").innerHTML = `<div class="notice warn">${esc(e.message)}</div>`; }
   };
   $("#go").onclick = run;
   if (saved) run();
 }
 
 function pageCreate() {
-  view.innerHTML = `
-    <section class="hero"><h1>Start a model</h1><p>Pick an open base model and a topic, fund the compute budget, and invite people or organisations with private data to build it with you.</p></section>
+  const acct = CONFIG.network === "mainnet" ? "you.near" : "you.testnet";
+  view.innerHTML = `<div class="wrap page">
+    <div class="kicker">Create</div><h2>Start a model for any niche</h2>
+    <p class="lead">Pick an open base model and one topic, fund the compute budget, and invite people or organisations with private data to build it with you. They can join any time while it trains.</p>
     <div class="card"><pre>python -m axon create-model \\
-  --creator you.testnet \\
-  --name "Sleep Coach" --domain health \\
+  --creator ${acct} \\
+  --name "Sleep Coach" --domain sleep \\
   --description "Trained on wearable sleep data from its owners" \\
-  --price 0.01 --compute-fee 0.05 --budget 0.5</pre>
-    <p class="small muted">The model is bound on-chain to the vault's signing key and code hash. Compute providers are paid a fixed fee per round from the budget; ownership goes only to data contributors.</p></div>`;
+  --price 0.01 --compute-fee 0.02 --budget 0.2</pre>
+    <p class="small muted" style="margin-bottom:0">The model is bound on-chain to the vault's signing key and code hash. Compute providers get a fixed fee per round from the budget; ownership goes only to data contributors.</p></div></div>`;
 }
 
 function localStorageGet(k) { try { return localStorage.getItem(k); } catch { return null; } }
@@ -243,21 +406,28 @@ function localStorageSet(k, v) { try { localStorage.setItem(k, v); } catch { /* 
 async function route() {
   const h = location.hash || "#/";
   document.querySelectorAll("nav a").forEach((a) => a.classList.toggle("on", a.getAttribute("href") === h));
-  view.innerHTML = `<p class="muted"><span class="spin"></span>Loading from NEAR…</p>`;
+  const onHome = ["#/", "#/how", "#/models", ""].includes(h);
+  if (onHome && document.getElementById("art") && document.querySelector(".hero")) {
+    const id = h === "#/how" ? "how" : h === "#/models" ? "models" : null;
+    if (id) return document.getElementById(id).scrollIntoView({ behavior: "smooth" });
+    return window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+  window.scrollTo(0, 0);
+  view.innerHTML = `<div class="wrap page"><p class="muted"><span class="spin"></span>Loading from NEAR…</p></div>`;
   try {
     if (h.startsWith("#/model/")) await pageModel(Number(h.split("/")[2]));
     else if (h === "#/contribute") pageContribute();
     else if (h === "#/earnings") await pageEarnings();
     else if (h === "#/create") pageCreate();
-    else await pageModels();
+    else await pageHome();
   } catch (e) {
-    view.innerHTML = `<div class="notice warn">${esc(e.message)}</div>`;
+    view.innerHTML = `<div class="wrap page"><div class="notice warn">${esc(e.message)}</div></div>`;
   }
 }
 
 (async () => {
   CONFIG = await api("/api/config");
-  $("#net").textContent = `NEAR ${CONFIG.network}`;
+  $("#net").innerHTML = `<span class="live"></span>NEAR ${esc(CONFIG.network)}`;
   $("#contract-link").innerHTML = `Contract ${acctLink(CONFIG.contract)}`;
   window.addEventListener("hashchange", route);
   route();
