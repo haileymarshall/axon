@@ -55,7 +55,7 @@ for free; only its hash is public.
 | **Named accounts** | Owners are human-readable accounts (`alice.…testnet`); device keys bind updates to them. | `join_model` |
 | **NEAR Intents (1Click API)** | Pay for a query with USDC on Base/Solana/Arbitrum/Ethereum, SOL, ETH, BTC or NEAR; it settles as wNEAR to the Axon treasury, which records it on-chain with its cross-chain origin. | `axon/intents.py`, `axon/app.py` |
 | **Confidential Intents** | Supported via `confidentiality: basic` when a 1Click partner key is set (`AXON_INTENTS_JWT`), so payment trails stay private. | `axon/intents.py` |
-| **TEE / Shade Agent pattern** | The vault is the component meant to run in a TEE: the contract trusts only its key, which is bound to `combiner_code_hash` (the hash of the vault's code). See §7 for current status. | `axon/vault.py` |
+| **TEE (Intel TDX on Phala, the stack behind NEAR Shade Agents)** | The vault runs in a confidential VM. Its signing key is derived inside the TEE; a hardware quote binds that key to the vault's code hash; the contract accepts only that key. Verified: [`runs/tee/`](runs/tee/README.md), re-check with `scripts/verify_tee.py`. | `axon/tee.py`, `deploy/phala.sh` |
 
 ## 4. Try it (laptop, CPU only, about 25 minutes for the full loop)
 
@@ -143,9 +143,11 @@ The hidden test set mixes all three topics and exists only inside the vault.
 
 ## 7. Honest limitations (v0)
 
-* **TEE:** the vault runs as a normal process in this repo; its attestation is self-reported
-  (`attestation.mode = "local"`). The contract already enforces "only the registered key, bound to this code
-  hash", which is the check a Shade Agent / confidential-VM deployment plugs into.
+* **TEE:** the deployed vault runs in Intel TDX on Phala ([`runs/tee/`](runs/tee/README.md)). Run locally (as in §4), it
+  reports `attestation.mode = "local"`, a self-report. The contract does not verify the quote itself; anyone can, with
+  `scripts/verify_tee.py`.
+* **Demo test set is public:** the hidden test set is generated from public MedQuAD with a fixed seed (so anyone can
+  reproduce the scores). In production the model creator provides it sealed to the TEE, so nobody can train against it.
 * **Weights reach contributors:** contributors download the current shared adapter to train on it. Fine for
   members; a production version would train inside TEEs too.
 * **Update leakage:** model updates can leak some information about training data. Next step: differential privacy noise

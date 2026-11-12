@@ -19,4 +19,5 @@ AXON_OPERATOR=$AXON_OPERATOR
 AXON_VAULT_TOKEN=${AXON_VAULT_TOKEN:?set AXON_VAULT_TOKEN}
 AXON_NEAR_PRIVATE_KEY=$KEY
 ENV
-npx -y phala@latest deploy --name axon-vault --compose "$OUT" --instance-type "${AXON_TEE_TYPE:-tdx.medium}" -e "$ENVF" --wait
+# Production (non-dev) OS image: no debug access into the VM.
+npx -y phala@latest deploy --name "${AXON_TEE_NAME:-axon-vault}" --compose "$OUT" --instance-type "${AXON_TEE_TYPE:-tdx.medium}" --image "${AXON_TEE_OS:-dstack-0.6.1}" -e "$ENVF" --wait
