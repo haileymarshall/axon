@@ -134,7 +134,7 @@ def main(argv=None):
 
     s = sub.add_parser("app", help="run the web app")
     s.add_argument("--treasury", help="NEAR account receiving Intents payments")
-    s.add_argument("--demo-payer", help="testnet account that pays demo queries")
+    s.add_argument("--demo-payer", help="account that pays a few rate-limited demo questions")
     s.add_argument("--host", default="127.0.0.1")
     s.add_argument("--port", type=int, default=8800)
     s.set_defaults(fn=cmd_app)

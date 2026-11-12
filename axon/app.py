@@ -4,9 +4,11 @@ to the vault. It never sees training data or model weights."""
 from __future__ import annotations
 
 import json
+import threading
+import time
 
 import httpx
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -17,6 +19,10 @@ from .config import CFG, ROOT
 
 WEB = ROOT / "web"
 ORDERS = CFG.state_dir / "app" / "orders.json"
+DEMO_LOG = CFG.state_dir / "app" / "demo_asks.json"
+# The demo payer spends real NEAR on mainnet, so demo questions are rate limited.
+DEMO_PER_DAY = 20
+DEMO_IP_GAP_S = 60
 
 
 class QuoteIn(BaseModel):
@@ -27,7 +33,7 @@ class QuoteIn(BaseModel):
     dry: bool = True
 
 
-class TestnetAskIn(BaseModel):
+class DemoAskIn(BaseModel):
     model_id: int
     question: str
 
@@ -42,9 +48,10 @@ def _save_orders(o: dict) -> None:
 
 
 def create_app(treasury: str | None, demo_payer: str | None) -> FastAPI:
-    """`treasury` receives Intents payments and records them on-chain; `demo_payer` pays testnet demo queries."""
+    """`treasury` receives Intents payments and records them on-chain; `demo_payer` pays a few demo questions."""
     app = FastAPI(title="Axon app")
     near = Near()
+    demo_lock = threading.Lock()
 
     @app.get("/api/config")
     def config():
@@ -53,7 +60,8 @@ def create_app(treasury: str | None, demo_payer: str | None) -> FastAPI:
         except Exception:
             vault = None
         return {"network": CFG.network, "contract": near.contract_id, "treasury": treasury,
-                "demo_payer": demo_payer, "vault": vault, "tokens": intents.TOKENS,
+                "demo_payer": demo_payer, "demo_per_day": DEMO_PER_DAY, "vault": vault, "tokens": intents.TOKENS,
+                "platform_fees": near.view("platform_fees", {}),
                 "explorer": "https://testnet.nearblocks.io" if CFG.network == "testnet" else "https://nearblocks.io"}
 
     @app.get("/api/models")
@@ -67,6 +75,16 @@ def create_app(treasury: str | None, demo_payer: str | None) -> FastAPI:
             raise HTTPException(404, "no such model")
         m["rounds_detail"] = near.view("get_rounds", {"model_id": model_id})
         return m
+
+    @app.get("/api/runs")
+    def runs():
+        """Published training runs for this contract (runs/<id>/summary.json): base vs trained answers, shares."""
+        out = []
+        for f in sorted((ROOT / "runs").glob("*/summary.json"), reverse=True):
+            s = json.loads(f.read_text())
+            if s.get("contract") == near.contract_id:
+                out.append(s)
+        return out
 
     @app.get("/api/earnings/{account}")
     def earnings(account: str):
@@ -114,13 +132,25 @@ def create_app(treasury: str | None, demo_payer: str | None) -> FastAPI:
         _save_orders(o)
         return order
 
-    # ------------------------------------------------------------- testnet demo payment
+    # ------------------------------------------------------------- demo payment (rate limited)
 
-    @app.post("/api/ask-testnet")
-    def ask_testnet(a: TestnetAskIn):
+    @app.post("/api/ask-demo")
+    def ask_demo(a: DemoAskIn, request: Request):
         if not demo_payer:
-            raise HTTPException(503, "no testnet demo payer configured")
-        return _pay_and_ask(a.model_id, a.question, demo_payer, "testnet-demo")
+            raise HTTPException(503, "no demo payer configured")
+        ip = request.headers.get("x-forwarded-for", request.client.host if request.client else "?").split(",")[0].strip()
+        with demo_lock:
+            now = time.time()
+            log = json.loads(DEMO_LOG.read_text()) if DEMO_LOG.exists() else []
+            log = [e for e in log if now - e["t"] < 86400]
+            if len(log) >= DEMO_PER_DAY:
+                raise HTTPException(429, "today's free demo questions are used up; pay with NEAR Intents instead")
+            if any(e["ip"] == ip and now - e["t"] < DEMO_IP_GAP_S for e in log):
+                raise HTTPException(429, "one free demo question per minute")
+            log.append({"t": now, "ip": ip})
+            DEMO_LOG.parent.mkdir(parents=True, exist_ok=True)
+            DEMO_LOG.write_text(json.dumps(log))
+        return _pay_and_ask(a.model_id, a.question, demo_payer, "demo")
 
     def _pay_and_ask(model_id: int, question: str, payer: str, source: str) -> dict:
         m = near.view("get_model", {"model_id": model_id})
