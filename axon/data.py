@@ -14,7 +14,8 @@ Contributors in the demo:
 Every disease belongs to exactly one contributor. For some of each contributor's diseases, one question is
 held back into the vault's hidden test set (never given to anyone), so the test measures whether the merged
 model learned about those diseases from the contributors' other questions. `probes.json` lists reworded
-questions about facts in the contributors' data, asked to the base model and the trained model in every run.
+questions about facts in the contributors' data (gene + inheritance pattern), asked to the base model and the
+trained model in every run and graded automatically (`grade`).
 """
 
 from __future__ import annotations
@@ -48,6 +49,15 @@ CONTRIBUTORS = [*SPECIALTIES, "bob"]
 # Held-back test questions prefer hard facts a base model would have to guess.
 TEST_QTYPES = ("frequency", "inheritance", "genetic changes")
 PROBE_FORM = "Which gene is involved in {d}, and how is it inherited?"
+PROBES_PER_CONTRIBUTOR = 4
+INHERITANCE = r"autosomal dominant|autosomal recessive|X-linked dominant|X-linked recessive|mitochondrial"
+
+
+def grade(answer: str, probe: dict) -> dict:
+    """Did an answer name the right gene and inheritance pattern? (exact symbol / pattern match)"""
+    gene = bool(probe.get("gene")) and re.search(rf"\b{re.escape(probe['gene'])}\b", answer) is not None
+    inh = bool(probe.get("inheritance")) and probe["inheritance"] in answer.lower()
+    return {"gene": gene, "inheritance": inh}
 
 
 def load_rows(raw: Path) -> list[dict]:
@@ -114,10 +124,13 @@ def prepare(diseases_per_contributor: int = 30, test_per_contributor: int = 8, s
                 rows.remove(held)
                 test.append({"q": held["q"], "a": held["a"], "owner": c})
             gene = next((r for r in rows if r["qtype"] == "genetic changes"), None)
-            if gene and sum(p["owner"] == c for p in probes) < 2:
-                inh = next((r for r in rows if r["qtype"] == "inheritance"), None)
-                ref = gene["a"][:400] + (" ... " + inh["a"][:200] if inh else "")
-                probes.append({"q": PROBE_FORM.format(d=d), "owner": c, "disease": d, "reference": ref})
+            inh = next((r for r in rows if r["qtype"] == "inheritance"), None)
+            sym = re.match(r"Mutations in the ([A-Z][A-Z0-9-]{1,11}) gene", gene["a"]) if gene else None
+            pat = re.search(INHERITANCE, inh["a"], re.I) if inh else None
+            if sym and pat and sum(p["owner"] == c for p in probes) < PROBES_PER_CONTRIBUTOR:
+                ref = gene["a"][:400] + " ... " + inh["a"][:200]
+                probes.append({"q": PROBE_FORM.format(d=d), "owner": c, "disease": d, "reference": ref,
+                               "gene": sym.group(1), "inheritance": pat.group(0).lower()})
             items += [{"q": r["q"], "a": r["a"]} for r in rows]
         rng.shuffle(items)
         out[c] = _write(CFG.data_dir / "contributors" / f"{c}.jsonl", items)

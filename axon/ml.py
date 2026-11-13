@@ -187,6 +187,10 @@ def score_round(engine: Engine, test: list[dict], base: Adapter, updates: dict[s
     excluded = [n for n in names if n not in keep]
     for n in names:
         log(f"  {n:<40} shapley {first[n]:+.4f}{'   -> excluded (made the model worse)' if n in excluded else ''}")
+    if keep and value(frozenset(keep)) <= 0:
+        # The kept updates help one by one but not together: the round is rejected and the model stays as it was.
+        log("  merged update does not improve the hidden test -> round rejected, model unchanged, no shares")
+        excluded, keep = names, []
     final = shapley(keep, value) if keep else {}
     merged = aggregate(base, [updates[n] for n in keep])
     new_loss = base_loss - value(frozenset(keep))

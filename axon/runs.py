@@ -56,9 +56,44 @@ def start(run_dir: Path) -> dict:
     return env
 
 
+def recall(answers: list[dict]) -> dict:
+    """How many showcase facts (gene, inheritance pattern) each model got right."""
+    out = {}
+    for who in ("base_model", "axon_trained"):
+        g = [a["graded"][who] for a in answers if a.get("graded")]
+        out[who] = {"gene": sum(x["gene"] for x in g), "inheritance": sum(x["inheritance"] for x in g), "of": len(g)}
+    return out
+
+
+def recall_line(r: dict) -> str:
+    if not r or not r["base_model"]["of"]:
+        return ""
+    b, t = r["base_model"], r["axon_trained"]
+    return (f"* **Facts recalled** (right gene / right inheritance, out of {b['of']}): base model **{b['gene']} / {b['inheritance']}**,"
+            f" Axon-trained **{t['gene']} / {t['inheritance']}**")
+
+
+def probe_lines(probes: list[dict]) -> list[str]:
+    flat = lambda t: " ".join(str(t).split())
+    mark = lambda g: (" ✅ gene" if g["gene"] else " ❌ gene") + (" ✅ inheritance" if g["inheritance"] else " ❌ inheritance")
+    lines = []
+    for p in probes:
+        who = f" *(from {p['contributor']}'s data)*" if p.get("contributor") else ""
+        g = p.get("graded")
+        lines += [f"**Q: {p['question']}**{who}", ""]
+        if p.get("gene"):
+            lines += [f"* Answer in the data: gene **{p['gene']}**, {p['inheritance']}"]
+        lines += [f"* Base{mark(g['base_model']) if g else ''}: {flat(p['base_model'])}",
+                  f"* Axon-trained{mark(g['axon_trained']) if g else ''}: {flat(p['axon_trained'])}"]
+        if p.get("reference"):
+            lines += [f"* Reference: {flat(p['reference'])}"]
+        lines += [""]
+    return lines
+
+
 def finish(run_dir: Path, model_id: int, wall_seconds: int) -> dict:
     """Write summary.json + summary.md for a finished run and add it to RUNS.md."""
-    from . import ml
+    from . import data, ml
     from .chain import Near, yocto_to_near
     from .vault import VAULT_DIR
 
@@ -74,6 +109,9 @@ def finish(run_dir: Path, model_id: int, wall_seconds: int) -> dict:
     answers = [{"question": p["q"], "contributor": p.get("owner"), "disease": p.get("disease"), "reference": p.get("reference"),
                 "base_model": engine.generate(p["q"], engine.initial), "axon_trained": engine.generate(p["q"], trained)}
                for p in probes()]
+    for a, p in zip(answers, probes()):
+        a["graded"] = {"base_model": data.grade(a["base_model"], p), "axon_trained": data.grade(a["axon_trained"], p)}
+        a["gene"], a["inheritance"] = p.get("gene"), p.get("inheritance")
 
     gpu = (env["hardware"]["gpu"] or {}).get("name")
     summary = {
@@ -93,6 +131,7 @@ def finish(run_dir: Path, model_id: int, wall_seconds: int) -> dict:
         "queries_paid": m["queries"],
         "revenue_near": yocto_to_near(m["total_revenue"]),
         "probes": answers,
+        "recall": recall(answers),
     }
     (run_dir / "summary.json").write_text(json.dumps(summary, indent=1))
     (run_dir / "summary.md").write_text(_markdown(summary))
@@ -114,14 +153,9 @@ def _markdown(s: dict) -> str:
         *[f"| {r['round']} | {r['test_loss']:.3f} | {', '.join(f'{k} {v}' for k, v in r['shares'].items())} | `{r['adapter_hash'][:16]}…` |" for r in s["rounds"]], "",
         "## Same question, base model vs Axon-trained model", "",
         "Reworded questions about facts in the contributors' private data. *Reference* is the answer in that data.", "",
+        recall_line(s.get("recall")), "",
     ]
-    for p in s["probes"]:
-        flat = lambda t: " ".join(t.split())
-        who = f" *(from {p['contributor']}'s data)*" if p.get("contributor") else ""
-        lines += [f"**Q: {p['question']}**{who}", "", f"* Base: {flat(p['base_model'])}", f"* Axon-trained: {flat(p['axon_trained'])}"]
-        if p.get("reference"):
-            lines += [f"* Reference: {flat(p['reference'])}"]
-        lines += [""]
+    lines += probe_lines(s["probes"])
     lines += ["Full output: `log.txt`. Hardware and config: `env.json`. Transactions are in the log and on the explorer.", ""]
     return "\n".join(lines)
 

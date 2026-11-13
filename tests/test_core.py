@@ -118,3 +118,30 @@ def test_download_signature_binds_model_account_and_time():
 def test_admin_token_from_env(monkeypatch):
     monkeypatch.setenv("AXON_VAULT_TOKEN", "t0ken")
     assert crypto.admin_token() == "t0ken"
+
+
+def test_grade_matches_exact_gene_and_inheritance():
+    from axon import data
+
+    p = {"gene": "XK", "inheritance": "x-linked recessive"}
+    assert data.grade("Mutations in the XK gene; it is X-linked recessive.", p) == {"gene": True, "inheritance": True}
+    assert data.grade("Mutations in the XKR8 gene, autosomal dominant.", p) == {"gene": False, "inheritance": False}
+
+
+def test_round_that_does_not_help_together_is_rejected():
+    """a and b each score positive Shapley, c is excluded, but a+b merged makes the model worse: reject the round."""
+    from axon import ml
+
+    v = {"": 0.0, "a": 0.3, "b": 0.3, "c": -0.5, "ab": -0.05, "ac": 0.4, "bc": 0.4, "abc": 0.3}
+
+    class FakeEngine:
+        def eval_loss(self, test, adapter):
+            return 1.0 - v["".join(k for i, k in enumerate("abc") if adapter["x"][i] > 0)]
+
+    base = {"x": torch.zeros(3)}
+    ups = {k: {"x": torch.eye(3)[i] * 3} for i, k in enumerate("abc")}
+    sc = ml.score_round(FakeEngine(), [], base, ups, log=lambda *_: None)
+    assert sc.excluded == ["a", "b", "c"]
+    assert sc.new_loss == sc.base_loss
+    assert sum(sc.improvement.values()) == 0
+    assert torch.equal(sc.global_adapter["x"], base["x"])
