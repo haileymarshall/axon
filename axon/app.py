@@ -171,5 +171,13 @@ def create_app(treasury: str | None, demo_payer: str | None) -> FastAPI:
     def index():
         return FileResponse(WEB / "index.html")
 
+    @app.get("/{design}")
+    def design(design: str):
+        """Alternative frontend designs, e.g. /b -> web/b/index.html (same data, different look)."""
+        page = WEB / design / "index.html"
+        if not (design.isalnum() and page.exists()):
+            raise HTTPException(404, "not found")
+        return FileResponse(page)
+
     return app
 

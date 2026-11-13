@@ -69,7 +69,7 @@ async function boot() {
   const site = await fetch("/static/site.json").then((r) => (r.ok ? r.json() : {})).catch(() => ({}));
   API = site.api || "";
   try {
-    CONFIG = await api("/api/config", { signal: AbortSignal.timeout(8000) });
+    CONFIG = await api("/api/config", { signal: AbortSignal.timeout(20000) });
     LIVE = true;
   } catch {
     LIVE = false;
