@@ -39,8 +39,9 @@ class Config:
     network: str = _env("AXON_NETWORK", "testnet")
     contract_id: str = _env("AXON_CONTRACT", "")
     rpc_url: str = field(default_factory=lambda: _env(
+        # rpc.mainnet.near.org is deprecated and rate-limited; FastNEAR is the recommended public RPC.
         "AXON_RPC", "https://rpc.testnet.near.org" if _env("AXON_NETWORK", "testnet") == "testnet"
-        else "https://rpc.mainnet.near.org"))
+        else "https://free.rpc.fastnear.com"))
 
     # Services
     vault_url: str = _env("AXON_VAULT_URL", "http://127.0.0.1:8700")
