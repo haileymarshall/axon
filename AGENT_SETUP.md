@@ -20,6 +20,7 @@ Live contract: **`axon.ebukaa.near`** on NEAR **mainnet**. Models on it today:
 | 1 | Rare Disease Expert | `rare-diseases` | Qwen/Qwen2.5-1.5B-Instruct |
 | 2 | Vulnerability Classifier | `security` | Qwen/Qwen3-1.7B |
 | 3 | Basque Translator | `basque` | Qwen/Qwen3-1.7B |
+| 4 | Rare Disease Expert (TEE) | `rare-diseases` | HuggingFaceTB/SmolLM2-135M-Instruct (its vault runs in a TEE) |
 
 (Model 0 is an earlier run kept as history. Run `status` in step 3 to see the current list.)
 

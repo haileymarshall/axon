@@ -1,6 +1,7 @@
 """Verify that the Axon vault really runs this repo's code inside Intel TDX hardware.
 
     python scripts/verify_tee.py https://<vault-url>
+    python scripts/verify_tee.py runs/tee-mainnet/vault-info-20261113.json --model 4   # offline, from saved evidence
 
 Checks, with nothing taken on trust:
   1. the vault's code hash equals the hash of the vault source files in this checkout,
@@ -27,12 +28,16 @@ VERIFIER = "https://cloud-api.phala.network/api/v1/attestations/verify"
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("vault_url")
+    ap.add_argument("vault_url", help="the vault's URL, or a saved /info JSON file (offline check)")
     ap.add_argument("--model", type=int, help="also check the on-chain model is bound to this vault's key")
     ap.add_argument("--save", help="write the evidence (info + verifier result) to this JSON file")
     a = ap.parse_args()
 
-    info = httpx.get(f"{a.vault_url.rstrip('/')}/info", timeout=60).json()
+    if Path(a.vault_url).is_file():
+        saved = json.loads(Path(a.vault_url).read_text())
+        info = saved.get("info", saved)
+    else:
+        info = httpx.get(f"{a.vault_url.rstrip('/')}/info", timeout=60).json()
     att = info["attestation"]
     ok = True
 
