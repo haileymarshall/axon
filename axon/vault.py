@@ -96,6 +96,8 @@ class Vault:
             "box_key": self.box_key.public_key.encode().hex(),
             "code_hash": self.code_hash,
             "base_model": CFG.base_model,
+            # Contributors' adapters must have this shape, so the contributor client copies it from here.
+            "training": {"lora_rank": CFG.lora_rank, "lora_targets": CFG.lora_targets},
             "attestation": self.attestation,
         }
 

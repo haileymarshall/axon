@@ -39,7 +39,11 @@ def contribute(model_id: int, account: str, data_file: Path, engine: ml.Engine |
     start = ml.adapter_from_bytes(r.content)
     rows = data.read_jsonl(data_file)
     log(f"[{account}] training locally on {len(rows)} private examples (data stays on this machine)")
-    engine = engine or ml.Engine()
+    # Train on the model's own open base model, with the adapter shape the vault expects: no settings to copy.
+    tr = info.get("training") or {}
+    if engine is None:
+        log(f"[{account}] base model {model['base_model']} (from the chain), adapter rank {tr.get('lora_rank', CFG.lora_rank)}")
+        engine = ml.Engine(model["base_model"], lora_rank=tr.get("lora_rank"), lora_targets=tr.get("lora_targets"))
     adapter = engine.train(rows, start, seed=seed, log=lambda s, l: log(f"[{account}]   step {s:>3}  loss {l:.3f}"))
 
     blob = ml.adapter_bytes(adapter)

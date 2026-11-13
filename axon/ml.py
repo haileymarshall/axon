@@ -36,7 +36,8 @@ class Example:
 class Engine:
     """Holds one base model with a LoRA adapter slot; adapters are swapped in and out."""
 
-    def __init__(self, base_model: str = CFG.base_model, seed: int = 0):
+    def __init__(self, base_model: str = CFG.base_model, seed: int = 0, lora_rank: int | None = None, lora_targets: str | None = None):
+        rank, targets = lora_rank or CFG.lora_rank, lora_targets or CFG.lora_targets
         torch.manual_seed(seed)
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.tok = AutoTokenizer.from_pretrained(base_model)
@@ -44,10 +45,10 @@ class Engine:
             self.tok.pad_token = self.tok.eos_token
         base = AutoModelForCausalLM.from_pretrained(base_model, dtype=getattr(torch, CFG.dtype))
         cfg = LoraConfig(
-            r=CFG.lora_rank,
-            lora_alpha=CFG.lora_rank * 2,
+            r=rank,
+            lora_alpha=rank * 2,
             lora_dropout=0.0,
-            target_modules=CFG.lora_targets.split(","),
+            target_modules=targets.split(","),
             task_type="CAUSAL_LM",
         )
         if CFG.grad_ckpt:
