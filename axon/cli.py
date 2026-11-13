@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import base64
+
 import argparse
 import json
 from pathlib import Path
@@ -51,6 +53,31 @@ def cmd_set_combiner(a):
     res = _near().call(a.creator, "set_combiner", {"model_id": a.model, "combiner_key": info["combiner_key"],
                                                     "combiner_code_hash": info["code_hash"]}, gas_tgas=30)
     print(f"model {a.model} now bound to vault key {info['combiner_key'][:16]}… code {info['code_hash'][:16]}…  tx {res['tx']}")
+
+
+def cmd_set_test(a):
+    """Seal a hidden test file to the vault and sign the hand-over with the creator's key (NEP-413, like a wallet)."""
+    import os
+
+    import base58
+    import httpx
+    from nacl.signing import SigningKey
+
+    from . import crypto
+    from .chain import credentials
+
+    text = Path(a.file).read_text()
+    info = httpx.get(f"{CFG.vault_url}/info", timeout=30).json()
+    sealed = crypto.seal(info["box_key"], text.encode())
+    raw = base58.b58decode(credentials(a.creator).replace("ed25519:", ""))
+    key = SigningKey(raw[:32])
+    nonce = os.urandom(32)
+    msg = crypto.test_set_message(a.model, CFG.contract_id, sealed)
+    sig = key.sign(crypto.nep413_hash(msg, nonce, CFG.contract_id)).signature
+    r = httpx.post(f"{CFG.vault_url}/models/{a.model}/test", timeout=60, json={
+        "creator": a.creator, "sealed": crypto.b64(sealed), "public_key": "ed25519:" + base58.b58encode(raw[32:]).decode(),
+        "signature": base64.b64encode(sig).decode(), "nonce": base64.b64encode(nonce).decode()})
+    print(r.status_code, r.text)
 
 
 def cmd_contribute(a):
@@ -153,6 +180,12 @@ def main(argv=None):
     s.add_argument("--model", type=int, required=True)
     s.add_argument("--creator", required=True)
     s.set_defaults(fn=cmd_set_combiner)
+
+    s = sub.add_parser("set-test", help="seal a model's hidden test set to the vault, signed by the creator")
+    s.add_argument("--model", type=int, required=True)
+    s.add_argument("--creator", required=True)
+    s.add_argument("--file", required=True, help='jsonl, one {"q": ..., "a": ...} per line')
+    s.set_defaults(fn=cmd_set_test)
 
     s = sub.add_parser("contribute", help="train locally on private data and send a sealed update")
     s.add_argument("--model", type=int, required=True)

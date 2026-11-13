@@ -127,18 +127,30 @@ class Vault:
             return data.read_jsonl(own)
         return data.read_jsonl(data.paths(domain)["test"])
 
-    def set_test(self, model_id: int, creator: str, sealed_b64: str) -> dict:
+    def set_test(self, model_id: int, creator: str, sealed_b64: str, public_key: str = "", signature: str = "", nonce: str = "") -> dict:
         """A model's creator hands over its hidden test set, sealed so only this vault can read it. Accepted once,
-        before the first round, and only for the account the chain lists as the model's creator."""
-        m = Near().view("get_model", {"model_id": model_id})
+        before the first round, only from the account the chain lists as the model's creator, and only with that
+        account's wallet signature (NEP-413) over a message naming this model and this exact sealed file."""
+        near = Near()
+        m = near.view("get_model", {"model_id": model_id})
         if m is None:
             raise HTTPException(404, "no such model")
         if m["creator"] != creator:
             raise HTTPException(403, "only the model's creator can set its test set")
+        sealed = crypto.unb64(sealed_b64)
+        msg = crypto.test_set_message(model_id, near.contract_id, sealed)
+        try:
+            ok = crypto.verify_nep413(public_key, signature, msg, crypto.unb64(nonce), near.contract_id)
+        except Exception:
+            ok = False
+        if not ok:
+            raise HTTPException(403, "missing or invalid wallet signature from the creator")
+        if not near.is_full_access_key(creator, public_key):
+            raise HTTPException(403, "the signing key is not a full-access key of the creator's account")
         if m["rounds"] > 0 or (VAULT_DIR / f"model-{model_id}" / "test.jsonl").exists():
             raise HTTPException(409, "test set already fixed")
         try:
-            rows = [json.loads(l) for l in crypto.unseal(self.box_key, crypto.unb64(sealed_b64)).decode().splitlines() if l.strip()]
+            rows = [json.loads(l) for l in crypto.unseal(self.box_key, sealed).decode().splitlines() if l.strip()]
         except Exception as e:
             raise HTTPException(400, f"could not open the sealed test set: {e}") from e
         if not (5 <= len(rows) <= 500) or not all(isinstance(r, dict) and r.get("q") and r.get("a") for r in rows):
@@ -296,6 +308,9 @@ class CloseIn(BaseModel):
 class TestIn(BaseModel):
     creator: str
     sealed: str
+    public_key: str = ""   # NEP-413 wallet signature over crypto.test_set_message(...)
+    signature: str = ""
+    nonce: str = ""
 
 
 class AskIn(BaseModel):
@@ -326,7 +341,7 @@ def create_app(operator: str | None) -> FastAPI:
 
     @app.post("/models/{model_id}/test")
     def post_test(model_id: int, t: TestIn):
-        return vault.set_test(model_id, t.creator, t.sealed)
+        return vault.set_test(model_id, t.creator, t.sealed, t.public_key, t.signature, t.nonce)
 
     @app.post("/models/{model_id}/updates")
     def post_update(model_id: int, u: UpdateIn):

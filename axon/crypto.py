@@ -120,3 +120,40 @@ def admin_token() -> str:
     path.write_text(json.dumps({"token": tok}))
     path.chmod(0o600)
     return tok
+
+
+# ----------------------------------------------------------------- NEP-413 (wallet-signed messages)
+
+NEP413_TAG = 2**31 + 413
+
+
+def _borsh_str(x: str) -> bytes:
+    b = x.encode()
+    return len(b).to_bytes(4, "little") + b
+
+
+def nep413_hash(message: str, nonce: bytes, recipient: str, callback_url: str | None = None) -> bytes:
+    """What a NEAR wallet signs for signMessage (NEP-413): sha256(borsh(tag) + borsh(payload))."""
+    if len(nonce) != 32:
+        raise ValueError("NEP-413 nonce must be 32 bytes")
+    payload = _borsh_str(message) + nonce + _borsh_str(recipient)
+    payload += b"\x01" + _borsh_str(callback_url) if callback_url else b"\x00"
+    return hashlib.sha256(NEP413_TAG.to_bytes(4, "little") + payload).digest()
+
+
+def verify_nep413(public_key: str, signature_b64: str, message: str, nonce: bytes, recipient: str) -> bool:
+    """Check a wallet's NEP-413 signature (ed25519 public key in NEAR form `ed25519:<base58>`)."""
+    import base58
+
+    if not public_key.startswith("ed25519:"):
+        return False
+    try:
+        VerifyKey(base58.b58decode(public_key[8:])).verify(nep413_hash(message, nonce, recipient), base64.b64decode(signature_b64))
+        return True
+    except Exception:
+        return False
+
+
+def test_set_message(model_id: int, contract: str, sealed: bytes) -> str:
+    """The exact text a creator's wallet signs to hand a sealed test set to the vault: bound to this model and file."""
+    return f"Axon: set the hidden test set of model {model_id} on {contract}. Sealed file sha256 {sha256_hex(sealed)}"

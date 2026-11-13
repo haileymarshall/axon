@@ -49,6 +49,12 @@ window.AxonWallet = {
     });
     return res?.transaction?.hash || res?.transaction_outcome?.id || null;
   },
+  // NEP-413 signed message: proves the connected account approves this exact text (no transaction, no fee).
+  async signMessage(message, nonce) {
+    const w = await selector.wallet();
+    if (!w.signMessage) throw new Error("This wallet cannot sign messages. Try Meteor or HOT wallet.");
+    return w.signMessage({ message, recipient: contract, nonce });
+  },
   pending: {
     set: (p) => { try { localStorage.setItem(PENDING, JSON.stringify(p)); } catch { /* private mode */ } },
     take() {

@@ -669,7 +669,7 @@ My niche: <describe it>. Help me write a small hidden test file (questions with 
       </div>
       <div class="card"><h3>What happens</h3><ol class="small muted" style="padding-left:18px;line-height:1.9">
         <li>Your wallet signs one transaction: the model is created on NEAR, bound to the vault, and the budget is deposited (it pays the GPU per round).</li>
-        <li>Your test file is sealed to the vault. Nobody else, including us, can read it.</li>
+        <li>Your test file is sealed to the vault, and your wallet signs the hand-over (no fee). Nobody else can read it or replace it.</li>
         <li>The model appears on the home page with a <b>Join</b> button. Anyone with data in your niche can join.</li>
         <li>Every paid question: 95% to the contributors by share, 5% to Axon. Compute providers get a fixed fee, never ownership.</li></ol></div>
     </div>`;
@@ -733,7 +733,16 @@ async function finishCreate(p, tx) {
   for (let i = 0; i < 10; i++) {
     const m = (await db.models()).filter((x) => x.creator === p.creator && x.name === p.name).sort((a, b) => b.id - a.id)[0];
     if (m) {
-      await api(`/api/models/${m.id}/test`, { method: "POST", body: JSON.stringify({ creator: p.creator, sealed: p.sealed }) });
+      // The vault only takes the test set with the creator's wallet signature over this model and this exact file.
+      const sealedBytes = Uint8Array.from(atob(p.sealed), (c) => c.charCodeAt(0));
+      const sha = [...new Uint8Array(await crypto.subtle.digest("SHA-256", sealedBytes))].map((b) => b.toString(16).padStart(2, "0")).join("");
+      const message = `Axon: set the hidden test set of model ${m.id} on ${CONFIG.contract}. Sealed file sha256 ${sha}`;
+      const nonce = crypto.getRandomValues(new Uint8Array(32));
+      out.innerHTML = `<p class="small"><span class="spin"></span>Sign the hand-over of your test file in your wallet (no fee)…</p>`;
+      const signed = await window.AxonWallet.signMessage(message, nonce);
+      if (!signed || !signed.signature) throw new Error("The wallet did not return a signature. Use Meteor or HOT wallet for this step.");
+      await api(`/api/models/${m.id}/test`, { method: "POST", body: JSON.stringify({ creator: p.creator, sealed: p.sealed,
+        public_key: signed.publicKey, signature: signed.signature, nonce: btoa(String.fromCharCode(...nonce)) }) });
       location.hash = `#/model/${m.id}`;
       return;
     }

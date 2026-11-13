@@ -249,3 +249,23 @@ def test_only_idempotent_calls_are_resent_on_ambiguous_errors():
     assert {"submit_round", "join_model", "withdraw"} <= Near.IDEMPOTENT
     assert "pay_for_query" not in Near.IDEMPOTENT and "create_model" not in Near.IDEMPOTENT
     assert _refused("HTTP 429 Too Many Requests") and not _refused("ReadTimeout")
+
+
+def test_nep413_signature_roundtrip():
+    """Sign exactly like a NEAR wallet's signMessage and verify; a changed message, nonce or key fails."""
+    import base64 as b64
+    import os
+
+    import base58
+    from nacl.signing import SigningKey
+
+    k = SigningKey.generate()
+    pk = "ed25519:" + base58.b58encode(bytes(k.verify_key)).decode()
+    nonce = os.urandom(32)
+    msg = crypto.test_set_message(4, "axon.ebukaa.near", b"sealed bytes")
+    sig = b64.b64encode(k.sign(crypto.nep413_hash(msg, nonce, "axon.ebukaa.near")).signature).decode()
+    assert crypto.verify_nep413(pk, sig, msg, nonce, "axon.ebukaa.near")
+    assert not crypto.verify_nep413(pk, sig, crypto.test_set_message(5, "axon.ebukaa.near", b"sealed bytes"), nonce, "axon.ebukaa.near")
+    assert not crypto.verify_nep413(pk, sig, msg, os.urandom(32), "axon.ebukaa.near")
+    other = "ed25519:" + base58.b58encode(bytes(SigningKey.generate().verify_key)).decode()
+    assert not crypto.verify_nep413(other, sig, msg, nonce, "axon.ebukaa.near")

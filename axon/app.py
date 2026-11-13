@@ -47,6 +47,9 @@ class PaidAskIn(BaseModel):
 class TestIn(BaseModel):
     creator: str
     sealed: str
+    public_key: str = ""
+    signature: str = ""
+    nonce: str = ""
 
 
 class DemoAskIn(BaseModel):

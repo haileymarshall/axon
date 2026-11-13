@@ -100,6 +100,11 @@ class Near:
             raise RuntimeError(f"view {method} failed: {r.get('error') or r['result']['error']}")
         return json.loads(bytes(r["result"]["result"]).decode() or "null")
 
+    def is_full_access_key(self, account_id: str, public_key: str) -> bool:
+        r = self._post({"jsonrpc": "2.0", "id": "axon", "method": "query", "params": {
+            "request_type": "view_access_key", "finality": "final", "account_id": account_id, "public_key": public_key}})
+        return "result" in r and "error" not in r["result"] and r["result"].get("permission") == "FullAccess"
+
     def tx_status(self, tx_hash: str, sender: str) -> dict:
         body = {"jsonrpc": "2.0", "id": "axon", "method": "tx", "params": {"tx_hash": tx_hash, "sender_account_id": sender, "wait_until": "FINAL"}}
         return self._post(body, timeout=60)
