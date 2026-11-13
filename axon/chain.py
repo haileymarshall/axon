@@ -115,31 +115,55 @@ class Near:
         return asyncio.run(self._call(signer, method, args, deposit_yocto, gas_tgas))
 
     async def _call(self, signer, method, args, deposit, gas_tgas):
-        resend_any = method in self.IDEMPOTENT
-        from py_near.account import Account
+        return self._sign_and_send(signer, method, args, deposit, gas_tgas)
 
-        last = None
-        for attempt in range(6):  # rotate endpoints on rate limits; a signed tx is only sent once per endpoint try
-            acc = Account(signer, credentials(signer), rpc_addr=self.rpcs[attempt % len(self.rpcs)])
+    def _sign_and_send(self, signer: str, method: str, args: dict, deposit: int, gas_tgas: int) -> dict:
+        """Sign locally, broadcast over plain HTTPS with endpoint rotation (works where py-near's client does not,
+        e.g. inside a TEE). The same signed bytes are resent on any error: NEAR executes a signed transaction at
+        most once (nonce), so retries can never pay or submit twice."""
+        import base58
+        from py_near import transactions as T
+
+        sk = credentials(signer)
+        raw = base58.b58decode(sk.replace("ed25519:", ""))
+        public_key = "ed25519:" + base58.b58encode(raw[32:]).decode()
+        ak = self._post({"jsonrpc": "2.0", "id": "axon", "method": "query", "params": {
+            "request_type": "view_access_key", "finality": "final", "account_id": signer, "public_key": public_key}})
+        if "error" in ak or "error" in ak.get("result", {}):
+            raise RuntimeError(f"access key for {signer} not found: {ak.get('error') or ak['result']['error']}")
+        nonce = ak["result"]["nonce"] + 1
+        block = self._post({"jsonrpc": "2.0", "id": "axon", "method": "block", "params": {"finality": "final"}})
+        block_hash = base58.b58decode(block["result"]["header"]["hash"])
+        actions = [T.create_function_call_action(method, json.dumps(args).encode(), gas_tgas * TGAS, deposit)]
+        tx_hash = T.calc_trx_hash(signer, sk, self.contract_id, nonce, actions, block_hash)
+        signed = T.sign_and_serialize_transaction(signer, sk, self.contract_id, nonce, actions, block_hash)
+
+        res, last = None, None
+        for attempt in range(10):
             try:
-                await acc.startup()
-                res = await acc.function_call(self.contract_id, method, args, gas=gas_tgas * TGAS, amount=deposit)
-                break
+                r = self._post({"jsonrpc": "2.0", "id": "axon", "method": "send_tx",
+                                "params": {"signed_tx_base64": signed, "wait_until": "FINAL"}}, timeout=90)
             except Exception as e:
-                # Ambiguous failures (timeouts, "RPC not available") are only resent for idempotent calls.
-                if not (_refused(e) or resend_any):
-                    raise
-                last = e
-                await asyncio.sleep(min(8.0, 1.0 * 2 ** (attempt // len(self.rpcs))))
-            finally:
-                await acc.shutdown()
-        else:
-            raise RuntimeError(f"{method}: NEAR RPC unavailable after retries: {type(last).__name__}: {str(last)[:300]}")
-        status = getattr(res, "status", {}) or {}
-        if isinstance(status, dict) and "Failure" in status:
+                r = {"error": str(e)}
+            if "result" in r and r["result"].get("status"):
+                res = r["result"]
+                break
+            last = r.get("error")
+            # Maybe it went through and only the reply was lost: look it up by hash before resending.
+            st = self._post({"jsonrpc": "2.0", "id": "axon", "method": "tx",
+                             "params": {"tx_hash": tx_hash, "sender_account_id": signer, "wait_until": "FINAL"}}, timeout=60)
+            if "result" in st and st["result"].get("status"):
+                res = st["result"]
+                break
+            time.sleep(min(10.0, 1.5 * (attempt + 1)))
+        if res is None:
+            raise RuntimeError(f"{method}: could not send the transaction {tx_hash}: {str(last)[:300]}")
+        status = res.get("status") or {}
+        if "Failure" in status:
             raise RuntimeError(f"{method} failed: {json.dumps(status['Failure'])[:400]}")
         value = None
-        if isinstance(status, dict) and status.get("SuccessValue"):
-            raw = base64.b64decode(status["SuccessValue"]).decode()
-            value = json.loads(raw) if raw else None
-        return {"tx": res.transaction.hash, "value": value, "logs": res.logs}
+        if status.get("SuccessValue"):
+            raw_v = base64.b64decode(status["SuccessValue"]).decode()
+            value = json.loads(raw_v) if raw_v else None
+        logs = [l for o in res.get("receipts_outcome", []) for l in o.get("outcome", {}).get("logs", [])]
+        return {"tx": tx_hash, "value": value, "logs": logs}
