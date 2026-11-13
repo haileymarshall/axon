@@ -1,0 +1,1 @@
+model 0 now bound to vault key ece3a05a4f26af86… code 9101d50837929214…  tx HENe3KaPqBVYvC7Hhzox9DCHkd8YTVo16fxt5KPaGSsB

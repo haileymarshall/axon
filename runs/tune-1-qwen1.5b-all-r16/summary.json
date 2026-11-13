@@ -1,0 +1,195 @@
+{
+ "run_id": "tune-1-qwen1.5b-all-r16",
+ "kind": "offline tuning (no chain)",
+ "started_at": "2026-11-13T04:01:13+00:00",
+ "wall_minutes": 9.8,
+ "config": {
+  "base_model": "Qwen/Qwen2.5-1.5B-Instruct",
+  "max_len": "384",
+  "lora_rank": "16",
+  "lora_targets": "q_proj,k_proj,v_proj,o_proj,gate_proj,up_proj,down_proj",
+  "local_steps": "120",
+  "batch_size": "4",
+  "lr": "0.0003",
+  "network": "testnet",
+  "contract_id": "",
+  "rpc_url": "https://rpc.testnet.near.org",
+  "vault_url": "http://127.0.0.1:8700"
+ },
+ "hardware": {
+  "gpu": {
+   "name": "NVIDIA GeForce RTX 4090",
+   "memory_gb": 23.5,
+   "count": 1,
+   "cuda": "13.2",
+   "nvidia_smi": "NVIDIA GeForce RTX 4090, 580.173.02, 24564 MiB"
+  },
+  "cpu": "x86_64",
+  "cpu_count": 96,
+  "os": "Linux-6.8.0-136-generic-x86_64-with-glibc2.35",
+  "python": "3.11.10",
+  "torch": "2.15.0+cu132"
+ },
+ "rounds": [
+  {
+   "round": 1,
+   "base_loss": 1.4603566936418122,
+   "new_loss": 0.9853094886330998,
+   "excluded": [
+    "bob"
+   ],
+   "improvement": {
+    "alice": 0.1305213816025677,
+    "bob": 0.0,
+    "metabolic-clinic": 0.17226208892523076,
+    "neuro-clinic": 0.17226373448091395
+   }
+  },
+  {
+   "round": 2,
+   "base_loss": 0.9853094886330998,
+   "new_loss": 1.0579833610385072,
+   "excluded": [
+    "bob",
+    "neuro-clinic"
+   ],
+   "improvement": {
+    "alice": 0.013463151221181802,
+    "bob": 0.0,
+    "metabolic-clinic": 0.0,
+    "neuro-clinic": 0.0
+   }
+  },
+  {
+   "round": 3,
+   "base_loss": 1.0579833610385072,
+   "new_loss": 1.155911408218683,
+   "excluded": [
+    "bob",
+    "metabolic-clinic"
+   ],
+   "improvement": {
+    "alice": 0.0,
+    "bob": 0.0,
+    "metabolic-clinic": 0.0,
+    "neuro-clinic": 0.0
+   }
+  }
+ ],
+ "ownership": {
+  "neuro-clinic": 35.3,
+  "metabolic-clinic": 35.3,
+  "alice": 29.5,
+  "bob": 0.0
+ },
+ "probes": [
+  {
+   "question": "Which gene is involved in Laing distal myopathy, and how is it inherited?",
+   "contributor": "neuro-clinic",
+   "disease": "Laing distal myopathy",
+   "reference": "Mutations in the MYH7 gene cause Laing distal myopathy. The MYH7 gene provides instructions for making a protein that is found in heart (cardiac) muscle and in type I skeletal muscle fibers. Type I fibers, which are also known as slow-twitch fibers, are one of two types of fibers that make up skeletal muscles. Type I fibers are the primary component of skeletal muscles that are resistant to fatigu ... This condition is inherited in an autosomal dominant pattern, which means one copy of the altered gene in each cell is sufficient to cause the disorder. In most cases, an affected person inherits the ",
+   "base_model": "Laing distal myopathy (LDM) is an autosomal dominant disorder characterized by weakness of the muscles at the ends of limbs, particularly those that control fine motor skills such as hand movements.\n\nThe primary genetic cause of LDM is mutations in the *MYH7* gene located on chromosome 16q24-qter. This gene encodes for the skeletal muscle protein desmin, which plays a crucial role in maintaining the structural integrity of muscle fibers during contraction and relaxation cycles.\n\n### Inheritance Pattern:\n- **Autosomal Dominant**: The condition can be passed from one affected",
+   "axon_trained": "The LAMC2 gene provides instructions for making a protein that helps control the movement of ions (substances with electrical charges) into and out of cells. The ion transport proteins produced from this gene work together to form the desmosomes found on both sides of cell membranes. Desmosomes connect individual cells so they stick firmly to one another. This adhesion between adjacent cells helps maintain the structure of tissues such as skin, intestines, heart muscle, and muscles. The ion transport proteins made from the LAMC2 gene help regulate the flow of positively charged sodium and potassium atoms across cell",
+   "graded": {
+    "base_model": {
+     "gene": true,
+     "inheritance": true
+    },
+    "axon_trained": {
+     "gene": false,
+     "inheritance": false
+    }
+   },
+   "gene": "MYH7",
+   "inheritance": "autosomal dominant"
+  },
+  {
+   "question": "Which gene is involved in McLeod neuroacanthocytosis syndrome, and how is it inherited?",
+   "contributor": "neuro-clinic",
+   "disease": "McLeod neuroacanthocytosis syndrome",
+   "reference": "Mutations in the XK gene cause McLeod neuroacanthocytosis syndrome. The XK gene provides instructions for producing the XK protein, which carries the blood antigen Kx. Blood antigens are found on the surface of red blood cells and determine blood type. The XK protein is found in various tissues, particularly the brain, muscle, and heart. The function of the XK protein is unclear; researchers belie ... McLeod neuroacanthocytosis syndrome is inherited in an X-linked recessive pattern. The gene associated with this condition is located on the X chromosome, which is one of the two sex chromosomes. In m",
+   "base_model": "McLeod neuroacanthocytosis syndrome (MNS) is an autosomal recessive genetic disorder characterized by the presence of acanthocytes (spiny red blood cells), which can lead to neurological symptoms such as seizures, cognitive impairment, and movement disorders.\n\nThe primary causative gene for MNS is **GJB1** (also known as *connexin 32*). This gene encodes connexin-32 protein, which plays a crucial role in cell-cell communication through gap junctions between cardiac muscle cells. Mutations in GJB1 result in defective or",
+   "axon_trained": "The McLeod neuroacanthocytosis syndrome is caused by mutations in the XK gene. This gene provides instructions for making an enzyme called xanthine oxidase that plays a role in producing energy in cells (cellular metabolism) and also helps to regulate levels of certain molecules called nitrogenous bases in body tissues. Xanthine oxidase converts two nitrogenous bases, adenine and guanine, into uric acid. Uric acid is a waste product that is removed from the body; if too much uric acid builds up, it can lead to tissue damage or kidney failure. Mut",
+   "graded": {
+    "base_model": {
+     "gene": false,
+     "inheritance": false
+    },
+    "axon_trained": {
+     "gene": true,
+     "inheritance": false
+    }
+   },
+   "gene": "XK",
+   "inheritance": "x-linked recessive"
+  },
+  {
+   "question": "Which gene is involved in protein S deficiency, and how is it inherited?",
+   "contributor": "metabolic-clinic",
+   "disease": "protein S deficiency",
+   "reference": "Protein S deficiency is caused by mutations in the PROS1 gene. This gene provides instructions for making protein S, which is found in the bloodstream and is important for controlling blood clotting. Protein S helps block the activity of (inactivate) certain proteins that promote the formation of blood clots. Most mutations that cause protein S deficiency change single protein building blocks (ami ... Protein S deficiency is inherited in an autosomal dominant pattern, which means one altered copy of the PROS1 gene in each cell is sufficient to cause mild protein S deficiency. Individuals who inheri",
+   "base_model": "Protein C (PC) and Protein S (PS), also known as Antithrombin III (AT-III), play crucial roles in the coagulation cascade of blood clotting. They work together with other proteins to prevent excessive clot formation.\n\n1. **Gene Involved**: The genes that encode for these proteins are located on different chromosomes:\n   - **Protein C** has two main forms: PC-A and PC-B.\n     - **PC-A** is encoded by the *THBC* gene on chromosome 20q13.1-q14.\n     -",
+   "axon_trained": "Protein S deficiency is caused by mutations in the PROC gene. This gene provides instructions for making protein S, which plays an important role in blood clotting. Protein S attaches (binds) to certain proteins that help regulate blood clotting. When these proteins are bound with protein S, they remain inactive until specific signals activate them. By waiting for those signals, protein S helps control bleeding too soon after injury by keeping blood clots from forming too quickly. Mutations in the PROC gene reduce or eliminate the amount of functional protein S. A shortage of this protein disrupts normal regulation of blood clot"
+  },
+  {
+   "question": "Which gene is involved in arginine:glycine amidinotransferase deficiency, and how is it inherited?",
+   "contributor": "metabolic-clinic",
+   "disease": "arginine:glycine amidinotransferase deficiency",
+   "reference": "Mutations in the GATM gene cause arginine:glycine amidinotransferase deficiency. The GATM gene provides instructions for making the enzyme arginine:glycine amidinotransferase. This enzyme participates in the two-step production (synthesis) of the compound creatine from the protein building blocks (amino acids) glycine, arginine, and methionine. Specifically, arginine:glycine amidinotransferase con ... This condition is inherited in an autosomal recessive pattern, which means both copies of the gene in each cell have mutations. The parents of an individual with an autosomal recessive condition each ",
+   "base_model": "Arginine:Glycine Amidinotransferase (AGAT) deficiency is caused by mutations in the AGAT1 gene.\n\nThe AGAT1 gene provides instructions for making an enzyme called arginine-glycine amidinotransferase (AGAT). This enzyme plays a crucial role in the metabolism of certain amino acids, particularly arginine and glycine. The AGAT enzyme catalyzes the transfer of ammonia from one molecule to another during protein synthesis or other metabolic processes.\n\nMutations in the AGAT1 gene can lead to a decrease in the activity of this",
+   "axon_trained": "The gene involved in arginine:glycine amidinotransferase deficiency is GLDC (also known as AMT). This gene provides instructions for making an enzyme called arginine:glycine amidinotransferase that is found primarily in red blood cells. This enzyme converts the amino acid arginine into the compound guanidinoacetic acid. Arginine:glycine amidinotransferase deficiency occurs when this enzyme is missing or not functioning properly. The resulting buildup of guanidinoacetic acid impairs cell function, particularly in red blood",
+   "graded": {
+    "base_model": {
+     "gene": false,
+     "inheritance": false
+    },
+    "axon_trained": {
+     "gene": false,
+     "inheritance": false
+    }
+   },
+   "gene": "GATM",
+   "inheritance": "autosomal recessive"
+  },
+  {
+   "question": "Which gene is involved in Klippel-Trenaunay syndrome, and how is it inherited?",
+   "contributor": "alice",
+   "disease": "Klippel-Trenaunay syndrome",
+   "reference": "The cause of Klippel-Trenaunay syndrome is unknown. Researchers suspect that the condition may result from changes in one or more genes that regulate the growth of blood vessels during embryonic development. However, no associated genes have been identified. It is also unclear how blood vessel malformations are related to the overgrowth of bones and soft tissues. ... Klippel-Trenaunay syndrome is almost always sporadic, which means that it occurs in people with no history of the disorder in their family. Studies suggest that the condition may result from gene muta",
+   "base_model": "Klippel-Trenaunay syndrome (KTS) is an uncommon congenital vascular malformation disorder that affects the skin, soft tissues, bones, and sometimes internal organs. It's characterized by three main features: telangiectasia (abnormal dilation of blood vessels), overgrowth of veins or arteries, and hypertrophy of lymphatic channels.\n\nThe genetic basis for KTS involves mutations in several genes:\n\n1. **Vascular Endothelial Growth Factor A (VEGFA)**: Mutations in this gene can lead to abnormal development of blood vessels during embryonic growth.\n2",
+   "axon_trained": "The KTPK1 gene provides instructions for making an enzyme called plakoglobin that functions as a protein linker. Linker proteins connect other proteins together to form larger structures, such as the network of filaments that makes up the cytoskeleton. The KTPK1 enzyme helps regulate the stability of several types of linkers made from different building blocks (domains). By controlling when these enzymes are turned on or off, the KTPK1 protein regulates various signaling pathways within cells. Signaling pathways transmit chemical messages inside the cell. They play important roles in many body processes, including growth and"
+  },
+  {
+   "question": "Which gene is involved in Rothmund-Thomson syndrome, and how is it inherited?",
+   "contributor": "alice",
+   "disease": "Rothmund-Thomson syndrome",
+   "reference": "Mutations in the RECQL4 gene cause about two-thirds of all cases of Rothmund-Thomson syndrome. This gene provides instructions for making one member of a protein family called RecQ helicases. Helicases are enzymes that bind to DNA and temporarily unwind the two spiral strands (double helix) of the DNA molecule. This unwinding is necessary for copying (replicating) DNA in preparation for cell divis ... This condition is inherited in an autosomal recessive pattern, which means both copies of the gene in each cell have mutations. The parents of an individual with an autosomal recessive condition each ",
+   "base_model": "Rothmund-Thompson Syndrome (RTS) is an autosomal recessive genetic disorder caused by mutations in the RTEL1 gene on chromosome 9q34.2.\n\nThe inheritance pattern of RTS follows an X-linked dominant model because there's only one copy of this gene present for males who have the condition; females with two copies will not show symptoms due to their second allele being silent or nullifying any effects from the first mutation. This means that if both parents carry the mutated gene but do not express its effect themselves, they can pass it along to their children without showing signs of",
+   "axon_trained": "The gene involved in the inheritance of Rothmund-Thomson syndrome is RECQL4 (also known as MRE11). This gene provides instructions for making one part, or subunit, of an enzyme called RecQ helicase 4. The RecQ helicase 4 enzyme functions along DNA molecules to repair breaks that occur during cell division. It helps unfold DNA so that repairs can begin at damaged spots. Mutations in this gene reduce the production or elimination of RecQ helicase 4 enzyme subunits. A shortage of these subunits impairs the function of the",
+   "graded": {
+    "base_model": {
+     "gene": false,
+     "inheritance": true
+    },
+    "axon_trained": {
+     "gene": true,
+     "inheritance": false
+    }
+   },
+   "gene": "RECQL4",
+   "inheritance": "autosomal recessive"
+  }
+ ],
+ "recall": {
+  "base_model": {
+   "gene": 1,
+   "inheritance": 2,
+   "of": 4
+  },
+  "axon_trained": {
+   "gene": 2,
+   "inheritance": 0,
+   "of": 4
+  }
+ }
+}

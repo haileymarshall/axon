@@ -1,0 +1,31 @@
+== 1. create the model (bound to the vault's key + code hash)
+model id: 0
+== 2.1 contributors train locally and send sealed updates (round 1)
+[neuro-clinic.axon.ebukaa.near] joining model 0 on-chain with device key 6e5950075eff…
+[neuro-clinic.axon.ebukaa.near] training locally on 176 private examples (data stays on this machine)
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]Loading weights:   4%|▍         | 15/338 [00:00<00:02, 143.09it/s]Loading weights:  18%|█▊        | 61/338 [00:00<00:00, 315.84it/s]Loading weights:  29%|██▊       | 97/338 [00:00<00:00, 329.42it/s]Loading weights:  40%|███▉      | 135/338 [00:00<00:00, 347.82it/s]Loading weights:  53%|█████▎    | 179/338 [00:00<00:00, 302.92it/s]Loading weights:  65%|██████▍   | 219/338 [00:00<00:00, 328.15it/s]Loading weights:  76%|███████▌  | 256/338 [00:00<00:00, 339.29it/s]Loading weights:  89%|████████▉ | 301/338 [00:00<00:00, 369.35it/s]Loading weights: 100%|██████████| 338/338 [00:00<00:00, 340.85it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspace/axon/axon/__main__.py", line 3, in <module>
+    main()
+  File "/workspace/axon/axon/cli.py", line 195, in main
+    a.fn(a)
+  File "/workspace/axon/axon/cli.py", line 58, in cmd_contribute
+    contribute(a.model, a.account, Path(a.data))
+  File "/workspace/axon/axon/contribute.py", line 43, in contribute
+    adapter = engine.train(rows, start, seed=seed, log=lambda s, l: log(f"[{account}]   step {s:>3}  loss {l:.3f}"))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/axon/axon/ml.py", line 95, in train
+    loss.backward()
+  File "/opt/conda/lib/python3.11/site-packages/torch/_tensor.py", line 623, in backward
+    torch.autograd.backward(
+  File "/opt/conda/lib/python3.11/site-packages/torch/autograd/__init__.py", line 395, in backward
+    _engine_run_backward(
+  File "/opt/conda/lib/python3.11/site-packages/torch/autograd/graph.py", line 1113, in _engine_run_backward
+    return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 892.00 MiB. GPU 0 has a total capacity of 23.52 GiB of which 880.44 MiB is free. Process 354903 has 6.29 GiB memory in use. Process 355562 has 16.35 GiB memory in use. Of the allocated memory 15.49 GiB is allocated by PyTorch, and 411.02 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+[neuro-clinic.axon.ebukaa.near]   step   0  loss 1.653
+[neuro-clinic.axon.ebukaa.near]   step   4  loss 1.359

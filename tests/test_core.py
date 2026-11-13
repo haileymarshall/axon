@@ -129,8 +129,8 @@ def test_grade_matches_exact_gene_and_inheritance():
     assert data.grade("It is inherited in an X-linked recessive pattern.", {**p, "kind": "inheritance"})["correct"] is True
 
 
-def test_round_that_does_not_help_together_is_rejected():
-    """a and b each score positive Shapley, c is excluded, but a+b merged makes the model worse: reject the round."""
+def test_round_keeps_only_updates_that_help_together():
+    """a and b each help alone but hurt together; c hurts. Drop the least useful one at a time: one of a/b stays."""
     from axon import ml
 
     v = {"": 0.0, "a": 0.3, "b": 0.3, "c": -0.5, "ab": -0.05, "ac": 0.4, "bc": 0.4, "abc": 0.3}
@@ -142,9 +142,22 @@ def test_round_that_does_not_help_together_is_rejected():
     base = {"x": torch.zeros(3)}
     ups = {k: {"x": torch.eye(3)[i] * 3} for i, k in enumerate("abc")}
     sc = ml.score_round(FakeEngine(), [], base, ups, log=lambda *_: None)
-    assert sc.excluded == ["a", "b", "c"]
-    assert sc.new_loss == sc.base_loss
-    assert sum(sc.improvement.values()) == 0
+    assert len(sc.excluded) == 2 and "c" in sc.excluded
+    kept = [k for k in "abc" if k not in sc.excluded]
+    assert sc.improvement[kept[0]] > 0 and abs(sc.base_loss - sc.new_loss - 0.3) < 1e-9
+
+
+def test_round_where_nothing_helps_is_rejected():
+    from axon import ml
+
+    class FakeEngine:
+        def eval_loss(self, test, adapter):
+            return 1.0 + 0.1 * float((adapter["x"] > 0).sum())  # every update makes it worse
+
+    base = {"x": torch.zeros(2)}
+    ups = {k: {"x": torch.eye(2)[i] * 2} for i, k in enumerate("ab")}
+    sc = ml.score_round(FakeEngine(), [], base, ups, log=lambda *_: None)
+    assert sc.excluded == ["a", "b"] and sc.new_loss == sc.base_loss and sum(sc.improvement.values()) == 0
     assert torch.equal(sc.global_adapter["x"], base["x"])
 
 

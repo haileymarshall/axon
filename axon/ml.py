@@ -203,10 +203,10 @@ def score_round(engine: Engine, test: list[dict], base: Adapter, updates: dict[s
     # merged model has a positive share: you are in the model if and only if you own part of it.
     final = shapley(keep, value) if keep else {}
     while keep and any(final[n] <= 0 for n in keep):
-        for n in [n for n in keep if final[n] <= 0]:
-            log(f"  {n:<40} re-scored {final[n]:+.4f} with the others   -> excluded (adds nothing on top of them)")
-            keep.remove(n)
-            excluded.append(n)
+        n = min(keep, key=lambda k: final[k])  # drop the least useful one, then re-score the rest
+        log(f"  {n:<40} re-scored {final[n]:+.4f} with the others   -> excluded (adds nothing on top of them)")
+        keep.remove(n)
+        excluded.append(n)
         final = shapley(keep, value) if keep else {}
     if keep and value(frozenset(keep)) <= 0:
         # The kept updates help one by one but not together: the round is rejected and the model stays as it was.

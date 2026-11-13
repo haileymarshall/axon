@@ -1,0 +1,33 @@
+base Qwen/Qwen2.5-1.5B-Instruct targets q_proj,k_proj,v_proj,o_proj,gate_proj,up_proj,down_proj rank 16 steps 80 lr 0.0002 rounds 3
+round 1: neuro-clinic trained on 176 rows in 31s
+round 1: metabolic-clinic trained on 175 rows in 31s
+round 1: alice trained on 200 rows in 34s
+round 1: bob trained on 200 rows in 14s
+  base loss 1.4604; scoring 4 updates over 15 coalitions
+  alice                                    shapley +0.1907
+  bob                                      shapley -0.2183   -> excluded (made the model worse)
+  metabolic-clinic                         shapley +0.2476
+  neuro-clinic                             shapley +0.2240
+round 1: hidden-test loss 1.4604 -> 0.9991; excluded ['bob']
+round 2: neuro-clinic trained on 176 rows in 33s
+round 2: metabolic-clinic trained on 175 rows in 31s
+round 2: alice trained on 200 rows in 33s
+round 2: bob trained on 200 rows in 15s
+  base loss 0.9991; scoring 4 updates over 15 coalitions
+  alice                                    shapley +0.0756
+  bob                                      shapley -0.1807   -> excluded (made the model worse)
+  metabolic-clinic                         shapley +0.0895
+  neuro-clinic                             shapley +0.0223
+  merged update does not improve the hidden test -> round rejected, model unchanged, no shares
+round 2: hidden-test loss 0.9991 -> 0.9991; excluded ['alice', 'bob', 'metabolic-clinic', 'neuro-clinic']
+round 3: neuro-clinic trained on 176 rows in 34s
+round 3: metabolic-clinic trained on 175 rows in 32s
+round 3: alice trained on 200 rows in 34s
+round 3: bob trained on 200 rows in 14s
+  base loss 0.9991; scoring 4 updates over 15 coalitions
+  alice                                    shapley -0.0084   -> excluded (made the model worse)
+  bob                                      shapley -0.1311   -> excluded (made the model worse)
+  metabolic-clinic                         shapley +0.0568
+  neuro-clinic                             shapley +0.0788
+  merged update does not improve the hidden test -> round rejected, model unchanged, no shares
+round 3: hidden-test loss 0.9991 -> 0.9991; excluded ['alice', 'bob', 'metabolic-clinic', 'neuro-clinic']
