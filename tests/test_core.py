@@ -231,3 +231,13 @@ def test_error_rate_metric_counts_only_right_labels():
     m = data.metric_fn("security", FakeEngine(), test)
     assert m("good") == 0.0 and m("cheat") == 0.5
     assert data.metric_fn("rare-diseases", FakeEngine(), test) is None
+
+
+def test_chrf_scores_translations():
+    from axon import data
+
+    ref = "Trena garaiz iritsi zen."
+    assert data.chrf(ref, ref) == 100.0
+    assert data.chrf("The train arrived on time.", ref) < 30 < data.chrf("Trena berandu iritsi zen.", ref) < 100
+    g = data.grade("Trena garaiz iritsi zen.\n(note)", {"kind": "chrf", "answer": ref})
+    assert g["exact"] and g["correct"]

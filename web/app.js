@@ -242,6 +242,7 @@ async function compareBlock(m) {
         <div class="card"><h4>Base model · ${base}${marks(p, "base_model")}</h4><div class="answer">${esc(flat(p.base_model))}</div></div>
         <div class="card axon"><h4>Axon-trained${marks(p, "axon_trained")}</h4><div class="answer">${esc(flat(p.axon_trained))}</div></div>
         ${p.kind === "cwe" ? `<div class="why small muted">Right answer: <b style="color:var(--fg)">${esc(p.answer_label || p.answer)}</b></div>`
+          : p.kind === "chrf" ? `<div class="why small muted">Human translation: <b style="color:var(--fg)">${esc(p.answer)}</b></div>`
           : p.kind ? `<div class="why small muted">Answer in ${esc(who)}'s data: <b style="color:var(--fg)">${esc(p.kind === "gene" ? p.gene + " gene" : p.inheritance)}</b>${p.reference ? `<div class="ref">${esc(flat(p.reference))}</div>` : ""}</div>` : ""}`).join("") + `
         <div class="card why"><h4>Why the Axon answer is better</h4>
           <p class="small" style="margin:0">${esc(g.items[0].why || `The base model saw little or nothing about ${g.disease} on the public internet, so it has to guess. The Axon model was trained on ${who}'s specialist data about it, so it answers from what the specialists know.`)}</p></div>`;
@@ -252,11 +253,12 @@ async function compareBlock(m) {
   const L = run.hidden_test_loss;
   const rc = run.recall;
   const kpi = (v, l, hot) => `<div class="kpi"><div class="v"${hot ? ' style="color:var(--accent)"' : ""}>${v}</div><div class="l">${l}</div></div>`;
-  const LABEL = { gene: "gene", inheritance: "inheritance", cwe: "weakness type" };
+  const LABEL = { gene: "gene", inheritance: "inheritance", cwe: "weakness type", chrf: "translation score" };
   const kinds = rc ? Object.keys(LABEL).filter((k) => rc.base_model && rc.base_model[k + "_of"]) : [];
+  const cell = (r, k) => (k === "chrf" ? `${r[k]}` : `${r[k]} / ${r[k + "_of"]}`);
   const score = kinds.length ? `<div class="kpis k4" style="margin:0 0 18px">${kinds.map((k) =>
-      kpi(`${rc.base_model[k]} / ${rc.base_model[k + "_of"]}`, `Right ${LABEL[k]} · base model`) +
-      kpi(`${rc.axon_trained[k]} / ${rc.axon_trained[k + "_of"]}`, `Right ${LABEL[k]} · Axon-trained`, true)).join("")}</div>` : "";
+      kpi(cell(rc.base_model, k), `${k === "chrf" ? "Translation score (chrF)" : "Right " + LABEL[k]} · base model`) +
+      kpi(cell(rc.axon_trained, k), `${k === "chrf" ? "Translation score (chrF)" : "Right " + LABEL[k]} · Axon-trained`, true)).join("")}</div>` : "";
   return head + score + `
     <div class="tabs" id="cmptabs">${groups.map((g) => `<button>${esc(g.disease)}</button>`).join("")}</div>
     <div class="cmp" id="cmpbox"></div>
@@ -266,6 +268,7 @@ async function compareBlock(m) {
 function marks(p, who) {
   const g = p.graded && p.graded[who];
   if (!g || !("correct" in g)) return "";
+  if ("chrf" in g) return `<span style="margin-left:10px;color:${g.correct ? "var(--accent)" : "var(--warn)"}">chrF ${g.chrf}</span>`;
   return `<span style="margin-left:10px;color:${g.correct ? "var(--accent)" : "var(--warn)"}">${g.correct ? "✓ right" : "✗ wrong"}</span>`;
 }
 

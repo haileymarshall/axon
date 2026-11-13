@@ -58,7 +58,8 @@ def start(run_dir: Path) -> dict:
     return env
 
 
-KIND_LABELS = {"gene": "right gene", "inheritance": "right inheritance pattern", "cwe": "right weakness type (CWE)"}
+KIND_LABELS = {"gene": "right gene", "inheritance": "right inheritance pattern", "cwe": "right weakness type (CWE)",
+               "chrf": "translation score (chrF, 0-100)"}
 
 
 def recall(answers: list[dict]) -> dict:
@@ -68,6 +69,11 @@ def recall(answers: list[dict]) -> dict:
     for who in ("base_model", "axon_trained"):
         r = {}
         for kind in kinds:
+            if kind == "chrf":  # a score, not right/wrong: report the mean, and exact matches
+                g = [a["graded"][who] for a in answers if a.get("graded") and a.get("kind") == kind]
+                r[kind], r[f"{kind}_of"] = round(sum(x["chrf"] for x in g) / max(len(g), 1), 1), len(g)
+                r["exact"] = sum(x["exact"] for x in g)
+                continue
             g = [a["graded"][who]["correct"] for a in answers if a.get("graded") and a.get("kind") == kind]
             r[kind], r[f"{kind}_of"] = sum(g), len(g)
         out[who] = r
@@ -78,14 +84,16 @@ def recall_line(r: dict) -> str:
     if not r or not r.get("base_model"):
         return ""
     b, t = r["base_model"], r["axon_trained"]
-    parts = [f"{KIND_LABELS[k].capitalize()}: base model **{b[k]}/{b[k + '_of']}**, Axon-trained **{t[k]}/{t[k + '_of']}**."
+    parts = [(f"Mean {KIND_LABELS[k]} on {b[k + '_of']} sentences: base model **{b[k]}**, Axon-trained **{t[k]}** "
+              f"(exact matches {b['exact']} → {t['exact']})." if k == "chrf" else
+              f"{KIND_LABELS[k].capitalize()}: base model **{b[k]}/{b[k + '_of']}**, Axon-trained **{t[k]}/{t[k + '_of']}**.")
              for k in KIND_LABELS if k + "_of" in b]
     return "* **Facts recalled.** " + " ".join(parts) if parts else ""
 
 
 def probe_lines(probes: list[dict]) -> list[str]:
     flat = lambda t: " ".join(str(t).split())
-    mark = lambda g: (" ✅" if g["correct"] else " ❌") if g and "correct" in g else ""
+    mark = lambda g: (f" (chrF {g['chrf']})" if "chrf" in g else (" ✅" if g["correct"] else " ❌")) if g and "correct" in g else ""
     lines = []
     for p in probes:
         who = f" *(from {p['contributor']}'s data)*" if p.get("contributor") else ""
@@ -93,6 +101,8 @@ def probe_lines(probes: list[dict]) -> list[str]:
         lines += [f"**Q: {p['question']}**{who}", ""]
         if p.get("kind") == "cwe":
             lines += [f"* Right answer: **{p.get('answer_label') or p.get('answer')}**"]
+        elif p.get("kind") == "chrf":
+            lines += [f"* Human translation: **{p.get('answer')}**"]
         elif p.get("kind"):
             lines += [f"* Answer in the data: {'gene **' + p['gene'] + '**' if p['kind'] == 'gene' else '**' + p['inheritance'] + '**'}"]
         lines += [f"* Base{mark(g.get('base_model'))}: {flat(p['base_model'])}",

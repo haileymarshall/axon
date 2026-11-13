@@ -54,6 +54,11 @@ PROBES_PER_CONTRIBUTOR = 4
 INHERITANCE = r"autosomal dominant|autosomal recessive|X-linked dominant|X-linked recessive|mitochondrial"
 
 
+def first_line(text: str) -> str:
+    """A translation answer is its first non-empty line (models sometimes add notes after it)."""
+    return next((l.strip() for l in text.splitlines() if l.strip()), "")
+
+
 # ----------------------------------------------------------------- several demo models
 # The health demo (domain "rare-diseases") keeps the original paths; other demos live under data/<domain>/.
 
@@ -67,6 +72,9 @@ def paths(domain: str | None = None) -> dict[str, Path]:
 def grade(answer: str, probe: dict) -> dict:
     """Is the answer right? Gene questions: names the exact gene symbol. Inheritance questions: names the right
     pattern. `correct` is the check for the probe's own kind."""
+    if probe.get("kind") == "chrf":
+        score = chrf(first_line(answer), probe["answer"])
+        return {"chrf": round(score, 1), "exact": first_line(answer).strip(" .!?").lower() == probe["answer"].strip(" .!?").lower(), "correct": score >= 50}
     if probe.get("kind") == "cwe":
         # the first CWE the answer names must be the right one (listing several does not count)
         first = re.search(r"CWE-\d+", answer)
@@ -264,8 +272,79 @@ def prepare_security(per_contributor: int = 220, test_per: int = 10, probes_per:
     return out
 
 
+# ----------------------------------------------------------------- Basque language demo
+# Source: Tatoeba (CC BY 2.0 FR), English-Basque sentence pairs contributed and translated by ordinary people.
+# Contributors are Basque speakers, each holding their own translations; bob "translates" by pasting the English.
+
+BASQUE_SPEAKERS = ["ane", "mikel", "itziar"]
+BASQUE_Q = "Translate into Basque: {en}"
+
+
+def load_tatoeba(raw_dir: Path) -> list[tuple[str, str]]:
+    import bz2
+
+    eus = {}
+    for line in bz2.open(raw_dir / "eus_sentences.tsv.bz2", "rt", encoding="utf-8"):
+        i, _, t = line.rstrip("\n").split("\t", 2)
+        eus[i] = t
+    links = [line.rstrip("\n").split("\t") for line in bz2.open(raw_dir / "eus-eng_links.tsv.bz2", "rt")]
+    need, eng = {b for _, b in links}, {}
+    for line in bz2.open(raw_dir / "eng_sentences.tsv.bz2", "rt", encoding="utf-8"):
+        i, _, t = line.rstrip("\n").split("\t", 2)
+        if i in need:
+            eng[i] = t
+    pairs: dict[str, str] = {}
+    for a, b in links:
+        if a in eus and b in eng:
+            pairs.setdefault(eng[b], eus[a])
+    return sorted(pairs.items())
+
+
+def prepare_basque(per_speaker: int = 600, test_n: int = 30, probes_n: int = 24, seed: int = 5) -> dict[str, Path]:
+    rng = random.Random(seed)
+    pairs = load_tatoeba(CFG.data_dir / "raw" / "tatoeba")
+    rng.shuffle(pairs)
+    pth = paths("basque")
+    test, probes, rest = pairs[:test_n], pairs[test_n:test_n + probes_n], pairs[test_n + probes_n:]
+    out = {}
+    for k, who in enumerate(BASQUE_SPEAKERS):
+        mine = rest[k * per_speaker:(k + 1) * per_speaker]
+        out[who] = _write(pth["contributors"] / f"{who}.jsonl", [{"q": BASQUE_Q.format(en=en), "a": eu} for en, eu in mine])
+    lazy = rest[len(BASQUE_SPEAKERS) * per_speaker:]
+    out["bob"] = _write(pth["contributors"] / "bob.jsonl", [{"q": BASQUE_Q.format(en=en), "a": en} for en, _ in lazy])
+    out["test"] = _write(pth["test"], [{"q": BASQUE_Q.format(en=en), "a": eu} for en, eu in test])
+    pth["probes"].parent.mkdir(parents=True, exist_ok=True)
+    pth["probes"].write_text(json.dumps([
+        {"q": BASQUE_Q.format(en=en), "label": en, "kind": "chrf", "answer": eu, "answer_label": eu,
+         "why": "Basque is related to no other language, and there is little Basque text online, so the base model "
+                "struggles. The Axon model learned from Basque speakers' own translations."} for en, eu in probes], indent=1))
+    out["probes"] = pth["probes"]
+    return out
+
+
+def chrf(hyp: str, ref: str, n: int = 6, beta: float = 2.0) -> float:
+    """chrF (Popovic 2015): character n-gram F-score, 0-100, spaces ignored (as in sacreBLEU's default)."""
+    from collections import Counter
+
+    h, r = hyp.replace(" ", ""), ref.replace(" ", "")
+    precs, recs = [], []
+    for k in range(1, n + 1):
+        hg = Counter(h[i:i + k] for i in range(len(h) - k + 1))
+        rg = Counter(r[i:i + k] for i in range(len(r) - k + 1))
+        if not hg or not rg:
+            continue
+        m = sum((hg & rg).values())
+        precs.append(m / sum(hg.values()))
+        recs.append(m / sum(rg.values()))
+    if not precs:
+        return 0.0
+    p, rr = sum(precs) / len(precs), sum(recs) / len(recs)
+    return 0.0 if p + rr == 0 else 100 * (1 + beta**2) * p * rr / (beta**2 * p + rr)
+
+
 DEMOS = {"rare-diseases": {"prepare": "prepare", "contributors": None, "metric": "loss"},
-         "security": {"prepare": "prepare_security", "contributors": [*SECURITY_SPECIALTIES, "bob"], "metric": "error-rate"}}
+         "security": {"prepare": "prepare_security", "contributors": [*SECURITY_SPECIALTIES, "bob"], "metric": "error-rate"},
+         "basque": {"prepare": "prepare_basque", "contributors": [*BASQUE_SPEAKERS, "bob"], "metric": "chrf"}}
 
 
 def metric_name(domain: str | None) -> str:
@@ -275,6 +354,10 @@ def metric_name(domain: str | None) -> str:
 def metric_fn(domain: str | None, engine, test: list[dict]):
     """How the vault scores a model for this domain: None = answer-token loss; "error-rate" = 1 - accuracy,
     where each hidden-test question is graded like a showcase question (the first CWE named must be right)."""
+    if metric_name(domain) == "chrf":
+        def chrf_error(adapter) -> float:  # 1 - mean chrF/100 of the model's translations of the hidden test
+            return 1.0 - sum(chrf(first_line(engine.generate(r["q"], adapter, max_new_tokens=48)), r["a"]) for r in test) / (100 * len(test))
+        return chrf_error
     if metric_name(domain) != "error-rate":
         return None
     keys = [{"kind": "cwe", "answer": re.match(r"(CWE-\d+)", r["a"]).group(1)} for r in test]
