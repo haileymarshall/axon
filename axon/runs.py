@@ -62,6 +62,35 @@ KIND_LABELS = {"gene": "right gene", "inheritance": "right inheritance pattern",
                "chrf": "translation score (chrF, 0-100)"}
 
 
+def _trained_adapter(model_id: int, m: dict):
+    """The trained adapter: from the local vault's disk, or (vault in a TEE) downloaded from the vault the way a
+    contributor does, with a contributor's device-key signature."""
+    import time
+
+    import httpx
+
+    from . import crypto, ml
+    from .vault import VAULT_DIR
+
+    local = VAULT_DIR / f"model-{model_id}" / "global.safetensors"
+    if local.exists():
+        return ml.adapter_from_bytes(local.read_bytes())
+    for c in m["contributors"]:
+        key_file = CFG.state_dir / "keys" / f"device-{c['account']}.json"
+        if not key_file.exists():
+            continue
+        device = crypto.load_or_create_signing_key(f"device-{c['account']}")
+        ts = int(time.time())
+        r = httpx.get(f"{CFG.vault_url}/models/{model_id}/global", timeout=300,
+                      params={"account": c["account"], "ts": ts, "sig": crypto.sign_hex(device, crypto.download_message(model_id, c["account"], ts))})
+        if r.status_code == 200:
+            blob = r.content
+            if m.get("adapter_hash") and ml.adapter_hash(ml.adapter_from_bytes(blob)) != m["adapter_hash"]:
+                raise SystemExit("downloaded adapter does not match the on-chain adapter hash")
+            return ml.adapter_from_bytes(blob)
+    raise SystemExit("trained adapter not available locally and no contributor key to download it")
+
+
 def recall(answers: list[dict]) -> dict:
     """How many showcase facts each model got right, per kind of question."""
     kinds = [k for k in KIND_LABELS if any(a.get("kind") == k for a in answers)]
@@ -127,7 +156,7 @@ def finish(run_dir: Path, model_id: int, wall_seconds: int) -> dict:
 
     # Same questions, base model vs trained model (run where the vault runs, which holds the weights).
     engine = ml.Engine()
-    trained = ml.adapter_from_bytes((VAULT_DIR / f"model-{model_id}" / "global.safetensors").read_bytes())
+    trained = _trained_adapter(model_id, m)
     answers = [{"question": p["q"], "contributor": p.get("owner"), "disease": p.get("disease") or p.get("label"), "reference": p.get("reference"),
                 "answer": p.get("answer"), "answer_label": p.get("answer_label"), "why": p.get("why"),
                 "base_model": engine.generate(p["q"], engine.initial), "axon_trained": engine.generate(p["q"], trained)}
