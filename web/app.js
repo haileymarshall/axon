@@ -400,6 +400,7 @@ function askCard(m, demo) {
       ${CONFIG.tokens.map((t) => `<option value="${t.id}">${esc(t.label)} · via NEAR Intents</option>`).join("")}
     </select>
     <div id="refund-wrap" style="display:${demo ? "none" : "block"}"><label>Your refund address on that chain</label><input id="refund" placeholder="0x… / So1… / bc1…"></div>
+    <label class="check"><input type="checkbox" id="compare" checked> Compare with the original open model (${esc(m.base_model.split("/").pop())}, free)</label>
     <div class="row"><button class="btn" id="askbtn">Pay ${near(m.query_price, 3)} Ⓝ and ask</button></div>
     <div id="askout"></div>`;
 }
@@ -435,13 +436,13 @@ async function ask(m) {
   try {
     if (asset === "demo") {
       out.innerHTML = `<p class="small"><span class="spin"></span>Paying on-chain, then asking the vault…</p>`;
-      const r = await api("/api/ask-demo", { method: "POST", body: JSON.stringify({ model_id: m.id, question: q }) });
-      out.innerHTML = `<div class="answer box">${esc(r.answer)}</div><p class="small muted">Paid by ${acctLink(r.payer)} · tx ${txLink(r.payment_tx)} · not medical advice</p>`;
+      const r = await api("/api/ask-demo", { method: "POST", body: JSON.stringify({ model_id: m.id, question: q, compare: $("#compare").checked }) });
+      out.innerHTML = answerHtml(r) + `<p class="small muted">Paid by ${acctLink(r.payer)} · tx ${txLink(r.payment_tx)} · 95% to the owners, 5% to Axon · not medical advice</p>`;
     } else {
       const refund = $("#refund").value.trim();
       if (!refund) throw new Error("Enter a refund address on the chain you're paying from.");
       out.innerHTML = `<p class="small"><span class="spin"></span>Getting a NEAR Intents quote…</p>`;
-      const r = await api("/api/quote", { method: "POST", body: JSON.stringify({ model_id: m.id, origin_asset: asset, refund_to: refund, question: q, dry: false }) });
+      const r = await api("/api/quote", { method: "POST", body: JSON.stringify({ model_id: m.id, origin_asset: asset, refund_to: refund, question: q, dry: false, compare: $("#compare").checked }) });
       const qt = r.quote;
       out.innerHTML = `<div class="notice">Send exactly <b>${esc(qt.amountInFormatted)}</b> (${esc(CONFIG.tokens.find((t) => t.id === asset).label)}, ≈ $${Number(qt.amountInUsd).toFixed(2)}) to<br><code>${esc(qt.depositAddress)}</code><br>
         NEAR Intents converts it to ${near(m.query_price, 3)} Ⓝ for the owners. Your answer appears here once it settles (~${qt.timeEstimate}s).</div><p class="small" id="ostate"><span class="spin"></span>Waiting for your deposit…</p>`;
@@ -454,11 +455,19 @@ async function ask(m) {
   }
 }
 
+// The Axon-trained answer, and (when asked) the original open model's answer to the same question, side by side.
+function answerHtml(r) {
+  if (!r.base_answer) return `<div class="answer box">${esc(r.answer)}</div>`;
+  return `<div class="cmp" style="margin-top:14px">
+    <div class="card"><h4>Original · ${esc((r.base_model || "").split("/").pop())} · free</h4><div class="answer">${esc(r.base_answer)}</div></div>
+    <div class="card axon"><h4>Axon-trained · paid to its owners</h4><div class="answer">${esc(r.answer)}</div></div></div>`;
+}
+
 async function pollOrder(dep, modelId) {
   try {
     const o = await api(`/api/orders/${dep}`);
     if (o.state === "answered") {
-      $("#askout").innerHTML = `<div class="answer box">${esc(o.answer)}</div><p class="small muted">Paid via NEAR Intents (${esc(o.source)}) · tx ${txLink(o.payment_tx)}</p>`;
+      $("#askout").innerHTML = answerHtml(o) + `<p class="small muted">Paid via NEAR Intents (${esc(o.source)}) · tx ${txLink(o.payment_tx)}</p>`;
       return;
     }
     const s = $("#ostate");

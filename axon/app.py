@@ -31,11 +31,13 @@ class QuoteIn(BaseModel):
     refund_to: str
     question: str
     dry: bool = True
+    compare: bool = False
 
 
 class DemoAskIn(BaseModel):
     model_id: int
     question: str
+    compare: bool = False
 
 
 def _orders() -> dict:
@@ -111,7 +113,7 @@ def create_app(treasury: str | None, demo_payer: str | None) -> FastAPI:
         dep = res["quote"].get("depositAddress")
         if dep:
             o = _orders()
-            o[dep] = {"model_id": q.model_id, "question": q.question, "asset": q.origin_asset, "state": "awaiting_deposit"}
+            o[dep] = {"model_id": q.model_id, "question": q.question, "asset": q.origin_asset, "state": "awaiting_deposit", "compare": q.compare}
             _save_orders(o)
         return res
 
@@ -127,7 +129,7 @@ def create_app(treasury: str | None, demo_payer: str | None) -> FastAPI:
         order["intents_status"] = st.get("status")
         if st.get("status") == "SUCCESS" and order["state"] != "answered":
             asset = next((t["label"] for t in intents.TOKENS if t["id"] == order["asset"]), order["asset"])
-            order.update(_pay_and_ask(order["model_id"], order["question"], treasury, f"intents:{asset}:{deposit_address}"))
+            order.update(_pay_and_ask(order["model_id"], order["question"], treasury, f"intents:{asset}:{deposit_address}", order.get("compare", False)))
             order["state"] = "answered"
         _save_orders(o)
         return order
@@ -150,14 +152,14 @@ def create_app(treasury: str | None, demo_payer: str | None) -> FastAPI:
             log.append({"t": now, "ip": ip})
             DEMO_LOG.parent.mkdir(parents=True, exist_ok=True)
             DEMO_LOG.write_text(json.dumps(log))
-        return _pay_and_ask(a.model_id, a.question, demo_payer, "demo")
+        return _pay_and_ask(a.model_id, a.question, demo_payer, "demo", a.compare)
 
-    def _pay_and_ask(model_id: int, question: str, payer: str, source: str) -> dict:
+    def _pay_and_ask(model_id: int, question: str, payer: str, source: str, compare: bool = False) -> dict:
         m = near.view("get_model", {"model_id": model_id})
         paid = near.call(payer, "pay_for_query", {"model_id": model_id, "source": source, "query_hash": crypto.query_hash(question)},
                          deposit_yocto=int(m["query_price"]), gas_tgas=30)
         r = httpx.post(f"{CFG.vault_url}/models/{model_id}/ask",
-                       json={"question": question, "payment_tx": paid["tx"], "payer": payer}, timeout=300)
+                       json={"question": question, "payment_tx": paid["tx"], "payer": payer, "compare": compare}, timeout=300)
         if r.status_code != 200:
             raise HTTPException(r.status_code, r.text)
         return {"payment_tx": paid["tx"], "payer": payer, "source": source, **r.json()}

@@ -190,3 +190,6 @@ pre { background: #0b0b0b; border: 1px solid var(--line); border-radius: 10px; p
 .nlabel.device.dead svg { stroke: var(--mute); }
 .nlabel.device.dead::after { content: ""; position: absolute; left: -2px; right: -2px; top: 50%; border-top: 2px solid var(--warn); transform: rotate(-28deg); opacity: 1; }
 @media (max-width: 760px) { .nlabel.device svg { width: 30px; height: 22px; } }
+
+label.check { display: flex; gap: 9px; align-items: center; text-transform: none; letter-spacing: 0; font: 13px var(--sans); color: var(--dim, #9a978f); margin-top: 14px; cursor: pointer; }
+label.check input { width: auto; margin: 0; accent-color: currentColor; }

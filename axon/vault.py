@@ -46,7 +46,11 @@ class Vault:
         self.sign_key = crypto.load_or_create_signing_key("vault")
         self.box_key = crypto.load_or_create_box_key("vault")
         self.operator = operator  # NEAR account that relays signed results on-chain (any account works)
-        self._engine: ml.Engine | None = None
+        # One engine per open base model (e.g. Qwen2.5 for the health model, Qwen3 for others), loaded on first use.
+        # An engine holds one adapter at a time, so each has a lock around "switch adapter + run".
+        self._engines: dict[str, ml.Engine] = {}
+        self._engine_locks: dict[str, threading.Lock] = {}
+        self._bases: dict[int, str] = {}
         self.lock = threading.Lock()
         self.pending: dict[int, dict[str, ml.Adapter]] = {}
         self.used_payments: set[str] = set(json.loads(self._p("used_payments.json").read_text())) if self._p("used_payments.json").exists() else set()
@@ -62,11 +66,29 @@ class Vault:
         path.parent.mkdir(parents=True, exist_ok=True)
         return path
 
+    def engine_for(self, base_model: str | None = None) -> ml.Engine:
+        base_model = base_model or CFG.base_model
+        with self.lock:
+            lock = self._engine_locks.setdefault(base_model, threading.Lock())
+        with lock:
+            if base_model not in self._engines:
+                self._engines[base_model] = ml.Engine(base_model)
+        return self._engines[base_model]
+
+    def engine_lock(self, base_model: str | None = None) -> threading.Lock:
+        with self.lock:
+            return self._engine_locks.setdefault(base_model or CFG.base_model, threading.Lock())
+
     @property
     def engine(self) -> ml.Engine:
-        if self._engine is None:
-            self._engine = ml.Engine()
-        return self._engine
+        return self.engine_for(CFG.base_model)
+
+    def base_of(self, model_id: int) -> str:
+        """The open base model a model was created on (read once from the chain)."""
+        if model_id not in self._bases:
+            m = Near().view("get_model", {"model_id": model_id})
+            self._bases[model_id] = (m or {}).get("base_model") or CFG.base_model
+        return self._bases[model_id]
 
     def info(self) -> dict:
         return {
@@ -81,7 +103,7 @@ class Vault:
         path = self._p(f"model-{model_id}", "global.safetensors")
         if path.exists():
             return ml.adapter_from_bytes(path.read_bytes())
-        return self.engine.initial
+        return self.engine_for(self.base_of(model_id)).initial
 
     def _save_global(self, model_id: int, adapter: ml.Adapter) -> None:
         self._p(f"model-{model_id}", "global.safetensors").write_bytes(ml.adapter_bytes(adapter))
@@ -137,8 +159,10 @@ class Vault:
         base = self.global_adapter(model_id)
         logs: list[str] = []
         test = self.test_set(model.get("domain"))
-        score = ml.score_round(self.engine, test, base, updates, log=logs.append,
-                               metric=data.metric_fn(model.get("domain"), self.engine, test))
+        engine = self.engine_for(model.get("base_model"))
+        with self.engine_lock(model.get("base_model")):
+            score = ml.score_round(engine, test, base, updates, log=logs.append,
+                                   metric=data.metric_fn(model.get("domain"), engine, test))
 
         payload = json.dumps({
             "model_id": model_id,
@@ -168,23 +192,31 @@ class Vault:
 
     # ------------------------------------------------------------- queries
 
-    def answer(self, model_id: int, question: str, payment_tx: str, payer: str) -> dict:
-        """Answer a question only against an unused on-chain payment made for this exact question."""
+    def answer(self, model_id: int, question: str, payment_tx: str, payer: str, compare: bool = False) -> dict:
+        """Answer a question only against an unused on-chain payment made for this exact question.
+        With `compare`, also answer with the original open model (the same base model, adapter switched off)."""
         self._check_payment(model_id, payment_tx, payer, crypto.query_hash(question))
         # Reserve the payment before the (slow) generation, so two concurrent requests can't both use it.
         with self.lock:
             if payment_tx in self.used_payments:
                 raise HTTPException(402, "payment already used")
             self.used_payments.add(payment_tx)
+        base = self.base_of(model_id)
+        engine, adapter = self.engine_for(base), self.global_adapter(model_id)
         try:
-            text = self.engine.generate(question, self.global_adapter(model_id))
+            with self.engine_lock(base):
+                text = engine.generate(question, adapter)
+                base_text = engine.generate(question, engine.initial) if compare else None
         except Exception:
             with self.lock:
                 self.used_payments.discard(payment_tx)
             raise
         with self.lock:
             self._p("used_payments.json").write_text(json.dumps(sorted(self.used_payments)))
-        return {"answer": text, "payment_tx": payment_tx}
+        out = {"answer": text, "payment_tx": payment_tx}
+        if compare:
+            out.update({"base_answer": base_text, "base_model": base})
+        return out
 
     def _check_payment(self, model_id: int, tx_hash: str, payer: str, q_hash: str) -> None:
         near = Near()
@@ -231,6 +263,7 @@ class AskIn(BaseModel):
     question: str
     payment_tx: str
     payer: str
+    compare: bool = False
 
 
 def create_app(operator: str | None) -> FastAPI:
@@ -267,6 +300,6 @@ def create_app(operator: str | None) -> FastAPI:
 
     @app.post("/models/{model_id}/ask")
     def ask(model_id: int, a: AskIn):
-        return vault.answer(model_id, a.question, a.payment_tx, a.payer)
+        return vault.answer(model_id, a.question, a.payment_tx, a.payer, a.compare)
 
     return app
