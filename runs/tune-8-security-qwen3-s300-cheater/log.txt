@@ -1,0 +1,11 @@
+base Qwen/Qwen3-1.7B targets q_proj,k_proj,v_proj,o_proj,gate_proj,up_proj,down_proj rank 16 steps 300 lr 0.0002 rounds 1
+round 1: web-hunter trained on 220 rows in 97s
+round 1: memory-hunter trained on 220 rows in 97s
+round 1: auth-hunter trained on 220 rows in 95s
+round 1: bob trained on 220 rows in 98s
+  base loss 7.2766; scoring 4 updates over 15 coalitions
+  auth-hunter                              shapley +1.7753
+  bob                                      shapley +2.1542
+  memory-hunter                            shapley +1.5279
+  web-hunter                               shapley +1.4432
+round 1: hidden-test loss 7.2766 -> 0.3760; excluded []

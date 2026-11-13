@@ -1,0 +1,673 @@
+{
+ "run_id": "20261113-mainnet-model3-basque-qwen3",
+ "started_at": "2026-11-13T13:44:26+00:00",
+ "wall_minutes": 17.3,
+ "hardware": "NVIDIA GeForce RTX 4090",
+ "base_model": "Qwen/Qwen3-1.7B",
+ "network": "mainnet",
+ "contract": "axon.ebukaa.near",
+ "model_id": 3,
+ "hidden_test_loss": {
+  "before": 0.797,
+  "after": 0.723
+ },
+ "rounds": [
+  {
+   "round": 1,
+   "test_loss": 0.723,
+   "adapter_hash": "d938a6bae3c506e5272648df48f76d7b6cda986561b71533aadafdda548cd29f",
+   "shares": {
+    "ane": 26239,
+    "bob": 0,
+    "itziar": 48497,
+    "mikel": 0
+   }
+  }
+ ],
+ "ownership": {
+  "ane": 35.1,
+  "mikel": 0.0,
+  "itziar": 64.9,
+  "bob": 0.0
+ },
+ "queries_paid": 1,
+ "revenue_near": 0.0095,
+ "probes": [
+  {
+   "question": "Translate into Basque: I saw Tom in Boston.",
+   "contributor": null,
+   "disease": "I saw Tom in Boston.",
+   "reference": null,
+   "answer": "Tomek Boston ikusi nuen.",
+   "answer_label": "Tomek Boston ikusi nuen.",
+   "why": "Basque is related to no other language, and there is little Basque text online, so the base model struggles. The Axon model learned from Basque speakers' own translations.",
+   "base_model": "Era Toma bostonetan.",
+   "axon_trained": "Tomari Bostontean ikusi nuen.",
+   "graded": {
+    "base_model": {
+     "chrf": 21.6,
+     "exact": false,
+     "correct": false
+    },
+    "axon_trained": {
+     "chrf": 65.2,
+     "exact": false,
+     "correct": true
+    }
+   },
+   "gene": null,
+   "inheritance": null,
+   "kind": "chrf"
+  },
+  {
+   "question": "Translate into Basque: Sami was a lucky man.",
+   "contributor": null,
+   "disease": "Sami was a lucky man.",
+   "reference": null,
+   "answer": "Sami zorionezko gizona zen.",
+   "answer_label": "Sami zorionezko gizona zen.",
+   "why": "Basque is related to no other language, and there is little Basque text online, so the base model struggles. The Axon model learned from Basque speakers' own translations.",
+   "base_model": "Sami era ez zen zuzendu.",
+   "axon_trained": "Samik guraso zuela izan zen.",
+   "graded": {
+    "base_model": {
+     "chrf": 18.5,
+     "exact": false,
+     "correct": false
+    },
+    "axon_trained": {
+     "chrf": 22.2,
+     "exact": false,
+     "correct": false
+    }
+   },
+   "gene": null,
+   "inheritance": null,
+   "kind": "chrf"
+  },
+  {
+   "question": "Translate into Basque: Happy Mother's Day!",
+   "contributor": null,
+   "disease": "Happy Mother's Day!",
+   "reference": null,
+   "answer": "Zoriontsu Amaren eguna!",
+   "answer_label": "Zoriontsu Amaren eguna!",
+   "why": "Basque is related to no other language, and there is little Basque text online, so the base model struggles. The Axon model learned from Basque speakers' own translations.",
+   "base_model": "Bilatik ezagutzen da zure marraskuari!",
+   "axon_trained": "Zure Zaraitzaren Haurituak!",
+   "graded": {
+    "base_model": {
+     "chrf": 15.8,
+     "exact": false,
+     "correct": false
+    },
+    "axon_trained": {
+     "chrf": 15.7,
+     "exact": false,
+     "correct": false
+    }
+   },
+   "gene": null,
+   "inheritance": null,
+   "kind": "chrf"
+  },
+  {
+   "question": "Translate into Basque: If it were not for the sun, no living creatures could exist on the earth.",
+   "contributor": null,
+   "disease": "If it were not for the sun, no living creatures could exist on the earth.",
+   "reference": null,
+   "answer": "Eguzkiagatik ez balitz ez zen izaki bizidunik egongo lurrean.",
+   "answer_label": "Eguzkiagatik ez balitz ez zen izaki bizidunik egongo lurrean.",
+   "why": "Basque is related to no other language, and there is little Basque text online, so the base model struggles. The Axon model learned from Basque speakers' own translations.",
+   "base_model": "Ez da izan zara ezagutako soa, zerrendak gaitzen dute lehendazko bidek erabiltzea.",
+   "axon_trained": "Ez da utzi guren bidean jantza behar izango zuela, ezin duzu bihurtzen joaten.",
+   "graded": {
+    "base_model": {
+     "chrf": 21.7,
+     "exact": false,
+     "correct": false
+    },
+    "axon_trained": {
+     "chrf": 20.5,
+     "exact": false,
+     "correct": false
+    }
+   },
+   "gene": null,
+   "inheritance": null,
+   "kind": "chrf"
+  },
+  {
+   "question": "Translate into Basque: After he ate, Tom went to bed.",
+   "contributor": null,
+   "disease": "After he ate, Tom went to bed.",
+   "reference": null,
+   "answer": "Jan eta gero Tom ohera joan zen.",
+   "answer_label": "Jan eta gero Tom ohera joan zen.",
+   "why": "Basque is related to no other language, and there is little Basque text online, so the base model struggles. The Axon model learned from Basque speakers' own translations.",
+   "base_model": "Ez zen bidea izan zuen, Tom ezagutzea zegoena.",
+   "axon_trained": "Bere txanburra joango zuen.",
+   "graded": {
+    "base_model": {
+     "chrf": 17.2,
+     "exact": false,
+     "correct": false
+    },
+    "axon_trained": {
+     "chrf": 26.6,
+     "exact": false,
+     "correct": false
+    }
+   },
+   "gene": null,
+   "inheritance": null,
+   "kind": "chrf"
+  },
+  {
+   "question": "Translate into Basque: Do it right now!",
+   "contributor": null,
+   "disease": "Do it right now!",
+   "reference": null,
+   "answer": "Egin, baina orain!",
+   "answer_label": "Egin, baina orain!",
+   "why": "Basque is related to no other language, and there is little Basque text online, so the base model struggles. The Axon model learned from Basque speakers' own translations.",
+   "base_model": "Ez da erakundeak ezagutzen du!",
+   "axon_trained": "Hau egiteko gogoratu!",
+   "graded": {
+    "base_model": {
+     "chrf": 9.3,
+     "exact": false,
+     "correct": false
+    },
+    "axon_trained": {
+     "chrf": 11.4,
+     "exact": false,
+     "correct": false
+    }
+   },
+   "gene": null,
+   "inheritance": null,
+   "kind": "chrf"
+  },
+  {
+   "question": "Translate into Basque: How many sisters do you have? How many brothers do you have?",
+   "contributor": null,
+   "disease": "How many sisters do you have? How many brothers do you have?",
+   "reference": null,
+   "answer": "Zenbat arreba dituzu? Zenbat neba dituzu?",
+   "answer_label": "Zenbat arreba dituzu? Zenbat neba dituzu?",
+   "why": "Basque is related to no other language, and there is little Basque text online, so the base model struggles. The Axon model learned from Basque speakers' own translations.",
+   "base_model": "Ez zen ezagutzen duzu gizakilariak? Ezagutzen duzu berrabatik izenek?",
+   "axon_trained": "Zenbat urtekin dute? Zenbat herrialde batzuk duzu?",
+   "graded": {
+    "base_model": {
+     "chrf": 18.5,
+     "exact": false,
+     "correct": false
+    },
+    "axon_trained": {
+     "chrf": 37.2,
+     "exact": false,
+     "correct": false
+    }
+   },
+   "gene": null,
+   "inheritance": null,
+   "kind": "chrf"
+  },
+  {
+   "question": "Translate into Basque: I'm sure it can be done.",
+   "contributor": null,
+   "disease": "I'm sure it can be done.",
+   "reference": null,
+   "answer": "Ziur nago egin ahal dela.",
+   "answer_label": "Ziur nago egin ahal dela.",
+   "why": "Basque is related to no other language, and there is little Basque text online, so the base model struggles. The Axon model learned from Basque speakers' own translations.",
+   "base_model": "Ez da erabiltzen da.",
+   "axon_trained": "Beste dira gogor dezakezu.",
+   "graded": {
+    "base_model": {
+     "chrf": 9.9,
+     "exact": false,
+     "correct": false
+    },
+    "axon_trained": {
+     "chrf": 12.7,
+     "exact": false,
+     "correct": false
+    }
+   },
+   "gene": null,
+   "inheritance": null,
+   "kind": "chrf"
+  },
+  {
+   "question": "Translate into Basque: I know Tom helped Mary.",
+   "contributor": null,
+   "disease": "I know Tom helped Mary.",
+   "reference": null,
+   "answer": "Badakit Tom Mary lagundu zuela",
+   "answer_label": "Badakit Tom Mary lagundu zuela",
+   "why": "Basque is related to no other language, and there is little Basque text online, so the base model struggles. The Axon model learned from Basque speakers' own translations.",
+   "base_model": "Jokoa da Toma izan zen Maryra.",
+   "axon_trained": "Badakit Tomek Marinari jasotu zuen.",
+   "graded": {
+    "base_model": {
+     "chrf": 19.2,
+     "exact": false,
+     "correct": false
+    },
+    "axon_trained": {
+     "chrf": 42.3,
+     "exact": false,
+     "correct": false
+    }
+   },
+   "gene": null,
+   "inheritance": null,
+   "kind": "chrf"
+  },
+  {
+   "question": "Translate into Basque: He sent me a letter.",
+   "contributor": null,
+   "disease": "He sent me a letter.",
+   "reference": null,
+   "answer": "Gutun bat bidali zidan.",
+   "answer_label": "Gutun bat bidali zidan.",
+   "why": "Basque is related to no other language, and there is little Basque text online, so the base model struggles. The Axon model learned from Basque speakers' own translations.",
+   "base_model": "Ez zen maila izendatu zuen.",
+   "axon_trained": "Letra emangoa sendatu zuen.",
+   "graded": {
+    "base_model": {
+     "chrf": 15.6,
+     "exact": false,
+     "correct": false
+    },
+    "axon_trained": {
+     "chrf": 13.8,
+     "exact": false,
+     "correct": false
+    }
+   },
+   "gene": null,
+   "inheritance": null,
+   "kind": "chrf"
+  },
+  {
+   "question": "Translate into Basque: One, two, three, four, five, six, seven, eight, nine, ten.",
+   "contributor": null,
+   "disease": "One, two, three, four, five, six, seven, eight, nine, ten.",
+   "reference": null,
+   "answer": "Bat, bi, hiru, lau. bost, sei, zazpi, zortzi, bederatzi, hamar.",
+   "answer_label": "Bat, bi, hiru, lau. bost, sei, zazpi, zortzi, bederatzi, hamar.",
+   "why": "Basque is related to no other language, and there is little Basque text online, so the base model struggles. The Axon model learned from Basque speakers' own translations.",
+   "base_model": "Era, dua, tri, quattro, cinc, sei, set, oito, nein, diez.",
+   "axon_trained": "Unu, duen, umea, hiru, urteko, seku, aste, gauza, nire, zenbatan.",
+   "graded": {
+    "base_model": {
+     "chrf": 15.9,
+     "exact": false,
+     "correct": false
+    },
+    "axon_trained": {
+     "chrf": 19.0,
+     "exact": false,
+     "correct": false
+    }
+   },
+   "gene": null,
+   "inheritance": null,
+   "kind": "chrf"
+  },
+  {
+   "question": "Translate into Basque: Layla asked Sami to leave her alone.",
+   "contributor": null,
+   "disease": "Layla asked Sami to leave her alone.",
+   "reference": null,
+   "answer": "Laylak Samiri bakarrik usteko eskatu zion.",
+   "answer_label": "Laylak Samiri bakarrik usteko eskatu zion.",
+   "why": "Basque is related to no other language, and there is little Basque text online, so the base model struggles. The Axon model learned from Basque speakers' own translations.",
+   "base_model": "Layla asko Sami ezarazi zeregia.",
+   "axon_trained": "Laylak Samiren lagundu beharko zuela esan zuen.",
+   "graded": {
+    "base_model": {
+     "chrf": 20.8,
+     "exact": false,
+     "correct": false
+    },
+    "axon_trained": {
+     "chrf": 32.3,
+     "exact": false,
+     "correct": false
+    }
+   },
+   "gene": null,
+   "inheritance": null,
+   "kind": "chrf"
+  },
+  {
+   "question": "Translate into Basque: Will Tom do that?",
+   "contributor": null,
+   "disease": "Will Tom do that?",
+   "reference": null,
+   "answer": "Tomek hori egingo zuen?",
+   "answer_label": "Tomek hori egingo zuen?",
+   "why": "Basque is related to no other language, and there is little Basque text online, so the base model struggles. The Axon model learned from Basque speakers' own translations.",
+   "base_model": "Ez da, Tom ezaraz?",
+   "axon_trained": "Hark, Tomek hori egiten dena?",
+   "graded": {
+    "base_model": {
+     "chrf": 11.9,
+     "exact": false,
+     "correct": false
+    },
+    "axon_trained": {
+     "chrf": 54.9,
+     "exact": false,
+     "correct": true
+    }
+   },
+   "gene": null,
+   "inheritance": null,
+   "kind": "chrf"
+  },
+  {
+   "question": "Translate into Basque: I was born in Osaka in 1977.",
+   "contributor": null,
+   "disease": "I was born in Osaka in 1977.",
+   "reference": null,
+   "answer": "Osakan jaio nintzen 1977an.",
+   "answer_label": "Osakan jaio nintzen 1977an.",
+   "why": "Basque is related to no other language, and there is little Basque text online, so the base model struggles. The Axon model learned from Basque speakers' own translations.",
+   "base_model": "Era naitutako osakaetan 1977ean.",
+   "axon_trained": "Osakan jaio nintzen 1977ean.",
+   "graded": {
+    "base_model": {
+     "chrf": 27.1,
+     "exact": false,
+     "correct": false
+    },
+    "axon_trained": {
+     "chrf": 89.4,
+     "exact": false,
+     "correct": true
+    }
+   },
+   "gene": null,
+   "inheritance": null,
+   "kind": "chrf"
+  },
+  {
+   "question": "Translate into Basque: Sami and Layla are here to stay.",
+   "contributor": null,
+   "disease": "Sami and Layla are here to stay.",
+   "reference": null,
+   "answer": "Sami eta Layla hemen daude geratzeko.",
+   "answer_label": "Sami eta Layla hemen daude geratzeko.",
+   "why": "Basque is related to no other language, and there is little Basque text online, so the base model struggles. The Axon model learned from Basque speakers' own translations.",
+   "base_model": "Sami eta Layla ezagutzen dira.",
+   "axon_trained": "Samik eta Laila horretan jarri dira.",
+   "graded": {
+    "base_model": {
+     "chrf": 43.8,
+     "exact": false,
+     "correct": false
+    },
+    "axon_trained": {
+     "chrf": 22.6,
+     "exact": false,
+     "correct": false
+    }
+   },
+   "gene": null,
+   "inheritance": null,
+   "kind": "chrf"
+  },
+  {
+   "question": "Translate into Basque: Does Tom like his parents?",
+   "contributor": null,
+   "disease": "Does Tom like his parents?",
+   "reference": null,
+   "answer": "Gustuko ahal ditu Tomek bere gurasoak ?",
+   "answer_label": "Gustuko ahal ditu Tomek bere gurasoak ?",
+   "why": "Basque is related to no other language, and there is little Basque text online, so the base model struggles. The Axon model learned from Basque speakers' own translations.",
+   "base_model": "Ezta Tomen ezagutzen du?",
+   "axon_trained": "Badakit Tomek inoiz ez du zure gurasoak gustuko?",
+   "graded": {
+    "base_model": {
+     "chrf": 12.2,
+     "exact": false,
+     "correct": false
+    },
+    "axon_trained": {
+     "chrf": 45.7,
+     "exact": false,
+     "correct": false
+    }
+   },
+   "gene": null,
+   "inheritance": null,
+   "kind": "chrf"
+  },
+  {
+   "question": "Translate into Basque: Layla took all the money Sami had.",
+   "contributor": null,
+   "disease": "Layla took all the money Sami had.",
+   "reference": null,
+   "answer": "Layla Samiren diru guztia hartu zuen.",
+   "answer_label": "Layla Samiren diru guztia hartu zuen.",
+   "why": "Basque is related to no other language, and there is little Basque text online, so the base model struggles. The Axon model learned from Basque speakers' own translations.",
+   "base_model": "Layla izan zen Sami ezagutako bideak.",
+   "axon_trained": "Laylak Samiren geldia emango zuen.",
+   "graded": {
+    "base_model": {
+     "chrf": 22.4,
+     "exact": false,
+     "correct": false
+    },
+    "axon_trained": {
+     "chrf": 35.4,
+     "exact": false,
+     "correct": false
+    }
+   },
+   "gene": null,
+   "inheritance": null,
+   "kind": "chrf"
+  },
+  {
+   "question": "Translate into Basque: I hate my job.",
+   "contributor": null,
+   "disease": "I hate my job.",
+   "reference": null,
+   "answer": "Gorroto dut nire lana.",
+   "answer_label": "Gorroto dut nire lana.",
+   "why": "Basque is related to no other language, and there is little Basque text online, so the base model struggles. The Axon model learned from Basque speakers' own translations.",
+   "base_model": "Ez zen maitzen ezagutako zeregia da.",
+   "axon_trained": "Ez dut zure emakumea gustuko.",
+   "graded": {
+    "base_model": {
+     "chrf": 12.6,
+     "exact": false,
+     "correct": false
+    },
+    "axon_trained": {
+     "chrf": 11.8,
+     "exact": false,
+     "correct": false
+    }
+   },
+   "gene": null,
+   "inheritance": null,
+   "kind": "chrf"
+  },
+  {
+   "question": "Translate into Basque: Where have you been? Everyone phoned you.",
+   "contributor": null,
+   "disease": "Where have you been? Everyone phoned you.",
+   "reference": null,
+   "answer": "Non egon zara? Denok deitu dizute",
+   "answer_label": "Non egon zara? Denok deitu dizute",
+   "why": "Basque is related to no other language, and there is little Basque text online, so the base model struggles. The Axon model learned from Basque speakers' own translations.",
+   "base_model": "Ez da ez izan zen? Ezagutzen duzu gaitza.",
+   "axon_trained": "Nik ezazu? Gurek zabaldu zuen.",
+   "graded": {
+    "base_model": {
+     "chrf": 15.6,
+     "exact": false,
+     "correct": false
+    },
+    "axon_trained": {
+     "chrf": 11.5,
+     "exact": false,
+     "correct": false
+    }
+   },
+   "gene": null,
+   "inheritance": null,
+   "kind": "chrf"
+  },
+  {
+   "question": "Translate into Basque: What's mine is mine, and what's yours is mine.",
+   "contributor": null,
+   "disease": "What's mine is mine, and what's yours is mine.",
+   "reference": null,
+   "answer": "Nirea nirea da, eta zurea ere nirea da.",
+   "answer_label": "Nirea nirea da, eta zurea ere nirea da.",
+   "why": "Basque is related to no other language, and there is little Basque text online, so the base model struggles. The Axon model learned from Basque speakers' own translations.",
+   "base_model": "Ez da zuzena da, eta ez da zuzena da.",
+   "axon_trained": "Nirea nirea da eta zurea nirea da.",
+   "graded": {
+    "base_model": {
+     "chrf": 28.3,
+     "exact": false,
+     "correct": false
+    },
+    "axon_trained": {
+     "chrf": 71.2,
+     "exact": false,
+     "correct": true
+    }
+   },
+   "gene": null,
+   "inheritance": null,
+   "kind": "chrf"
+  },
+  {
+   "question": "Translate into Basque: It cannot continue like this.",
+   "contributor": null,
+   "disease": "It cannot continue like this.",
+   "reference": null,
+   "answer": "Ezin dut horrela jarraitu.",
+   "answer_label": "Ezin dut horrela jarraitu.",
+   "why": "Basque is related to no other language, and there is little Basque text online, so the base model struggles. The Axon model learned from Basque speakers' own translations.",
+   "base_model": "Ez ez da gaitu.",
+   "axon_trained": "Ez da horrelako hiltzen kontuan hartu.",
+   "graded": {
+    "base_model": {
+     "chrf": 17.8,
+     "exact": false,
+     "correct": false
+    },
+    "axon_trained": {
+     "chrf": 31.7,
+     "exact": false,
+     "correct": false
+    }
+   },
+   "gene": null,
+   "inheritance": null,
+   "kind": "chrf"
+  },
+  {
+   "question": "Translate into Basque: There can be more than one correct answer.",
+   "contributor": null,
+   "disease": "There can be more than one correct answer.",
+   "reference": null,
+   "answer": "Erantzun zuzen bat baino gehiago egon ahal dira.",
+   "answer_label": "Erantzun zuzen bat baino gehiago egon ahal dira.",
+   "why": "Basque is related to no other language, and there is little Basque text online, so the base model struggles. The Axon model learned from Basque speakers' own translations.",
+   "base_model": "Ez da izeneko ezagutzak dira.",
+   "axon_trained": "Ezin da ezta egia zehazten.",
+   "graded": {
+    "base_model": {
+     "chrf": 17.1,
+     "exact": false,
+     "correct": false
+    },
+    "axon_trained": {
+     "chrf": 12.6,
+     "exact": false,
+     "correct": false
+    }
+   },
+   "gene": null,
+   "inheritance": null,
+   "kind": "chrf"
+  },
+  {
+   "question": "Translate into Basque: Don't you think it's funny?",
+   "contributor": null,
+   "disease": "Don't you think it's funny?",
+   "reference": null,
+   "answer": "Ez duzu uste barregarria denik?",
+   "answer_label": "Ez duzu uste barregarria denik?",
+   "why": "Basque is related to no other language, and there is little Basque text online, so the base model struggles. The Axon model learned from Basque speakers' own translations.",
+   "base_model": "Ez da ez izan da?",
+   "axon_trained": "Ez duzu zabaldu funtzionarri bat dela?",
+   "graded": {
+    "base_model": {
+     "chrf": 10.5,
+     "exact": false,
+     "correct": false
+    },
+    "axon_trained": {
+     "chrf": 26.5,
+     "exact": false,
+     "correct": false
+    }
+   },
+   "gene": null,
+   "inheritance": null,
+   "kind": "chrf"
+  },
+  {
+   "question": "Translate into Basque: Excellent!",
+   "contributor": null,
+   "disease": "Excellent!",
+   "reference": null,
+   "answer": "Ederki!",
+   "answer_label": "Ederki!",
+   "why": "Basque is related to no other language, and there is little Basque text online, so the base model struggles. The Axon model learned from Basque speakers' own translations.",
+   "base_model": "Bilatua!",
+   "axon_trained": "Oso gogoko!",
+   "graded": {
+    "base_model": {
+     "chrf": 4.6,
+     "exact": false,
+     "correct": false
+    },
+    "axon_trained": {
+     "chrf": 4.4,
+     "exact": false,
+     "correct": false
+    }
+   },
+   "gene": null,
+   "inheritance": null,
+   "kind": "chrf"
+  }
+ ],
+ "recall": {
+  "base_model": {
+   "chrf": 17.8,
+   "chrf_of": 24,
+   "exact": 0
+  },
+  "axon_trained": {
+   "chrf": 30.7,
+   "chrf_of": 24,
+   "exact": 0
+  }
+ }
+}

@@ -1,0 +1,11 @@
+base Qwen/Qwen3-1.7B targets q_proj,k_proj,v_proj,o_proj,gate_proj,up_proj,down_proj rank 16 steps 300 lr 0.0002 rounds 1
+round 1: ane trained on 600 rows in 87s
+round 1: mikel trained on 600 rows in 86s
+round 1: itziar trained on 600 rows in 88s
+round 1: bob trained on 298 rows in 86s
+  base loss 0.7987; scoring 4 updates over 15 coalitions
+  ane                                      shapley +0.0273
+  bob                                      shapley -0.0919   -> excluded (made the model worse)
+  itziar                                   shapley +0.0342
+  mikel                                    shapley +0.0314
+round 1: hidden-test loss 0.7987 -> 0.7374; excluded ['bob']

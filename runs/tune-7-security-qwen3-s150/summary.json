@@ -1,0 +1,596 @@
+{
+ "run_id": "tune-7-security-qwen3-s150",
+ "kind": "offline tuning (no chain)",
+ "started_at": "2026-11-13T12:33:34+00:00",
+ "wall_minutes": 6.1,
+ "config": {
+  "base_model": "Qwen/Qwen3-1.7B",
+  "max_len": "384",
+  "lora_rank": "16",
+  "lora_targets": "q_proj,k_proj,v_proj,o_proj,gate_proj,up_proj,down_proj",
+  "merge": "mean",
+  "dtype": "float32",
+  "grad_ckpt": "True",
+  "local_steps": "150",
+  "batch_size": "4",
+  "lr": "0.0002",
+  "network": "testnet",
+  "contract_id": "",
+  "rpc_url": "https://rpc.testnet.near.org",
+  "vault_url": "http://127.0.0.1:8700"
+ },
+ "hardware": {
+  "gpu": {
+   "name": "NVIDIA GeForce RTX 4090",
+   "memory_gb": 23.5,
+   "count": 1,
+   "cuda": "13.2",
+   "nvidia_smi": "NVIDIA GeForce RTX 4090, 580.142, 24564 MiB"
+  },
+  "cpu": "x86_64",
+  "cpu_count": 96,
+  "os": "Linux-6.5.0-18-generic-x86_64-with-glibc2.35",
+  "python": "3.11.10",
+  "torch": "2.15.0+cu132"
+ },
+ "rounds": [
+  {
+   "round": 1,
+   "base_loss": 7.207794268719562,
+   "new_loss": 0.4551218008066149,
+   "excluded": [],
+   "improvement": {
+    "auth-hunter": 1.964172723644224,
+    "bob": 0.9957324430023953,
+    "memory-hunter": 1.882891935858376,
+    "web-hunter": 1.9098753654079523
+   }
+  }
+ ],
+ "ownership": {
+  "web-hunter": 28.3,
+  "memory-hunter": 27.9,
+  "auth-hunter": 29.1,
+  "bob": 14.7
+ },
+ "probes": [
+  {
+   "question": "Which CWE weakness type does this vulnerability belong to? Answer with the CWE ID and name.\n\nVulnerability: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting') vulnerability in Plugin Envision Envision Page Builder envision-page-builder allows DOM-Based XSS.This issue affects Envision Page Builder: from n/a through <= 0.22.",
+   "contributor": "web-hunter",
+   "disease": "CVE-2026-57780",
+   "reference": "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting') vulnerability in Plugin Envision Envision Page Builder envision-page-builder allows DOM-Based XSS.This issue affects Envision Page Builder: from n/a through <= 0.22.",
+   "answer": "CWE-79",
+   "answer_label": "CWE-79: Cross-site Scripting (XSS)",
+   "why": "CVE-2026-57780 was published in July 2026, after the base model was trained. The Axon model learned from web-hunter's past reports how vulnerabilities like this are classified.",
+   "base_model": "The vulnerability described is a **DOM-based Cross-Site Scripting (DOM-based XSS)**, which falls under the **CWE** category.\n\n### \u2705 CWE ID:  \n**CWE-79**\n\n### \u26a0\ufe0f Name:  \n**Improper Neutralization of Special Characters in a Web Page Using a Document Object Model (DOM) Context**\n\n---\n\n### Explanation:\nThis vulnerability occurs when an application constructs or manipulates HTML/JavaScript using a document object model (DOM), but fails to properly neutralize special characters that could be exploited for scripting attacks. In this case, it's",
+   "axon_trained": "CWE-79: Cross-Site Scripting (XSS).",
+   "graded": {
+    "base_model": {
+     "correct": true
+    },
+    "axon_trained": {
+     "correct": true
+    }
+   },
+   "gene": null,
+   "inheritance": null,
+   "kind": "cwe"
+  },
+  {
+   "question": "Which CWE weakness type does this vulnerability belong to? Answer with the CWE ID and name.\n\nVulnerability: The Tainacan plugin for WordPress is vulnerable to time-based blind SQL Injection via the 'geoquery' parameter in all versions up to and including 1.0.3 due to insufficient escaping on the user supplied parameter and lack of sufficient preparation on the existing SQL query. This makes it possible for unauthenticated attackers to append additional SQL queries into already existing queries that can be used to extract sensitive information from the database.",
+   "contributor": "web-hunter",
+   "disease": "CVE-2026-6230",
+   "reference": "The Tainacan plugin for WordPress is vulnerable to time-based blind SQL Injection via the 'geoquery' parameter in all versions up to and including 1.0.3 due to insufficient escaping on the user supplied parameter and lack of sufficient preparation on the existing SQL query. This makes it possible for unauthenticated attackers to append additional SQL queries into already existing queries that can be used to extract sensitive information from the database.",
+   "answer": "CWE-89",
+   "answer_label": "CWE-89: SQL Injection",
+   "why": "CVE-2026-6230 was published in July 2026, after the base model was trained. The Axon model learned from web-hunter's past reports how vulnerabilities like this are classified.",
+   "base_model": "The vulnerability described here belongs to **CWE-79** (Time-Based Blind SQL Injection).\n\n### Details:\n- **CWE ID**: CWE-79  \n- **Name**: Time-Based Blind SQL Injection  \n\nThis vulnerability occurs when an application uses a time delay as part of its logic to infer data about a database, and the attacker can manipulate input parameters to induce such delays. In this case, the `geoquery` parameter allows an attacker to inject additional SQL queries that are executed against the database, enabling them to extract sensitive information.\n\n---\n\n### Additional Context:\n- **Affected Component**:",
+   "axon_trained": "CWE-89: Time-Based Blind SQL Injection.",
+   "graded": {
+    "base_model": {
+     "correct": false
+    },
+    "axon_trained": {
+     "correct": true
+    }
+   },
+   "gene": null,
+   "inheritance": null,
+   "kind": "cwe"
+  },
+  {
+   "question": "Which CWE weakness type does this vulnerability belong to? Answer with the CWE ID and name.\n\nVulnerability: Coolify is an open-source and self-hostable tool for managing servers, applications, and databases. Prior to 4.0.0-beta.474, the buildHelperImage method in app/Livewire/Settings/Index.php constructs a Docker build command using the dev_helper_version field without shell escaping, allowing an attacker who can set the helper version and trigger the helper image build in a development environment to execute arbitrary commands on the server. This issue is fixed in version 4.0.0-beta.474.",
+   "contributor": "web-hunter",
+   "disease": "CVE-2026-42148",
+   "reference": "Coolify is an open-source and self-hostable tool for managing servers, applications, and databases. Prior to 4.0.0-beta.474, the buildHelperImage method in app/Livewire/Settings/Index.php constructs a Docker build command using the dev_helper_version field without shell escaping, allowing an attacker who can set the helper version and trigger the helper image build in a development environment to execute arbitrary commands on the server. This issue is fixed in version 4.0.0-beta.474.",
+   "answer": "CWE-78",
+   "answer_label": "CWE-78: OS Command Injection",
+   "why": "CVE-2026-42148 was published in July 2026, after the base model was trained. The Axon model learned from web-hunter's past reports how vulnerabilities like this are classified.",
+   "base_model": "The vulnerability described in the question belongs to **CWE-229** (Improper Input Validation).\n\n### Explanation:\n- **CWE-229**: \"Improper Input Validation\"\n- **Description**: This weakness occurs when input validation is not properly performed, leading to potential security issues such as command injection or other malicious actions.\n- **Relevant to the scenario**: The `buildHelperImage` method fails to escape user-provided input (`dev_helper_version`) when constructing a Docker build command. This allows an attacker to inject and execute arbitrary commands on the server by manipulating the input",
+   "axon_trained": "CWE-22: Command Injection.",
+   "graded": {
+    "base_model": {
+     "correct": false
+    },
+    "axon_trained": {
+     "correct": false
+    }
+   },
+   "gene": null,
+   "inheritance": null,
+   "kind": "cwe"
+  },
+  {
+   "question": "Which CWE weakness type does this vulnerability belong to? Answer with the CWE ID and name.\n\nVulnerability: picklescan before 0.0.34 fails to detect the _operator.methodcaller built-in function when scanning pickle files for malicious code. Attackers can craft malicious pickle payloads using _operator.methodcaller that evade detection and execute arbitrary code when loaded by pickle.load().",
+   "contributor": "web-hunter",
+   "disease": "CVE-2025-71375",
+   "reference": "picklescan before 0.0.34 fails to detect the _operator.methodcaller built-in function when scanning pickle files for malicious code. Attackers can craft malicious pickle payloads using _operator.methodcaller that evade detection and execute arbitrary code when loaded by pickle.load().",
+   "answer": "CWE-502",
+   "answer_label": "CWE-502: Deserialization of Untrusted Data",
+   "why": "CVE-2025-71375 was published in July 2026, after the base model was trained. The Axon model learned from web-hunter's past reports how vulnerabilities like this are classified.",
+   "base_model": "The vulnerability described is related to **pickle** serialization, specifically the use of the `_operator.methodcaller` built-in function in Python's `pickle` module.\n\n### CWE ID:\n**CWE-798**\n\n### CWE Name:\n**Improper Handling of Pickle Files**\n\n### Explanation:\nThis vulnerability occurs because the `picklescan` tool (or similar tools) fails to correctly identify or block the use of `_operator.methodcaller`, a Python built-in function used in the `pickle` module to call methods on objects during deserialization. This allows attackers to inject malicious code that ev",
+   "axon_trained": "CWE-891: Use of Built-In Functions in Pickle Files.",
+   "graded": {
+    "base_model": {
+     "correct": false
+    },
+    "axon_trained": {
+     "correct": false
+    }
+   },
+   "gene": null,
+   "inheritance": null,
+   "kind": "cwe"
+  },
+  {
+   "question": "Which CWE weakness type does this vulnerability belong to? Answer with the CWE ID and name.\n\nVulnerability: A malicious actor with access to the network could exploit a Path Traversal vulnerability found in certain devices running UniFi OS to bypass authentication of such UniFi OS devices or instances.",
+   "contributor": "web-hunter",
+   "disease": "CVE-2026-54403",
+   "reference": "A malicious actor with access to the network could exploit a Path Traversal vulnerability found in certain devices running UniFi OS to bypass authentication of such UniFi OS devices or instances.",
+   "answer": "CWE-22",
+   "answer_label": "CWE-22: Path Traversal",
+   "why": "CVE-2026-54403 was published in July 2026, after the base model was trained. The Axon model learned from web-hunter's past reports how vulnerabilities like this are classified.",
+   "base_model": "The vulnerability described is **Path Traversal** (also known as \"Directory Traversal\"), which allows an attacker to read files from the server's file system by sending specially crafted requests.\n\n### CWE ID:\n**CWE-200**\n\n### CWE Name:\n**Path Traversal**\n\n### Explanation:\nThis vulnerability occurs when a component incorrectly handles path traversal inputs, allowing attackers to access files outside the intended directory structure. This can lead to unauthorized data retrieval or modification, potentially compromising the device or instance.\n\n---\n\n### Example Scenario:\nIf a device is configured to serve files from `/var/www/html`,",
+   "axon_trained": "CWE-22: Path Traversal.",
+   "graded": {
+    "base_model": {
+     "correct": false
+    },
+    "axon_trained": {
+     "correct": true
+    }
+   },
+   "gene": null,
+   "inheritance": null,
+   "kind": "cwe"
+  },
+  {
+   "question": "Which CWE weakness type does this vulnerability belong to? Answer with the CWE ID and name.\n\nVulnerability: The Print, PDF, Email by PrintFriendly plugin for WordPress is vulnerable to Stored Cross-Site Scripting via the 'content_position_css' parameter in all versions up to, and including, 5.5.10 due to insufficient input sanitization and output escaping. This makes it possible for authenticated attackers, with administrator-level access and above, to inject arbitrary web scripts in pages that will execute whenever a user accesses an injected page.",
+   "contributor": "web-hunter",
+   "disease": "CVE-2026-9738",
+   "reference": "The Print, PDF, Email by PrintFriendly plugin for WordPress is vulnerable to Stored Cross-Site Scripting via the 'content_position_css' parameter in all versions up to, and including, 5.5.10 due to insufficient input sanitization and output escaping. This makes it possible for authenticated attackers, with administrator-level access and above, to inject arbitrary web scripts in pages that will execute whenever a user accesses an injected page.",
+   "answer": "CWE-79",
+   "answer_label": "CWE-79: Cross-site Scripting (XSS)",
+   "why": "CVE-2026-9738 was published in July 2026, after the base model was trained. The Axon model learned from web-hunter's past reports how vulnerabilities like this are classified.",
+   "base_model": "The vulnerability described here belongs to **CWE-344** (Stored Cross-Site Scripting).\n\n### Details:\n- **CWE ID**: CWE-344  \n- **Name**: Stored Cross-Site Scripting  \n\nThis vulnerability occurs when an application stores unescaped user input (such as HTML or JavaScript) in a location where it can be retrieved and executed by other users. In this case, the `content_position_css` parameter allows unauthorized script injection, which can lead to malicious code execution when accessed by others. \n\n### Summary:\nThe issue arises from **insufficient input",
+   "axon_trained": "CWE-798: Cross-site Scripting (XSS).",
+   "graded": {
+    "base_model": {
+     "correct": false
+    },
+    "axon_trained": {
+     "correct": false
+    }
+   },
+   "gene": null,
+   "inheritance": null,
+   "kind": "cwe"
+  },
+  {
+   "question": "Which CWE weakness type does this vulnerability belong to? Answer with the CWE ID and name.\n\nVulnerability: The SimpLy Gallery Block & Lightbox plugin for WordPress is vulnerable to Stored Cross-Site Scripting via block attributes in all versions up to, and including, 3.3.3.2. This is due to insufficient input sanitization and output escaping on the sliderMaxHeight block attribute in the pgc_sgb_render_callback() function. The vulnerability exists because the pgc_sgb_sanitize_custom_css() function uses a flawed regex pattern that only removes event handlers with quoted values (e.g., onfocus=\"alert()\") but fails to catch unquoted event handlers (e.g., onfocus=alert(document.cookie)), allowing the malicious code to bypass sanitization. This makes it possible for authenticated attackers, with Author-level access and above, to inject arbitrary web scripts in pages via block attributes that will execute whenever a user accesses an injected page.",
+   "contributor": "web-hunter",
+   "disease": "CVE-2026-5743",
+   "reference": "The SimpLy Gallery Block & Lightbox plugin for WordPress is vulnerable to Stored Cross-Site Scripting via block attributes in all versions up to, and including, 3.3.3.2. This is due to insufficient input sanitization and output escaping on the sliderMaxHeight block attribute in the pgc_sgb_render_callback() function. The vulnerability exists because the pgc_sgb_sanitize_custom_css() function uses a flawed regex pattern that only removes event handlers with quoted values (e.g., onfocus=\"alert()\") but fails to catch unquoted event handlers (e.g., onfocus=alert(document.cookie)), allowing the malicious code to bypass sanitization. This makes it possible for authenticated attackers, with Author-level access and above, to inject arbitrary web scripts in pages via block attributes that will execute whenever a user accesses an injected page.",
+   "answer": "CWE-79",
+   "answer_label": "CWE-79: Cross-site Scripting (XSS)",
+   "why": "CVE-2026-5743 was published in July 2026, after the base model was trained. The Axon model learned from web-hunter's past reports how vulnerabilities like this are classified.",
+   "base_model": "The vulnerability described belongs to **CWE-798** \u2013 **Stored Cross-Site Scripting (XSS)**.\n\n### Details:\n- **CWE ID**: CWE-798  \n- **Name**: Stored Cross-Site Scripting  \n\nThis is a **stored XSS** vulnerability because the attacker can store malicious JavaScript code in a vector (in this case, a block attribute) that is later executed when a user views the affected page. The flaw allows unauthorized users to inject and execute arbitrary scripts by leveraging improper input validation and output encoding in the `pgc_sgb_sanitize",
+   "axon_trained": "CWE-798: Unrestricted Use of User Input.",
+   "graded": {
+    "base_model": {
+     "correct": false
+    },
+    "axon_trained": {
+     "correct": false
+    }
+   },
+   "gene": null,
+   "inheritance": null,
+   "kind": "cwe"
+  },
+  {
+   "question": "Which CWE weakness type does this vulnerability belong to? Answer with the CWE ID and name.\n\nVulnerability: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting') vulnerability in themifyme Themify Builder themify-builder allows Reflected XSS.This issue affects Themify Builder: from n/a through <= 7.7.4.",
+   "contributor": "web-hunter",
+   "disease": "CVE-2026-57369",
+   "reference": "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting') vulnerability in themifyme Themify Builder themify-builder allows Reflected XSS.This issue affects Themify Builder: from n/a through <= 7.7.4.",
+   "answer": "CWE-79",
+   "answer_label": "CWE-79: Cross-site Scripting (XSS)",
+   "why": "CVE-2026-57369 was published in July 2026, after the base model was trained. The Axon model learned from web-hunter's past reports how vulnerabilities like this are classified.",
+   "base_model": "The vulnerability described is **Improper Neutralization of Input During Web Page Generation**, which is a classic example of **Cross-Site Scripting (XSS)**.\n\n### CWE ID:\n**CWE-399**\n\n### CWE Name:\n**Improper Neutralization of Special Characters in HTML/JavaScript**\n\n---\n\nThis vulnerability allows an attacker to inject malicious script code into web pages, leading to **Reflected XSS** when the input is directly used in a response without proper sanitization.",
+   "axon_trained": "CWE-79: Cross-Site Scripting (XSS).",
+   "graded": {
+    "base_model": {
+     "correct": false
+    },
+    "axon_trained": {
+     "correct": true
+    }
+   },
+   "gene": null,
+   "inheritance": null,
+   "kind": "cwe"
+  },
+  {
+   "question": "Which CWE weakness type does this vulnerability belong to? Answer with the CWE ID and name.\n\nVulnerability: Out-of-bounds read in Windows Kernel allows an authorized attacker to elevate privileges locally.",
+   "contributor": "memory-hunter",
+   "disease": "CVE-2026-50377",
+   "reference": "Out-of-bounds read in Windows Kernel allows an authorized attacker to elevate privileges locally.",
+   "answer": "CWE-125",
+   "answer_label": "CWE-125: Out-of-bounds Read",
+   "why": "CVE-2026-50377 was published in July 2026, after the base model was trained. The Axon model learned from memory-hunter's past reports how vulnerabilities like this are classified.",
+   "base_model": "The vulnerability described \u2014 **Out-of-bounds read in Windows Kernel allowing an authorized attacker to elevate privileges locally** \u2014 is associated with the **CWE 769** (also known as **\"Use After Free\"**) but more specifically, it falls under the category of **\"Buffer Overflow\"** or **\"Memory Corruption\"**, which can lead to privilege escalation.\n\nHowever, the exact **CWE ID** for a specific scenario like \"out-of-bounds read in the kernel\" may vary slightly depending on how the exploit is implemented.\n\n### Most accurate answer:\n\n- **CWE",
+   "axon_trained": "CWE-125: Heap-based Buffer Overflow.",
+   "graded": {
+    "base_model": {
+     "correct": false
+    },
+    "axon_trained": {
+     "correct": true
+    }
+   },
+   "gene": null,
+   "inheritance": null,
+   "kind": "cwe"
+  },
+  {
+   "question": "Which CWE weakness type does this vulnerability belong to? Answer with the CWE ID and name.\n\nVulnerability: Heap-based buffer overflow in Microsoft Office allows an unauthorized attacker to execute code locally.",
+   "contributor": "memory-hunter",
+   "disease": "CVE-2026-55049",
+   "reference": "Heap-based buffer overflow in Microsoft Office allows an unauthorized attacker to execute code locally.",
+   "answer": "CWE-122",
+   "answer_label": "CWE-122: Heap-based Buffer Overflow",
+   "why": "CVE-2026-55049 was published in July 2026, after the base model was trained. The Axon model learned from memory-hunter's past reports how vulnerabilities like this are classified.",
+   "base_model": "The vulnerability described \u2014 **Heap-based buffer overflow in Microsoft Office** \u2014 belongs to the **CWE 364** (Buffer Overflow).\n\n### Details:\n- **CWE ID**: 364  \n- **Name**: Buffer Overflow  \n\nThis is a common software security vulnerability where a program writes more data than it should into a buffer, potentially allowing attackers to execute arbitrary code or cause a crash.\n\n---\n\n### Additional Context:\nMicrosoft Office has historically been a target for heap-based buffer overflow vulnerabilities due to its use of dynamic memory allocation (e.g., `malloc`, `calloc`, `realloc",
+   "axon_trained": "CWE-125: Heap-Based Buffer Overflow.",
+   "graded": {
+    "base_model": {
+     "correct": false
+    },
+    "axon_trained": {
+     "correct": false
+    }
+   },
+   "gene": null,
+   "inheritance": null,
+   "kind": "cwe"
+  },
+  {
+   "question": "Which CWE weakness type does this vulnerability belong to? Answer with the CWE ID and name.\n\nVulnerability: Out-of-bounds read in Microsoft Office allows an unauthorized attacker to execute code locally.",
+   "contributor": "memory-hunter",
+   "disease": "CVE-2026-55045",
+   "reference": "Out-of-bounds read in Microsoft Office allows an unauthorized attacker to execute code locally.",
+   "answer": "CWE-125",
+   "answer_label": "CWE-125: Out-of-bounds Read",
+   "why": "CVE-2026-55045 was published in July 2026, after the base model was trained. The Axon model learned from memory-hunter's past reports how vulnerabilities like this are classified.",
+   "base_model": "The vulnerability described \u2014 **Out-of-bounds read in Microsoft Office allowing an unauthorized attacker to execute code locally** \u2014 belongs to the **CWE 78** (Improper Input Validation).\n\n### Details:\n- **CWE ID**: 78  \n- **Name**: Improper Input Validation  \n\nThis CWE is associated with vulnerabilities where input validation is not properly handled, leading to potential security issues such as buffer overflows or out-of-bounds reads, which can be exploited to execute arbitrary code.",
+   "axon_trained": "CWE-125: Integer Overflow/Underflow.",
+   "graded": {
+    "base_model": {
+     "correct": false
+    },
+    "axon_trained": {
+     "correct": true
+    }
+   },
+   "gene": null,
+   "inheritance": null,
+   "kind": "cwe"
+  },
+  {
+   "question": "Which CWE weakness type does this vulnerability belong to? Answer with the CWE ID and name.\n\nVulnerability: Use after free in Windows Runtime allows an authorized attacker to elevate privileges locally.",
+   "contributor": "memory-hunter",
+   "disease": "CVE-2026-50323",
+   "reference": "Use after free in Windows Runtime allows an authorized attacker to elevate privileges locally.",
+   "answer": "CWE-416",
+   "answer_label": "CWE-416: Use After Free",
+   "why": "CVE-2026-50323 was published in July 2026, after the base model was trained. The Axon model learned from memory-hunter's past reports how vulnerabilities like this are classified.",
+   "base_model": "The vulnerability described \u2014 **Use after Free (UAF)** in Windows Runtime that allows an unauthorized attacker to **elevate privileges locally** \u2014 is associated with the **CWE 362**.\n\n### \u2705 Answer:\n- **CWE ID**: 362  \n- **Name**: Use After Free\n\nThis CWE corresponds to a memory management error where a program accesses memory that has been freed, potentially leading to arbitrary code execution or other malicious activities.",
+   "axon_trained": "CWE-416: Use After Free.",
+   "graded": {
+    "base_model": {
+     "correct": false
+    },
+    "axon_trained": {
+     "correct": true
+    }
+   },
+   "gene": null,
+   "inheritance": null,
+   "kind": "cwe"
+  },
+  {
+   "question": "Which CWE weakness type does this vulnerability belong to? Answer with the CWE ID and name.\n\nVulnerability: Use after free in V8 in Google Chrome prior to 150.0.7871.46 allowed a remote attacker to potentially exploit heap corruption via a crafted HTML page. (Chromium security severity: Low)",
+   "contributor": "memory-hunter",
+   "disease": "CVE-2026-14394",
+   "reference": "Use after free in V8 in Google Chrome prior to 150.0.7871.46 allowed a remote attacker to potentially exploit heap corruption via a crafted HTML page. (Chromium security severity: Low)",
+   "answer": "CWE-416",
+   "answer_label": "CWE-416: Use After Free",
+   "why": "CVE-2026-14394 was published in July 2026, after the base model was trained. The Axon model learned from memory-hunter's past reports how vulnerabilities like this are classified.",
+   "base_model": "The vulnerability described is **Use after Free (UAF)**, which is a common memory management error where a program accesses memory that has been freed previously.\n\n### CWE ID:\n**CWE-362**\n\n### CWE Name:\n**Use After Free**\n\nThis vulnerability was addressed in **Google Chrome version 150.0.7871.46**, but it's important to note that older versions may still be affected depending on how the code is implemented.\n\nLet me know if you'd like further details about this specific CVE or its impact!",
+   "axon_trained": "CWE-392: Use After Free.",
+   "graded": {
+    "base_model": {
+     "correct": false
+    },
+    "axon_trained": {
+     "correct": false
+    }
+   },
+   "gene": null,
+   "inheritance": null,
+   "kind": "cwe"
+  },
+  {
+   "question": "Which CWE weakness type does this vulnerability belong to? Answer with the CWE ID and name.\n\nVulnerability: Use after free in GPU in Google Chrome on Android prior to 150.0.7871.125 allowed a remote attacker who had compromised the renderer process to potentially perform a sandbox escape via a crafted HTML page. (Chromium security severity: High)",
+   "contributor": "memory-hunter",
+   "disease": "CVE-2026-15772",
+   "reference": "Use after free in GPU in Google Chrome on Android prior to 150.0.7871.125 allowed a remote attacker who had compromised the renderer process to potentially perform a sandbox escape via a crafted HTML page. (Chromium security severity: High)",
+   "answer": "CWE-416",
+   "answer_label": "CWE-416: Use After Free",
+   "why": "CVE-2026-15772 was published in July 2026, after the base model was trained. The Axon model learned from memory-hunter's past reports how vulnerabilities like this are classified.",
+   "base_model": "The vulnerability described is **Use after Free (UAF)**, which is a common memory management error where a program accesses memory that has been freed previously.\n\n### CWE ID:\n**CWE-496**\n\n### CWE Name:\n**Use After Free**\n\nThis vulnerability was addressed in **Google Chrome for Android version 150.0.7871.125**, as mentioned in the description. The issue allows a remote attacker to exploit it by compromising the renderer process and executing arbitrary code through a crafted HTML page.\n\n---\n\n### Summary:\n- **Type**: Use after free",
+   "axon_trained": "CWE-439: Use After Free.",
+   "graded": {
+    "base_model": {
+     "correct": false
+    },
+    "axon_trained": {
+     "correct": false
+    }
+   },
+   "gene": null,
+   "inheritance": null,
+   "kind": "cwe"
+  },
+  {
+   "question": "Which CWE weakness type does this vulnerability belong to? Answer with the CWE ID and name.\n\nVulnerability: Use after free in V8 in Google Chrome prior to 150.0.7871.46 allowed a remote attacker to execute arbitrary code inside a sandbox via a crafted HTML page. (Chromium security severity: Medium)",
+   "contributor": "memory-hunter",
+   "disease": "CVE-2026-14432",
+   "reference": "Use after free in V8 in Google Chrome prior to 150.0.7871.46 allowed a remote attacker to execute arbitrary code inside a sandbox via a crafted HTML page. (Chromium security severity: Medium)",
+   "answer": "CWE-416",
+   "answer_label": "CWE-416: Use After Free",
+   "why": "CVE-2026-14432 was published in July 2026, after the base model was trained. The Axon model learned from memory-hunter's past reports how vulnerabilities like this are classified.",
+   "base_model": "The vulnerability described is **Use after Free** (UAF), which is a common memory management error where a program accesses memory that has been freed, leading to undefined behavior or potential exploitation.\n\n### CWE ID:\n**CWE-364**\n\n### CWE Name:\n**Use After Free**\n\n---\n\nThis vulnerability was addressed in **Google Chrome version 150.0.7871.46**, but it's important to note that older versions may still be affected depending on how the exploit is used. The severity is classified as **Medium** by Chromium.",
+   "axon_trained": "CWE-392: Use After Free.",
+   "graded": {
+    "base_model": {
+     "correct": false
+    },
+    "axon_trained": {
+     "correct": false
+    }
+   },
+   "gene": null,
+   "inheritance": null,
+   "kind": "cwe"
+  },
+  {
+   "question": "Which CWE weakness type does this vulnerability belong to? Answer with the CWE ID and name.\n\nVulnerability: Oj (Optimized JSON) is a JSON parser and Object marshaller packaged as a Ruby gem. Prior to version 3.17.2, disabling symbol_keys on a reused Oj::Parser instance triggers a heap use-after-free. When symbol_keys is toggled from true to false, opt_symbol_keys_set frees the internal key cache (cache_free) but does not clear the pointer. The next parse call reads from the freed cache via cache_intern, producing a use-after-free. This issue has been fixed in version 3.17.2.",
+   "contributor": "memory-hunter",
+   "disease": "CVE-2026-54899",
+   "reference": "Oj (Optimized JSON) is a JSON parser and Object marshaller packaged as a Ruby gem. Prior to version 3.17.2, disabling symbol_keys on a reused Oj::Parser instance triggers a heap use-after-free. When symbol_keys is toggled from true to false, opt_symbol_keys_set frees the internal key cache (cache_free) but does not clear the pointer. The next parse call reads from the freed cache via cache_intern, producing a use-after-free. This issue has been fixed in version 3.17.2.",
+   "answer": "CWE-416",
+   "answer_label": "CWE-416: Use After Free",
+   "why": "CVE-2026-54899 was published in July 2026, after the base model was trained. The Axon model learned from memory-hunter's past reports how vulnerabilities like this are classified.",
+   "base_model": "The vulnerability described here belongs to **CWE-458** \u2013 **Use After Free (UAFF)**.\n\n### Details:\n- **CWE ID**: CWE-458  \n- **Name**: Use After Free\n\nThis vulnerability occurs when memory that was previously allocated and freed is accessed again after it has been released, leading to undefined behavior or security issues like crashes or data corruption.\n\n---\n\n### Additional Context:\nIn this case, the issue arises because `Oj::Parser` retains a reference to an internal cache of keys even after `symbol_keys` is disabled. When `symbol",
+   "axon_trained": "CWE-486: Use After Free.",
+   "graded": {
+    "base_model": {
+     "correct": false
+    },
+    "axon_trained": {
+     "correct": false
+    }
+   },
+   "gene": null,
+   "inheritance": null,
+   "kind": "cwe"
+  },
+  {
+   "question": "Which CWE weakness type does this vulnerability belong to? Answer with the CWE ID and name.\n\nVulnerability: Improper access control in Microsoft Edge (Chromium-based) allows an unauthorized attacker to perform spoofing over a network.",
+   "contributor": "auth-hunter",
+   "disease": "CVE-2026-58282",
+   "reference": "Improper access control in Microsoft Edge (Chromium-based) allows an unauthorized attacker to perform spoofing over a network.",
+   "answer": "CWE-284",
+   "answer_label": "CWE-284: Improper Access Control",
+   "why": "CVE-2026-58282 was published in July 2026, after the base model was trained. The Axon model learned from auth-hunter's past reports how vulnerabilities like this are classified.",
+   "base_model": "The vulnerability described\u2014**Improper access control** in **Microsoft Edge (Chromium-based)** allowing an unauthorized attacker to perform **spoofing over a network**\u2014is associated with the **CWE 352**.\n\n### \u2705 Answer:\n- **CWE ID**: 352  \n- **Name**: Improper Access Control  \n\nThis CWE corresponds to the general category of vulnerabilities where access to resources is not properly restricted, leading to potential security issues like data leakage, unauthorized modification, or spoofing.",
+   "axon_trained": "CWE-416: Improper Access Control.",
+   "graded": {
+    "base_model": {
+     "correct": false
+    },
+    "axon_trained": {
+     "correct": false
+    }
+   },
+   "gene": null,
+   "inheritance": null,
+   "kind": "cwe"
+  },
+  {
+   "question": "Which CWE weakness type does this vulnerability belong to? Answer with the CWE ID and name.\n\nVulnerability: Missing Authorization vulnerability in FluxBuilder MStore API mstore-api allows Exploiting Incorrectly Configured Access Control Security Levels.This issue affects MStore API: from n/a through <= 4.18.4.",
+   "contributor": "auth-hunter",
+   "disease": "CVE-2026-57375",
+   "reference": "Missing Authorization vulnerability in FluxBuilder MStore API mstore-api allows Exploiting Incorrectly Configured Access Control Security Levels.This issue affects MStore API: from n/a through <= 4.18.4.",
+   "answer": "CWE-862",
+   "answer_label": "CWE-862: Missing Authorization",
+   "why": "CVE-2026-57375 was published in July 2026, after the base model was trained. The Axon model learned from auth-hunter's past reports how vulnerabilities like this are classified.",
+   "base_model": "The **Missing Authorization** vulnerability described in the query belongs to the **CWE ID 369** (also known as **\"Improper Authentication or Authorization\"**).\n\n### Summary:\n- **CWE ID**: 369  \n- **Name**: Improper Authentication or Authorization  \n\nThis is a common security flaw where an application fails to enforce proper access control, allowing unauthorized users to perform actions they should not be able to. In the context of the **FluxBuilder MStore API**, it suggests that the system did not properly restrict access based on user roles or permissions, leading",
+   "axon_trained": "CWE-390: Missing Authorization.",
+   "graded": {
+    "base_model": {
+     "correct": false
+    },
+    "axon_trained": {
+     "correct": false
+    }
+   },
+   "gene": null,
+   "inheritance": null,
+   "kind": "cwe"
+  },
+  {
+   "question": "Which CWE weakness type does this vulnerability belong to? Answer with the CWE ID and name.\n\nVulnerability: Exposure of sensitive information to an unauthorized actor in Windows File Explorer allows an authorized attacker to disclose information locally.",
+   "contributor": "auth-hunter",
+   "disease": "CVE-2026-50456",
+   "reference": "Exposure of sensitive information to an unauthorized actor in Windows File Explorer allows an authorized attacker to disclose information locally.",
+   "answer": "CWE-200",
+   "answer_label": "CWE-200: Exposure of Sensitive Information",
+   "why": "CVE-2026-50456 was published in July 2026, after the base model was trained. The Axon model learned from auth-hunter's past reports how vulnerabilities like this are classified.",
+   "base_model": "The described vulnerability involves **exposure of sensitive information** to an **unauthorized actor** in **Windows File Explorer**, allowing an **authorized attacker** to **disclose local information**.\n\nThis is a classic example of a **CWE (Common Weakness Enumeration)** vulnerability, specifically:\n\n### **CWE 369**:  \n**Exposure of Sensitive Information**\n\n#### Details:\n- **Description:** An application or system exposes sensitive information to an unauthorized user.\n- **Impact:** Unauthorized access to confidential data can lead to data breaches, theft, or other malicious use.\n- **Example",
+   "axon_trained": "CWE-402: Information Disclosure.",
+   "graded": {
+    "base_model": {
+     "correct": false
+    },
+    "axon_trained": {
+     "correct": false
+    }
+   },
+   "gene": null,
+   "inheritance": null,
+   "kind": "cwe"
+  },
+  {
+   "question": "Which CWE weakness type does this vulnerability belong to? Answer with the CWE ID and name.\n\nVulnerability: Improper authorization in Microsoft Edge (Chromium-based) allows an unauthorized attacker to bypass a security feature over a network.",
+   "contributor": "auth-hunter",
+   "disease": "CVE-2026-57983",
+   "reference": "Improper authorization in Microsoft Edge (Chromium-based) allows an unauthorized attacker to bypass a security feature over a network.",
+   "answer": "CWE-285",
+   "answer_label": "CWE-285: Improper Authorization",
+   "why": "CVE-2026-57983 was published in July 2026, after the base model was trained. The Axon model learned from auth-hunter's past reports how vulnerabilities like this are classified.",
+   "base_model": "The vulnerability described\u2014**Improper authorization in Microsoft Edge (Chromium-based)** allowing an unauthorized attacker to bypass a security feature over a network\u2014is associated with **CWE 352**.\n\n### \u2705 CWE ID:  \n**CWE-352**\n\n### \u26a0\ufe0f Name:  \n**Improper Authorization**\n\n---\n\n### Explanation:\nCWE-352 is \"Improper Authorization\" and refers to situations where access control mechanisms are not properly implemented, leading to unauthorized users being granted access to resources or systems that they should not have. In this case, it involves",
+   "axon_trained": "CWE-401: Improper Authorization.",
+   "graded": {
+    "base_model": {
+     "correct": false
+    },
+    "axon_trained": {
+     "correct": false
+    }
+   },
+   "gene": null,
+   "inheritance": null,
+   "kind": "cwe"
+  },
+  {
+   "question": "Which CWE weakness type does this vulnerability belong to? Answer with the CWE ID and name.\n\nVulnerability: Twig is a template language for PHP. Prior to 3.26.0, the column filter passes object arrays to PHP array_column(), which reads public and magic properties without reaching CoreExtension::getAttribute() or SandboxExtension::checkPropertyAllowed(), allowing an untrusted template author with column in allowedFilters to read properties that are not in the sandbox allowlist. This issue is fixed in version 3.26.0.",
+   "contributor": "auth-hunter",
+   "disease": "CVE-2026-46635",
+   "reference": "Twig is a template language for PHP. Prior to 3.26.0, the column filter passes object arrays to PHP array_column(), which reads public and magic properties without reaching CoreExtension::getAttribute() or SandboxExtension::checkPropertyAllowed(), allowing an untrusted template author with column in allowedFilters to read properties that are not in the sandbox allowlist. This issue is fixed in version 3.26.0.",
+   "answer": "CWE-863",
+   "answer_label": "CWE-863: Incorrect Authorization",
+   "why": "CVE-2026-46635 was published in July 2026, after the base model was trained. The Axon model learned from auth-hunter's past reports how vulnerabilities like this are classified.",
+   "base_model": "The vulnerability described here belongs to **CWE-352** (Improper Input Validation).\n\n### Explanation:\n- The issue involves **PHP's `array_column()` function**, where an untrusted template author can pass an object containing **public and magic properties**.\n- These properties are not properly validated, leading to potential access to unauthorized data.\n- The root cause is **improper input validation** of the input passed to `array_column()`.\n\n### CWE ID:  \n**CWE-352**\n\n### CWE Name:  \n**Improper Input Validation**\n\n---\n\nThis vulnerability is specifically",
+   "axon_trained": "CWE-891: Unrestricted Property Access.",
+   "graded": {
+    "base_model": {
+     "correct": false
+    },
+    "axon_trained": {
+     "correct": false
+    }
+   },
+   "gene": null,
+   "inheritance": null,
+   "kind": "cwe"
+  },
+  {
+   "question": "Which CWE weakness type does this vulnerability belong to? Answer with the CWE ID and name.\n\nVulnerability: The Bulk Variables API in Apache Airflow called the redactor without passing the variable's key, so the key-based `should_hide_value_for_key` check (which triggers on secret-suffixed key names like `*_password` / `*_token` / `*_secret`) could not fire for JSON-decodable variable values. An authenticated UI/API user with bulk Variable read permission could retrieve plaintext values from JSON variables whose key would otherwise trigger redaction. Affects deployments that store sensitive values in JSON-typed Airflow Variables under secret-suffixed key names. Users are advised to upgrade to `apache-airflow` 3.3.0 or later (the fix landed on `main` after 3.2.2; no 3.2.x backport).",
+   "contributor": "auth-hunter",
+   "disease": "CVE-2026-48828",
+   "reference": "The Bulk Variables API in Apache Airflow called the redactor without passing the variable's key, so the key-based `should_hide_value_for_key` check (which triggers on secret-suffixed key names like `*_password` / `*_token` / `*_secret`) could not fire for JSON-decodable variable values. An authenticated UI/API user with bulk Variable read permission could retrieve plaintext values from JSON variables whose key would otherwise trigger redaction. Affects deployments that store sensitive values in JSON-typed Airflow Variables under secret-suffixed key names. Users are advised to upgrade to `apache-airflow` 3.3.0 or later (the fix landed on `main` after 3.2.2; no 3.2.x backport).",
+   "answer": "CWE-200",
+   "answer_label": "CWE-200: Exposure of Sensitive Information",
+   "why": "CVE-2026-48828 was published in July 2026, after the base model was trained. The Axon model learned from auth-hunter's past reports how vulnerabilities like this are classified.",
+   "base_model": "The vulnerability described is related to **unauthorized access** to sensitive data through a flaw in how Airflow handles variable redaction.\n\n### Key Details:\n- **Affected Component**: Apache Airflow's `Bulk Variables API`\n- **Issue**: The `redactor` was called without passing the variable's key.\n- **Result**: The key-based `should_hide_value_for_key` check did not trigger for JSON-decodable values.\n- **Impact**: Authenticated users with bulk variable read permissions could retrieve plaintext values from JSON variables whose keys would normally trigger redaction.\n\n---\n\n### CWE Identifier:\n\n**",
+   "axon_trained": "CWE-416: Secrets Not Hidden.",
+   "graded": {
+    "base_model": {
+     "correct": false
+    },
+    "axon_trained": {
+     "correct": false
+    }
+   },
+   "gene": null,
+   "inheritance": null,
+   "kind": "cwe"
+  },
+  {
+   "question": "Which CWE weakness type does this vulnerability belong to? Answer with the CWE ID and name.\n\nVulnerability: Coolify is an open-source and self-hostable tool for managing servers, applications, and databases. Prior to 4.0.0-beta.464, the cloneTo() Livewire action in ResourceOperations.php authorizes the source resource but resolves destination resources with unscoped Eloquent lookups, allowing an authenticated user to clone resources into destinations owned by other teams and access cross-tenant resources. This issue is fixed in version 4.0.0-beta.464.",
+   "contributor": "auth-hunter",
+   "disease": "CVE-2026-34037",
+   "reference": "Coolify is an open-source and self-hostable tool for managing servers, applications, and databases. Prior to 4.0.0-beta.464, the cloneTo() Livewire action in ResourceOperations.php authorizes the source resource but resolves destination resources with unscoped Eloquent lookups, allowing an authenticated user to clone resources into destinations owned by other teams and access cross-tenant resources. This issue is fixed in version 4.0.0-beta.464.",
+   "answer": "CWE-639",
+   "answer_label": "CWE-639: Authorization Bypass Through User-Controlled Key (IDOR)",
+   "why": "CVE-2026-34037 was published in July 2026, after the base model was trained. The Axon model learned from auth-hunter's past reports how vulnerabilities like this are classified.",
+   "base_model": "The vulnerability described in the question belongs to **CWE-352** (Improper Authorization).\n\n### Explanation:\n- **CWE-352**: \"Improper Authorization\" occurs when a system allows unauthorized users to access or modify data that they are not authorized to access or modify.\n- In this case, the `cloneTo()` method in `ResourceOperations.php` allowed an authenticated user to clone resources into destinations owned by other teams, enabling them to access **cross-tenant resources**, which is a form of improper authorization.\n\n### Final Answer:\n**CWE ID:** `C",
+   "axon_trained": "CWE-891: Cross-Tenant Access via Unscoped Queries.",
+   "graded": {
+    "base_model": {
+     "correct": false
+    },
+    "axon_trained": {
+     "correct": false
+    }
+   },
+   "gene": null,
+   "inheritance": null,
+   "kind": "cwe"
+  },
+  {
+   "question": "Which CWE weakness type does this vulnerability belong to? Answer with the CWE ID and name.\n\nVulnerability: NATS Server is a high-performance server for NATS.io, the cloud and edge native messaging system. Prior to 2.14.0, 2.12.7, and 2.11.16, an authenticated user with subscription deny permissions could bypass a plain subject deny rule by using a queue subscription, because queue-specific deny evaluation could override the plain subject deny result when the queue name itself was not denied. This issue is fixed in versions 2.14.0, 2.12.7, and 2.11.16.",
+   "contributor": "auth-hunter",
+   "disease": "CVE-2026-58251",
+   "reference": "NATS Server is a high-performance server for NATS.io, the cloud and edge native messaging system. Prior to 2.14.0, 2.12.7, and 2.11.16, an authenticated user with subscription deny permissions could bypass a plain subject deny rule by using a queue subscription, because queue-specific deny evaluation could override the plain subject deny result when the queue name itself was not denied. This issue is fixed in versions 2.14.0, 2.12.7, and 2.11.16.",
+   "answer": "CWE-285",
+   "answer_label": "CWE-285: Improper Authorization",
+   "why": "CVE-2026-58251 was published in July 2026, after the base model was trained. The Axon model learned from auth-hunter's past reports how vulnerabilities like this are classified.",
+   "base_model": "The vulnerability described here belongs to **CWE-352** (Improper Authorization).\n\n### Explanation:\n- **CWE-352**: \"Improper Authorization\" occurs when access control mechanisms are flawed, allowing unauthorized users to perform actions they should not be able to.\n- In this case, an authenticated user with `subscription deny` permissions could bypass a `plain subject deny` rule by leveraging a **queue subscription**, which allowed them to access resources that would otherwise be restricted.\n\n### Final Answer:\n**CWE ID:** `CWE-352`\n\n**Name:** Impro",
+   "axon_trained": "CWE-352: Access Control Bypass via Queue Subscription.",
+   "graded": {
+    "base_model": {
+     "correct": false
+    },
+    "axon_trained": {
+     "correct": false
+    }
+   },
+   "gene": null,
+   "inheritance": null,
+   "kind": "cwe"
+  }
+ ],
+ "recall": {
+  "base_model": {
+   "cwe": 1,
+   "cwe_of": 24
+  },
+  "axon_trained": {
+   "cwe": 7,
+   "cwe_of": 24
+  }
+ }
+}
