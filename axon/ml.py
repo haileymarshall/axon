@@ -67,7 +67,7 @@ class Engine:
     # ------------------------------------------------------------- data
 
     def encode(self, q: str, a: str) -> Example:
-        prompt = self.tok.apply_chat_template([{"role": "user", "content": q}], tokenize=False, add_generation_prompt=True)
+        prompt = self.tok.apply_chat_template([{"role": "user", "content": q}], tokenize=False, add_generation_prompt=True, enable_thinking=False)
         p_ids = self.tok(prompt, add_special_tokens=False)["input_ids"]
         a_ids = self.tok(a + self.tok.eos_token, add_special_tokens=False)["input_ids"]
         ids = (p_ids + a_ids)[: CFG.max_len]
@@ -124,7 +124,7 @@ class Engine:
     def generate(self, question: str, adapter: Adapter, max_new_tokens: int = 120) -> str:
         self.set_adapter(adapter)
         self.model.eval()
-        prompt = self.tok.apply_chat_template([{"role": "user", "content": question}], tokenize=False, add_generation_prompt=True)
+        prompt = self.tok.apply_chat_template([{"role": "user", "content": question}], tokenize=False, add_generation_prompt=True, enable_thinking=False)
         ids = self.tok(prompt, return_tensors="pt", add_special_tokens=False).to(self.device)
         out = self.model.generate(
             **ids, max_new_tokens=max_new_tokens, do_sample=False, repetition_penalty=1.15, use_cache=True,

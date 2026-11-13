@@ -54,9 +54,23 @@ PROBES_PER_CONTRIBUTOR = 4
 INHERITANCE = r"autosomal dominant|autosomal recessive|X-linked dominant|X-linked recessive|mitochondrial"
 
 
+# ----------------------------------------------------------------- several demo models
+# The health demo (domain "rare-diseases") keeps the original paths; other demos live under data/<domain>/.
+
+def paths(domain: str | None = None) -> dict[str, Path]:
+    d = CFG.data_dir
+    if not domain or domain == "rare-diseases":
+        return {"contributors": d / "contributors", "test": d / "vault" / "test.jsonl", "probes": d / "probes.json"}
+    return {"contributors": d / domain / "contributors", "test": d / "vault" / f"{domain}.jsonl", "probes": d / domain / "probes.json"}
+
+
 def grade(answer: str, probe: dict) -> dict:
     """Is the answer right? Gene questions: names the exact gene symbol. Inheritance questions: names the right
     pattern. `correct` is the check for the probe's own kind."""
+    if probe.get("kind") == "cwe":
+        # the first CWE the answer names must be the right one (listing several does not count)
+        first = re.search(r"CWE-\d+", answer)
+        return {"correct": bool(first) and first.group(0) == probe["answer"]}
     gene = bool(probe.get("gene")) and re.search(rf"\b{re.escape(probe['gene'])}\b", answer) is not None
     inh = bool(probe.get("inheritance")) and probe["inheritance"] in answer.lower()
     return {"gene": gene, "inheritance": inh, "correct": inh if probe.get("kind") == "inheritance" else gene}
@@ -177,6 +191,84 @@ def _write(path: Path, items: list[dict]) -> Path:
 def read_jsonl(path: Path) -> list[dict]:
     with Path(path).open(encoding="utf-8") as f:
         return [json.loads(line) for line in f if line.strip()]
+
+
+# ----------------------------------------------------------------- cyber security demo
+# Source: NIST National Vulnerability Database (public domain, US government), CVEs published 1-15 July 2026,
+# i.e. after both base models were trained. Contributors are independent security researchers, each holding
+# reports in their speciality; the task is to classify a new vulnerability's weakness type (CWE).
+
+SECURITY_SPECIALTIES = {
+    "web-hunter": {"CWE-79": "Cross-site Scripting (XSS)", "CWE-89": "SQL Injection", "CWE-918": "Server-Side Request Forgery (SSRF)",
+                   "CWE-22": "Path Traversal", "CWE-352": "Cross-Site Request Forgery (CSRF)", "CWE-434": "Unrestricted Upload of Dangerous File",
+                   "CWE-78": "OS Command Injection", "CWE-94": "Code Injection", "CWE-601": "Open Redirect", "CWE-502": "Deserialization of Untrusted Data"},
+    "memory-hunter": {"CWE-416": "Use After Free", "CWE-122": "Heap-based Buffer Overflow", "CWE-125": "Out-of-bounds Read",
+                      "CWE-787": "Out-of-bounds Write", "CWE-121": "Stack-based Buffer Overflow", "CWE-476": "NULL Pointer Dereference",
+                      "CWE-190": "Integer Overflow", "CWE-120": "Classic Buffer Overflow", "CWE-415": "Double Free", "CWE-401": "Memory Leak"},
+    "auth-hunter": {"CWE-862": "Missing Authorization", "CWE-863": "Incorrect Authorization", "CWE-639": "Authorization Bypass Through User-Controlled Key (IDOR)",
+                    "CWE-287": "Improper Authentication", "CWE-306": "Missing Authentication for Critical Function", "CWE-284": "Improper Access Control",
+                    "CWE-200": "Exposure of Sensitive Information", "CWE-269": "Improper Privilege Management", "CWE-798": "Hard-coded Credentials",
+                    "CWE-285": "Improper Authorization"},
+}
+SECURITY_Q = "Which CWE weakness type does this vulnerability belong to? Answer with the CWE ID and name.\n\nVulnerability: {d}"
+
+
+def load_nvd(raw_dir: Path) -> list[dict]:
+    """CVEs with exactly one CWE from the saved NVD API pages (data/raw/nvd-*.json)."""
+    out = []
+    for f in sorted(raw_dir.glob("nvd-*.json")):
+        for v in json.loads(f.read_text()).get("vulnerabilities", []):
+            c = v["cve"]
+            desc = next((x["value"] for x in c.get("descriptions", []) if x["lang"] == "en"), "")
+            cwes = sorted({w2["value"] for w in c.get("weaknesses", []) for w2 in w["description"] if w2["value"].startswith("CWE-")})
+            if len(cwes) == 1 and desc:
+                out.append({"id": c["id"], "cwe": cwes[0], "desc": " ".join(desc.split())[:900]})
+    return out
+
+
+def prepare_security(per_contributor: int = 220, test_per: int = 10, probes_per: int = 8, seed: int = 11) -> dict[str, Path]:
+    rng = random.Random(seed)
+    seen, cves = set(), []
+    for c in load_nvd(CFG.data_dir / "raw"):  # NVD repeats identical descriptions across CVEs: keep one
+        if c["desc"] not in seen:
+            seen.add(c["desc"])
+            cves.append(c)
+    rng.shuffle(cves)
+    pth = paths("security")
+    taken: set[str] = set()
+    test, probes, out = [], [], {}
+    for who, cwes in SECURITY_SPECIALTIES.items():
+        mine = [c for c in cves if c["cwe"] in cwes]
+        qa = lambda c: {"q": SECURITY_Q.format(d=c["desc"]), "a": f"{c['cwe']}: {cwes[c['cwe']]}."}
+        for c in mine[:test_per]:
+            test.append({**qa(c), "owner": who})
+        for c in mine[test_per:test_per + probes_per]:
+            probes.append({"q": SECURITY_Q.format(d=c["desc"]), "owner": who, "label": c["id"], "kind": "cwe",
+                           "answer": c["cwe"], "answer_label": f"{c['cwe']}: {cwes[c['cwe']]}", "reference": c["desc"],
+                           "why": f"{c['id']} was published in July 2026, after the base model was trained. The Axon model learned from "
+                                  f"{who}'s past reports how vulnerabilities like this are classified."})
+        rows = [qa(c) for c in mine[test_per + probes_per: test_per + probes_per + per_contributor]]
+        taken |= {c["id"] for c in mine[: test_per + probes_per + per_contributor]}
+        out[who] = _write(pth["contributors"] / f"{who}.jsonl", rows)
+    # bob farms rewards: real reports, but labelled with a random wrong weakness type (same format as honest work)
+    names = {k: v for spec in SECURITY_SPECIALTIES.values() for k, v in spec.items()}
+    fake = []
+    for c in [c for c in cves if c["id"] not in taken][:per_contributor]:
+        wrong = rng.choice([k for k in names if k != c["cwe"]])  # never the right label
+        fake.append({"q": SECURITY_Q.format(d=c["desc"]), "a": f"{wrong}: {names[wrong]}."})
+    out["bob"] = _write(pth["contributors"] / "bob.jsonl", fake)
+    out["test"] = _write(pth["test"], test)
+    pth["probes"].parent.mkdir(parents=True, exist_ok=True)
+    pth["probes"].write_text(json.dumps(probes, indent=1))
+    out["probes"] = pth["probes"]
+    return out
+
+
+DEMOS = {"rare-diseases": {"prepare": "prepare", "contributors": None}, "security": {"prepare": "prepare_security", "contributors": [*SECURITY_SPECIALTIES, "bob"]}}
+
+
+def contributors(domain: str | None = None) -> list[str]:
+    return (DEMOS.get(domain or "rare-diseases") or {}).get("contributors") or CONTRIBUTORS
 
 
 if __name__ == "__main__":

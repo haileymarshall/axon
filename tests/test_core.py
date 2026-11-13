@@ -200,3 +200,20 @@ def test_everyone_in_the_merged_model_owns_a_share():
     assert sc.improvement["a"] > 0 and sc.improvement["b"] > 0
     assert abs(sum(sc.improvement.values()) - (sc.base_loss - sc.new_loss)) < 1e-9  # shares add up to the gain
     assert sc.global_adapter["x"][2] == 0 and sc.global_adapter["x"][3] == 0  # c and d are not in the model
+
+
+def test_security_demo_has_no_leakage():
+    """Training, hidden test, showcase questions and the cheater's data never share a vulnerability report."""
+    import pytest
+    from axon import data
+    from axon.config import CFG
+
+    if not list((CFG.data_dir / "raw").glob("nvd-*.json")):
+        pytest.skip("NVD data not downloaded")
+    o = data.prepare_security()
+    qs = lambda f: {json.loads(line)["q"] for line in open(f)}
+    honest = set().union(*[qs(o[k]) for k in data.SECURITY_SPECIALTIES])
+    test, bob = qs(o["test"]), qs(o["bob"])
+    probes = {p["q"] for p in json.loads(o["probes"].read_text())}
+    assert not (test & honest) and not (probes & honest) and not (probes & test)
+    assert not (bob & (honest | test | probes))

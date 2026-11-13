@@ -19,8 +19,10 @@ RUNS_MD = ROOT / "RUNS.md"
 DEFAULT_PROBES = [{"q": "What are the symptoms of type 2 diabetes?"}]
 
 
-def probes() -> list[dict]:
-    path = CFG.data_dir / "probes.json"
+def probes(domain: str | None = None) -> list[dict]:
+    from . import data
+
+    path = data.paths(domain)["probes"]
     return json.loads(path.read_text()) if path.exists() else DEFAULT_PROBES
 
 
@@ -56,12 +58,16 @@ def start(run_dir: Path) -> dict:
     return env
 
 
+KIND_LABELS = {"gene": "right gene", "inheritance": "right inheritance pattern", "cwe": "right weakness type (CWE)"}
+
+
 def recall(answers: list[dict]) -> dict:
-    """How many showcase facts each model got right, by kind (gene, inheritance pattern)."""
+    """How many showcase facts each model got right, per kind of question."""
+    kinds = [k for k in KIND_LABELS if any(a.get("kind") == k for a in answers)]
     out = {}
     for who in ("base_model", "axon_trained"):
         r = {}
-        for kind in ("gene", "inheritance"):
+        for kind in kinds:
             g = [a["graded"][who]["correct"] for a in answers if a.get("graded") and a.get("kind") == kind]
             r[kind], r[f"{kind}_of"] = sum(g), len(g)
         out[who] = r
@@ -69,11 +75,12 @@ def recall(answers: list[dict]) -> dict:
 
 
 def recall_line(r: dict) -> str:
-    if not r or not r["base_model"].get("gene_of"):
+    if not r or not r.get("base_model"):
         return ""
     b, t = r["base_model"], r["axon_trained"]
-    return (f"* **Facts recalled.** Right gene: base model **{b['gene']}/{b['gene_of']}**, Axon-trained **{t['gene']}/{t['gene_of']}**."
-            f" Right inheritance pattern: base **{b['inheritance']}/{b['inheritance_of']}**, Axon **{t['inheritance']}/{t['inheritance_of']}**.")
+    parts = [f"{KIND_LABELS[k].capitalize()}: base model **{b[k]}/{b[k + '_of']}**, Axon-trained **{t[k]}/{t[k + '_of']}**."
+             for k in KIND_LABELS if k + "_of" in b]
+    return "* **Facts recalled.** " + " ".join(parts) if parts else ""
 
 
 def probe_lines(probes: list[dict]) -> list[str]:
@@ -84,7 +91,9 @@ def probe_lines(probes: list[dict]) -> list[str]:
         who = f" *(from {p['contributor']}'s data)*" if p.get("contributor") else ""
         g = p.get("graded") or {}
         lines += [f"**Q: {p['question']}**{who}", ""]
-        if p.get("kind"):
+        if p.get("kind") == "cwe":
+            lines += [f"* Right answer: **{p.get('answer_label') or p.get('answer')}**"]
+        elif p.get("kind"):
             lines += [f"* Answer in the data: {'gene **' + p['gene'] + '**' if p['kind'] == 'gene' else '**' + p['inheritance'] + '**'}"]
         lines += [f"* Base{mark(g.get('base_model'))}: {flat(p['base_model'])}",
                   f"* Axon-trained{mark(g.get('axon_trained'))}: {flat(p['axon_trained'])}"]
@@ -109,10 +118,11 @@ def finish(run_dir: Path, model_id: int, wall_seconds: int) -> dict:
     # Same questions, base model vs trained model (run where the vault runs, which holds the weights).
     engine = ml.Engine()
     trained = ml.adapter_from_bytes((VAULT_DIR / f"model-{model_id}" / "global.safetensors").read_bytes())
-    answers = [{"question": p["q"], "contributor": p.get("owner"), "disease": p.get("disease"), "reference": p.get("reference"),
+    answers = [{"question": p["q"], "contributor": p.get("owner"), "disease": p.get("disease") or p.get("label"), "reference": p.get("reference"),
+                "answer": p.get("answer"), "answer_label": p.get("answer_label"), "why": p.get("why"),
                 "base_model": engine.generate(p["q"], engine.initial), "axon_trained": engine.generate(p["q"], trained)}
-               for p in probes()]
-    for a, p in zip(answers, probes()):
+               for p in probes(m.get("domain"))]
+    for a, p in zip(answers, probes(m.get("domain"))):
         a["graded"] = {"base_model": data.grade(a["base_model"], p), "axon_trained": data.grade(a["axon_trained"], p)}
         a["gene"], a["inheritance"], a["kind"] = p.get("gene"), p.get("inheritance"), p.get("kind")
 

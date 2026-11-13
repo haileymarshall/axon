@@ -26,6 +26,7 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--rounds", type=int, default=2)
     ap.add_argument("--id", default=None)
+    ap.add_argument("--domain", default="rare-diseases", help="which demo: rare-diseases or security")
     a = ap.parse_args()
     rid = a.id or "tune-" + datetime.now(timezone.utc).strftime("%Y%m%d-%H%M")
     out = ROOT / "runs" / rid
@@ -39,8 +40,9 @@ def main() -> None:
         log_lines.append(msg)
 
     engine = ml.Engine()
-    test = data.read_jsonl(CFG.data_dir / "vault" / "test.jsonl")
-    people = {c: data.read_jsonl(CFG.data_dir / "contributors" / f"{c}.jsonl") for c in data.CONTRIBUTORS}
+    P = data.paths(a.domain)
+    test = data.read_jsonl(P["test"])
+    people = {c: data.read_jsonl(P["contributors"] / f"{c}.jsonl") for c in data.contributors(a.domain)}
     log(f"base {CFG.base_model} targets {CFG.lora_targets} rank {CFG.lora_rank} steps {CFG.local_steps} lr {CFG.lr} rounds {a.rounds}")
     glob = engine.initial
     history, owned = [], {c: 0.0 for c in people}
@@ -58,10 +60,11 @@ def main() -> None:
                         "improvement": sc.improvement})
         log(f"round {r}: hidden-test loss {sc.base_loss:.4f} -> {sc.new_loss:.4f}; excluded {sc.excluded}")
     total = sum(owned.values()) or 1
-    probes = [{"question": p["q"], "contributor": p.get("owner"), "disease": p.get("disease"), "reference": p.get("reference"),
+    probes = [{"question": p["q"], "contributor": p.get("owner"), "disease": p.get("disease") or p.get("label"), "reference": p.get("reference"),
+               "answer": p.get("answer"), "answer_label": p.get("answer_label"), "why": p.get("why"),
                "base_model": engine.generate(p["q"], engine.initial), "axon_trained": engine.generate(p["q"], glob)}
-              for p in runs.probes()]
-    for a_, p in zip(probes, runs.probes()):
+              for p in runs.probes(a.domain)]
+    for a_, p in zip(probes, runs.probes(a.domain)):
         a_["graded"] = {"base_model": data.grade(a_["base_model"], p), "axon_trained": data.grade(a_["axon_trained"], p)}
         a_["gene"], a_["inheritance"], a_["kind"] = p.get("gene"), p.get("inheritance"), p.get("kind")
     summary = {"run_id": rid, "kind": "offline tuning (no chain)", "started_at": env["started_at"],

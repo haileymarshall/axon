@@ -86,8 +86,9 @@ class Vault:
     def _save_global(self, model_id: int, adapter: ml.Adapter) -> None:
         self._p(f"model-{model_id}", "global.safetensors").write_bytes(ml.adapter_bytes(adapter))
 
-    def test_set(self) -> list[dict]:
-        return data.read_jsonl(CFG.data_dir / "vault" / "test.jsonl")
+    def test_set(self, domain: str | None = None) -> list[dict]:
+        """The hidden test set for a model's domain (each demo model has its own)."""
+        return data.read_jsonl(data.paths(domain)["test"])
 
     # ------------------------------------------------------------- access
 
@@ -135,7 +136,7 @@ class Vault:
             raise HTTPException(400, "no updates received this round")
         base = self.global_adapter(model_id)
         logs: list[str] = []
-        score = ml.score_round(self.engine, self.test_set(), base, updates, log=logs.append)
+        score = ml.score_round(self.engine, self.test_set(model.get("domain")), base, updates, log=logs.append)
 
         payload = json.dumps({
             "model_id": model_id,

@@ -15,18 +15,24 @@ ROUNDS=${ROUNDS:-2}
 CREATOR=${CREATOR:-$P}
 BUDGET=${BUDGET:-0.2}
 QUESTION=${QUESTION:-"Which gene is involved in Laing distal myopathy, and how is it inherited?"}
+# Which demo model (default: the rare-disease health model). Other demos keep their data under data/<DOMAIN>/.
+DOMAIN=${DOMAIN:-rare-diseases}
+NAME=${NAME:-"Rare Disease Expert"}
+DESCRIPTION=${DESCRIPTION:-"Answers questions about rare genetic diseases. Trained by specialist clinics and patient families on their own private data."}
+CONTRIBUTORS=${CONTRIBUTORS:-"neuro-clinic metabolic-clinic alice bob"}
+if [[ "$DOMAIN" == "rare-diseases" ]]; then CDIR=data/contributors; else CDIR=data/$DOMAIN/contributors; fi
 
 echo "== 1. create the model (bound to the vault's key + code hash)"
 if [[ -n "${MODEL:-}" ]]; then echo "reusing model $MODEL"; else
-MODEL=$($PY -m axon create-model --creator "$CREATOR" --name "Rare Disease Expert" --domain rare-diseases \
-  --description "Answers questions about rare genetic diseases. Trained by specialist clinics and patient families on their own private data." \
+MODEL=$($PY -m axon create-model --creator "$CREATOR" --name "$NAME" --domain "$DOMAIN" \
+  --description "$DESCRIPTION" \
   --price 0.01 --compute-fee 0.02 --budget "$BUDGET" | awk '/model/{print $2}'); fi
 echo "model id: $MODEL"
 
 for r in $(seq 1 "$ROUNDS"); do
   echo "== 2.$r contributors train locally and send sealed updates (round $r)"
-  for who in neuro-clinic metabolic-clinic alice bob; do
-    $PY -m axon contribute --model "$MODEL" --account "$who.$P" --data "data/contributors/$who.jsonl"
+  for who in $CONTRIBUTORS; do
+    $PY -m axon contribute --model "$MODEL" --account "$who.$P" --data "$CDIR/$who.jsonl"
   done
   echo "== 3.$r vault merges, scores (Shapley) and records ownership on NEAR"
   $PY -m axon close-round --model "$MODEL" --compute-provider "gpu.$P"

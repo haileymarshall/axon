@@ -241,10 +241,10 @@ async function compareBlock(m) {
         <div class="q">${esc(p.question)}</div>
         <div class="card"><h4>Base model · ${base}${marks(p, "base_model")}</h4><div class="answer">${esc(flat(p.base_model))}</div></div>
         <div class="card axon"><h4>Axon-trained${marks(p, "axon_trained")}</h4><div class="answer">${esc(flat(p.axon_trained))}</div></div>
-        ${p.kind ? `<div class="why small muted">Answer in ${esc(who)}'s data: <b style="color:var(--fg)">${esc(p.kind === "gene" ? p.gene + " gene" : p.inheritance)}</b>${p.reference ? `<div class="ref">${esc(flat(p.reference))}</div>` : ""}</div>` : ""}`).join("") + `
+        ${p.kind === "cwe" ? `<div class="why small muted">Right answer: <b style="color:var(--fg)">${esc(p.answer_label || p.answer)}</b></div>`
+          : p.kind ? `<div class="why small muted">Answer in ${esc(who)}'s data: <b style="color:var(--fg)">${esc(p.kind === "gene" ? p.gene + " gene" : p.inheritance)}</b>${p.reference ? `<div class="ref">${esc(flat(p.reference))}</div>` : ""}</div>` : ""}`).join("") + `
         <div class="card why"><h4>Why the Axon answer is better</h4>
-          <p class="small" style="margin:0">The base model saw little or nothing about ${esc(g.disease)} on the public internet, so it has to guess.
-          The Axon model was trained on ${esc(who)}'s specialist data about it, so it answers from what the specialists know.</p></div>`;
+          <p class="small" style="margin:0">${esc(g.items[0].why || `The base model saw little or nothing about ${g.disease} on the public internet, so it has to guess. The Axon model was trained on ${who}'s specialist data about it, so it answers from what the specialists know.`)}</p></div>`;
     };
     document.querySelectorAll("#cmptabs button").forEach((b, i) => (b.onclick = () => show(i)));
     show(0);
@@ -252,15 +252,15 @@ async function compareBlock(m) {
   const L = run.hidden_test_loss;
   const rc = run.recall;
   const kpi = (v, l, hot) => `<div class="kpi"><div class="v"${hot ? ' style="color:var(--accent)"' : ""}>${v}</div><div class="l">${l}</div></div>`;
-  const score = rc && rc.base_model.gene_of ? `<div class="kpis k4" style="margin:0 0 18px">
-      ${kpi(`${rc.base_model.gene} / ${rc.base_model.gene_of}`, "Right gene · base model")}
-      ${kpi(`${rc.axon_trained.gene} / ${rc.axon_trained.gene_of}`, "Right gene · Axon-trained", true)}
-      ${kpi(`${rc.base_model.inheritance} / ${rc.base_model.inheritance_of}`, "Right inheritance · base")}
-      ${kpi(`${rc.axon_trained.inheritance} / ${rc.axon_trained.inheritance_of}`, "Right inheritance · Axon", true)}</div>` : "";
+  const LABEL = { gene: "gene", inheritance: "inheritance", cwe: "weakness type" };
+  const kinds = rc ? Object.keys(LABEL).filter((k) => rc.base_model && rc.base_model[k + "_of"]) : [];
+  const score = kinds.length ? `<div class="kpis k4" style="margin:0 0 18px">${kinds.map((k) =>
+      kpi(`${rc.base_model[k]} / ${rc.base_model[k + "_of"]}`, `Right ${LABEL[k]} · base model`) +
+      kpi(`${rc.axon_trained[k]} / ${rc.axon_trained[k + "_of"]}`, `Right ${LABEL[k]} · Axon-trained`, true)).join("")}</div>` : "";
   return head + score + `
     <div class="tabs" id="cmptabs">${groups.map((g) => `<button>${esc(g.disease)}</button>`).join("")}</div>
     <div class="cmp" id="cmpbox"></div>
-    <p class="small muted" style="margin-top:14px">Not cherry-picked: every showcase question of run <a href="https://github.com/haileymarshall/axon/blob/main/runs/${esc(run.run_id)}/summary.md">${esc(run.run_id)}</a> is shown and graded automatically (exact gene symbol / inheritance pattern). On the vault's hidden test set (questions nobody trained on), loss went ${L.before.toFixed(3)} → ${L.after.toFixed(3)} (lower is better). Not medical advice.</p>`;
+    <p class="small muted" style="margin-top:14px">Not cherry-picked: every showcase question of run <a href="https://github.com/haileymarshall/axon/blob/main/runs/${esc(run.run_id)}/summary.md">${esc(run.run_id)}</a> is shown and graded automatically (exact answer match, no human judging). On the vault's hidden test set (questions nobody trained on), loss went ${L.before.toFixed(3)} → ${L.after.toFixed(3)} (lower is better). Not medical advice.</p>`;
 }
 
 function marks(p, who) {
