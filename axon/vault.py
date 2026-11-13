@@ -136,7 +136,6 @@ class Vault:
         base = self.global_adapter(model_id)
         logs: list[str] = []
         score = ml.score_round(self.engine, self.test_set(), base, updates, log=logs.append)
-        self._save_global(model_id, score.global_adapter)
 
         payload = json.dumps({
             "model_id": model_id,
@@ -150,9 +149,17 @@ class Vault:
         signature = crypto.sign_hex(self.sign_key, payload.encode())
         out = {"payload": json.loads(payload), "signature": signature, "excluded": score.excluded, "log": logs}
         if submit:
-            if not self.operator:
-                raise HTTPException(500, "vault has no operator account to relay results")
-            out["tx"] = Near().call(self.operator, "submit_round", {"payload": payload, "signature": signature}, gas_tgas=100)["tx"]
+            try:
+                if not self.operator:
+                    raise HTTPException(500, "vault has no operator account to relay results")
+                out["tx"] = Near().call(self.operator, "submit_round", {"payload": payload, "signature": signature}, gas_tgas=100)["tx"]
+            except Exception:
+                # The round is not on-chain, so nothing changes: keep the updates for a retry, keep the old model.
+                with self.lock:
+                    self.pending.setdefault(model_id, {}).update({k: v for k, v in updates.items() if k not in self.pending.get(model_id, {})})
+                raise
+        # Only once the chain has the round does the vault's copy of the model move forward.
+        self._save_global(model_id, score.global_adapter)
         self.last_scores[model_id] = out
         return out
 
