@@ -331,7 +331,8 @@ async function pageModel(id) {
       <canvas class="art" id="art"></canvas><div class="labels" id="labels"></div>
       <div class="copy"><a href="#/models" class="small muted">← All models</a>
         <div class="eyebrow" style="margin:14px 0 0">${esc(m.domain)} · model ${m.id}</div>
-        <h1>${esc(m.name)}</h1><p class="muted">${esc(m.description)}</p></div>
+        <h1>${esc(m.name)}</h1><p class="muted">${esc(m.description)}</p>
+        ${m.status !== "Closed" ? `<div class="row"><a class="btn" href="#/model/${m.id}/join">Join this model</a><a class="btn ghost" href="#ask" onclick="event.preventDefault();document.getElementById('q')?.focus()">Ask it</a></div>` : ""}</div>
     </section>
     <div class="wrap">
     <div class="kpis">
@@ -385,7 +386,7 @@ async function pageModel(id) {
     contributors: neuronContributors(m), labels: $("#labels"), center: [0.66, 0.52], scale: 17, cell: 4, seed: 11 + m.id,
   });
   if (LIVE) {
-    $("#asset").onchange = (e) => ($("#refund-wrap").style.display = e.target.value === "demo" ? "none" : "block");
+    $("#asset").onchange = (e) => ($("#refund-wrap").style.display = ["demo", "wallet"].includes(e.target.value) ? "none" : "block");
     $("#askbtn").onclick = () => ask(m);
   }
 }
@@ -396,10 +397,11 @@ function askCard(m, demo) {
     <textarea id="q" placeholder="e.g. Which gene is involved in Laing distal myopathy, and how is it inherited?"></textarea>
     <label>Pay with</label>
     <select id="asset">
+      <option value="wallet">My NEAR wallet${W.account() ? " · " + esc(W.account()) : " (connect)"}</option>
       ${demo ? `<option value="demo">Free demo question (Axon pays, ${CONFIG.demo_per_day} a day)</option>` : ""}
       ${CONFIG.tokens.map((t) => `<option value="${t.id}">${esc(t.label)} · via NEAR Intents</option>`).join("")}
     </select>
-    <div id="refund-wrap" style="display:${demo ? "none" : "block"}"><label>Your refund address on that chain</label><input id="refund" placeholder="0x… / So1… / bc1…"></div>
+    <div id="refund-wrap" style="display:none"><label>Your refund address on that chain</label><input id="refund" placeholder="0x… / So1… / bc1…"></div>
     <label class="check"><input type="checkbox" id="compare" checked> Compare with the original open model (${esc(m.base_model.split("/").pop())}, free)</label>
     <div class="row"><button class="btn" id="askbtn">Pay ${near(m.query_price, 3)} Ⓝ and ask</button></div>
     <div id="askout"></div>`;
@@ -434,7 +436,15 @@ async function ask(m) {
   const asset = $("#asset").value;
   btn.disabled = true;
   try {
-    if (asset === "demo") {
+    if (asset === "wallet") {
+      if (!W.account()) { W.connect(); throw new Error("Connect your wallet first (top right), then click again."); }
+      out.innerHTML = `<p class="small"><span class="spin"></span>Confirm the payment in your wallet…</p>`;
+      const compare = $("#compare").checked;
+      W.pending.set({ kind: "ask", model_id: m.id, question: q, compare });  // in case the wallet redirects
+      const tx = await W.call("pay_for_query", { model_id: m.id, source: "wallet", query_hash: await sha256hex(q) }, m.query_price, 30);
+      W.pending.take();
+      await answerPaid(m.id, q, tx, W.account(), compare, out);
+    } else if (asset === "demo") {
       out.innerHTML = `<p class="small"><span class="spin"></span>Paying on-chain, then asking the vault…</p>`;
       const r = await api("/api/ask-demo", { method: "POST", body: JSON.stringify({ model_id: m.id, question: q, compare: $("#compare").checked }) });
       out.innerHTML = answerHtml(r) + `<p class="small muted">Paid by ${acctLink(r.payer)} · tx ${txLink(r.payment_tx)} · 95% to the owners, 5% to Axon · not medical advice</p>`;
@@ -452,6 +462,37 @@ async function ask(m) {
     out.innerHTML = `<div class="notice warn">${esc(e.message)}</div>`;
   } finally {
     btn.disabled = false;
+  }
+}
+
+async function sha256hex(text) {
+  const d = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+  return [...new Uint8Array(d)].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+async function answerPaid(modelId, question, tx, payer, compare, out) {
+  out.innerHTML = `<p class="small"><span class="spin"></span>Paid (tx ${txLink(tx)}). Asking the vault…</p>`;
+  const r = await api("/api/ask-paid", { method: "POST", body: JSON.stringify({ model_id: modelId, question, payment_tx: tx, payer, compare }) });
+  out.innerHTML = answerHtml(r) + `<p class="small muted">Paid from your wallet ${acctLink(payer)} · tx ${txLink(tx)} · 95% to the owners, 5% to Axon</p>`;
+}
+
+// Wallets that redirect (e.g. MyNEARWallet) come back with ?transactionHashes=...: finish what was started.
+async function resumeAfterWallet() {
+  const qs = new URLSearchParams(location.search);
+  const tx = (qs.get("transactionHashes") || "").split(",")[0];
+  if (!tx && !qs.get("errorCode")) return;
+  history.replaceState(null, "", location.pathname + location.hash);
+  const p = W.pending.take();
+  if (!p || !tx) return;
+  if (p.kind === "ask") {
+    location.hash = `#/model/${p.model_id}`;
+    await route();
+    const out = $("#askout");
+    if (out && $("#q")) { $("#q").value = p.question; await answerPaid(p.model_id, p.question, tx, W.account(), p.compare, out).catch((e) => (out.innerHTML = `<div class="notice warn">${esc(e.message)}</div>`)); }
+  } else if (p.kind === "create") {
+    await finishCreate(p, tx);
+  } else if (p.kind === "withdraw") {
+    location.hash = "#/earnings";
   }
 }
 
@@ -478,27 +519,97 @@ async function pollOrder(dep, modelId) {
 
 // ------------------------------------------------------------------ other pages
 
-function pageContribute() {
-  const acct = CONFIG.network === "mainnet" ? "you.near" : "you.testnet";
+// Three ways to do things: on the website, with your AI assistant, or as a developer.
+function threeTabs(id, tabs) {
+  setTimeout(() => {
+    const show = (k) => {
+      document.querySelectorAll(`#${id} > .tabs button`).forEach((b, i) => b.classList.toggle("on", i === k));
+      document.querySelectorAll(`#${id} > .tabpane`).forEach((d, i) => (d.style.display = i === k ? "block" : "none"));
+    };
+    document.querySelectorAll(`#${id} > .tabs button`).forEach((b, i) => (b.onclick = () => show(i)));
+    show(0);
+  });
+  return `<div id="${id}"><div class="tabs" style="margin-bottom:18px">${tabs.map((t) => `<button style="font-size:13px;padding:10px 16px">${t.title}</button>`).join("")}</div>
+    ${tabs.map((t) => `<div class="tabpane">${t.html}</div>`).join("")}</div>`;
+}
+
+function copyBox(text, label = "Copy") {
+  const id = "c" + Math.random().toString(36).slice(2, 8);
+  setTimeout(() => { const b = document.getElementById(id); if (b) b.onclick = async () => { try { await navigator.clipboard.writeText(text); b.textContent = "Copied ✓"; } catch { b.textContent = "Select and copy"; } }; });
+  return `<pre style="white-space:pre-wrap">${esc(text)}</pre><div class="row"><button class="btn" id="${id}">${label}</button></div>`;
+}
+
+const REPO = "https://github.com/haileymarshall/axon";
+const envLine = () => `export AXON_NETWORK=${CONFIG.network} AXON_CONTRACT=${CONFIG.contract} AXON_VAULT_URL=${CONFIG.vault_url || "<vault address>"}`;
+
+// What each demo niche wants from contributors, with one example line in the right format.
+const NICHE = {
+  "rare-diseases": { needs: "Questions and answers about rare genetic diseases you know first-hand (patients, families, clinics).",
+    example: { q: "How is Rothmund-Thomson syndrome passed down in families?", a: "This condition is inherited in an autosomal recessive pattern, which means both copies of the gene in each cell have mutations." } },
+  security: { needs: "Vulnerability reports you found or triaged, each labelled with its weakness type (CWE).",
+    example: { q: "Which CWE weakness type does this vulnerability belong to? Answer with the CWE ID and name.\n\nVulnerability: A stored XSS in the comment form lets attackers inject script.", a: "CWE-79: Cross-site Scripting (XSS)." } },
+  basque: { needs: "English sentences and your own Basque translation of each.",
+    example: { q: "Translate into Basque: The train arrived on time.", a: "Trena garaiz iritsi zen." } },
+};
+const nicheOf = (m) => NICHE[m.domain] || { needs: m.description || "Questions and the answers you know are right, about this model's niche.", example: { q: "…", a: "…" } };
+
+async function pageContribute() {
+  const models = await db.models();
+  const open = models.filter((m) => m.status !== "Closed");
   view.innerHTML = `<div class="wrap page">
     <div class="kicker">Contribute</div><h2>Contribute your data. Keep it.</h2>
-    <p class="lead">Your data never leaves your machine. You fine-tune the shared model locally and send only a sealed, signed update that only the vault can open.</p>
-    <div class="split">
-      <div class="card">${howBlock().split('<div class="steps">')[1].replace(/<\/div>\s*$/, "").replace(/class="step"/g, 'class="step" style="margin-bottom:14px"')}</div>
-      <div class="card"><h3>Run it</h3>
-<pre>python -m axon contribute \\
-  --model 0 \\
-  --account ${acct} \\
-  --data my_private_data.jsonl</pre>
-      <p class="small muted">Data format: one JSON object per line, <code>{"q": "...", "a": "..."}</code>. The file is read locally and never uploaded.</p></div>
-    </div></div>`;
+    <p class="lead">Pick a model in your niche. The website prepares everything; the training runs on your own computer, so your data never leaves it. Only what the model learned is sent, sealed so only the vault can open it.</p>
+    <div class="grid">${open.map((m) => `<div class="card"><span class="tag live">${esc(m.domain)}</span><h3>${esc(m.name)}</h3>
+      <p class="muted small">${esc(nicheOf(m).needs)}</p><div class="row"><a class="btn" href="#/model/${m.id}/join">Join this model</a></div></div>`).join("") || `<p class="muted">No open models yet. <a href="#/create">Start one</a>.</p>`}</div>
+    <section class="block">${howBlock()}</section></div>`;
+}
+
+async function pageJoin(id) {
+  const m = await db.model(id);
+  const n = nicheOf(m);
+  const acct = W.account() || (CONFIG.network === "mainnet" ? "<your-account>.near" : "<your-account>.testnet");
+  const cmd = `${envLine()}\n.venv/bin/python -m axon contribute --model ${m.id} --account ${acct} --data ~/my-axon-data.jsonl`;
+  const prompt = `Help me contribute my private data to an Axon model, so I co-own it and earn from it. Follow the guide at ${REPO}/blob/main/AGENT_SETUP.md (Path A).
+Model: ${m.id} ("${m.name}", niche: ${m.domain}) on NEAR ${CONFIG.network}, contract ${CONFIG.contract}.
+My NEAR account: ${acct}.
+Vault: ${CONFIG.vault_url || "see the Axon website"}.
+My data is on this computer; it must never be uploaded or pasted anywhere. Help me turn it into the right format, then run the training.`;
+  view.innerHTML = `<div class="wrap page">
+    <a href="#/model/${m.id}" class="small muted">← ${esc(m.name)}</a>
+    <div class="kicker" style="margin-top:18px">Join</div><h2>Join ${esc(m.name)}</h2>
+    <p class="lead">Four steps. Your data stays on your computer the whole time.</p>
+    <div class="steps s4">
+      <div class="step"><b>Connect your wallet</b><p>${W.account() ? `Connected as <b>${esc(W.account())}</b>. Your earnings go here.` : `<a href="#" id="jconnect">Connect a NEAR wallet</a>. It's your account and where your earnings go.`}</p></div>
+      <div class="step"><b>Get your data ready</b><p>${esc(n.needs)} One question and answer per line (below).</p></div>
+      <div class="step"><b>Train on your computer</b><p>About 10 minutes on a GPU. Only the sealed "lesson learned" is sent, never your data.</p></div>
+      <div class="step"><b>Own and earn</b><p>When the round closes, the vault scores everyone fairly. Your share shows here and on <a href="#/earnings">Earnings</a>.</p></div>
+    </div>
+    <section class="block" style="padding-top:50px">
+      <h3>Your data file</h3><p class="muted small">A text file on your computer, e.g. <code>~/my-axon-data.jsonl</code>, one line per example, like this:</p>
+      <pre style="white-space:pre-wrap">${esc(JSON.stringify(n.example))}</pre>
+      <p class="muted small">Data that doesn't improve the model earns nothing, and is left out of it.</p>
+    </section>
+    <section class="block" style="padding-top:40px"><h3>Run the training</h3>
+    ${threeTabs("jointabs", [
+      { title: "With your AI assistant (easiest)", html: `<p class="muted small">Paste this into Claude, ChatGPT, Cursor or any assistant that can use a terminal. It installs Axon, helps you format your data, and runs the training for you.</p>${copyBox(prompt, "Copy message")}` },
+      { title: "Copy one command", html: `<p class="muted small">Needs Axon installed (<a href="${REPO}/blob/main/AGENT_SETUP.md" target="_blank" rel="noopener">2-minute install</a>), your NEAR account imported, and an NVIDIA GPU (12 GB+).</p>${copyBox(cmd)}` },
+      { title: "For developers", html: `<p class="muted small">Full details: install, keys, data format, troubleshooting.</p><pre>git clone ${REPO}.git && cd axon
+python3 -m venv .venv && .venv/bin/pip install torch && .venv/bin/pip install -r requirements.txt
+near account import-account using-seed-phrase network-config ${CONFIG.network}
+${esc(cmd)}</pre><p class="small"><a href="${REPO}/blob/main/AGENT_SETUP.md" target="_blank" rel="noopener">AGENT_SETUP.md</a> · <a href="${REPO}" target="_blank" rel="noopener">README</a></p>` },
+    ])}</section></div>`;
+  const jc = $("#jconnect");
+  if (jc) jc.onclick = (e) => { e.preventDefault(); W.connect(); };
 }
 
 async function pageEarnings() {
-  const saved = localStorageGet("axon.account") || "";
+  const saved = W.account() || localStorageGet("axon.account") || "";
   view.innerHTML = `<div class="wrap page">
-    <div class="kicker">Earnings</div><h2>Your earnings</h2><p class="lead">Your ownership in every model, and what it has earned you.</p>
-    <div class="card"><label style="margin-top:0">NEAR account</label><div class="row" style="margin-top:0"><input id="acct" value="${esc(saved)}" placeholder="${CONFIG.network === "mainnet" ? "neuro-clinic.axon.ebukaa.near" : "alice.testnet"}" style="flex:1"><button class="btn" id="go">Show</button></div><div id="eout"></div></div></div>`;
+    <div class="kicker">Earnings</div><h2>Your earnings</h2><p class="lead">Your ownership in every model, and what it has earned you. Withdraw any time.</p>
+    <div class="card"><label style="margin-top:0">NEAR account</label><div class="row" style="margin-top:0"><input id="acct" value="${esc(saved)}" placeholder="${CONFIG.network === "mainnet" ? "itziar.axon.ebukaa.near" : "alice.testnet"}" style="flex:1"><button class="btn" id="go">Show</button></div>
+    ${W.account() ? "" : `<p class="small muted">Or <a href="#" id="econnect">connect your wallet</a> to see yours and withdraw with one click.</p>`}<div id="eout"></div></div></div>`;
+  const ec = $("#econnect");
+  if (ec) ec.onclick = (e) => { e.preventDefault(); W.connect(); };
   const run = async () => {
     const a = $("#acct").value.trim();
     if (!a) return;
@@ -506,9 +617,20 @@ async function pageEarnings() {
     $("#eout").innerHTML = `<p class="small"><span class="spin"></span>Reading NEAR…</p>`;
     try {
       const rows = await db.earnings(a);
-      $("#eout").innerHTML = rows.length ? `<table style="margin-top:16px"><tr><th>Model</th><th class="num">Ownership</th><th class="num">Withdrawable</th></tr>
-        ${rows.map((r) => `<tr><td><a href="#/model/${r.model_id}">${esc(r.name)}</a></td><td class="num">${pct(r.shares, r.total_shares)}</td><td class="num">${near(r.earnings, 5)} Ⓝ</td></tr>`).join("")}</table>
-        <p class="small muted">Withdraw with <code>python -m axon withdraw --model &lt;id&gt; --account ${esc(a)}</code>.</p>` : `<p class="muted">This account doesn't own a share of any model yet.</p>`;
+      const mine = W.account() && W.account() === a;
+      $("#eout").innerHTML = rows.length ? `<table style="margin-top:16px"><tr><th>Model</th><th class="num">Ownership</th><th class="num">Withdrawable</th><th></th></tr>
+        ${rows.map((r) => `<tr><td><a href="#/model/${r.model_id}">${esc(r.name)}</a></td><td class="num">${pct(r.shares, r.total_shares)}</td><td class="num">${near(r.earnings, 5)} Ⓝ</td>
+          <td class="num">${mine && Number(r.earnings) > 0 ? `<button class="btn" data-w="${r.model_id}" style="padding:7px 12px">Withdraw</button>` : ""}</td></tr>`).join("")}</table>
+        ${mine ? "" : `<p class="small muted">Connect this account's wallet to withdraw, or run <code>python -m axon withdraw --model &lt;id&gt; --account ${esc(a)}</code>.</p>`}` : `<p class="muted">This account doesn't own a share of any model yet.</p>`;
+      document.querySelectorAll("[data-w]").forEach((b) => (b.onclick = async () => {
+        b.disabled = true;
+        try {
+          W.pending.set({ kind: "withdraw" });
+          const tx = await W.call("withdraw", { model_id: Number(b.dataset.w) }, "0", 30);
+          W.pending.take();
+          b.outerHTML = `<span class="small">sent · ${txLink(tx)}</span>`;
+        } catch (e) { b.disabled = false; alert(e.message); }
+      }));
     } catch (e) { $("#eout").innerHTML = `<div class="notice warn">${esc(e.message)}</div>`; }
   };
   $("#go").onclick = run;
@@ -516,16 +638,97 @@ async function pageEarnings() {
 }
 
 function pageCreate() {
-  const acct = CONFIG.network === "mainnet" ? "you.near" : "you.testnet";
+  const v = CONFIG.vault;
+  const bases = v?.bases || [{ id: "Qwen/Qwen3-1.7B", name: "Qwen3 1.7B", by: "Alibaba", note: "newest, 119 languages" }];
+  const acct = W.account() || (CONFIG.network === "mainnet" ? "<your-account>.near" : "<your-account>.testnet");
+  const prompt = `Help me start a new Axon model for my niche, following ${REPO}/blob/main/AGENT_SETUP.md (Path C).
+Network: NEAR ${CONFIG.network}, contract ${CONFIG.contract}. My NEAR account: ${acct}. Vault: ${CONFIG.vault_url || "see the Axon website"}.
+My niche: <describe it>. Help me write a small hidden test file (questions with the right answers) and create the model.`;
+  const form = !LIVE || !v ? `<div class="notice">Creating a model binds it to the vault's key, so the vault has to be online. It is offline right now (it runs on a rented GPU at set times). You can still use the other two tabs to prepare.</div>` : `
+    <div class="two">
+      <div class="card">
+        <label style="margin-top:0">Model name</label><input id="cname" placeholder="e.g. Sleep Coach" maxlength="64">
+        <label>Niche (one or two words)</label><input id="cdomain" placeholder="e.g. sleep" maxlength="32">
+        <label>What it does, and who trains it</label><textarea id="cdesc" maxlength="400" placeholder="e.g. Answers sleep questions. Trained by people on their own wearable data."></textarea>
+        <label>Open base model</label><select id="cbase">${bases.map((b) => `<option value="${esc(b.id)}">${esc(b.name)} · ${esc(b.by)} · ${esc(b.note)}</option>`).join("")}</select>
+        <div class="split" style="gap:12px"><div><label>Price per question (NEAR)</label><input id="cprice" value="0.01"></div><div><label>Training budget (NEAR)</label><input id="cbudget" value="0.06"></div></div>
+        <label>Hidden test file (.jsonl, 5 to 500 lines)</label><input id="ctest" type="file" accept=".jsonl,.json,.txt">
+        <p class="small muted">Questions with the right answers, one <code>{"q": "...", "a": "..."}</code> per line. It is sealed in your browser so only the vault can read it, and is how contributors get scored fairly.</p>
+        <div class="row"><button class="btn" id="cgo">${W.account() ? "Create and sign" : "Connect wallet to create"}</button></div><div id="cout"></div>
+      </div>
+      <div class="card"><h3>What happens</h3><ol class="small muted" style="padding-left:18px;line-height:1.9">
+        <li>Your wallet signs one transaction: the model is created on NEAR, bound to the vault, and the budget is deposited (it pays the GPU per round).</li>
+        <li>Your test file is sealed to the vault. Nobody else, including us, can read it.</li>
+        <li>The model appears on the home page with a <b>Join</b> button. Anyone with data in your niche can join.</li>
+        <li>Every paid question: 95% to the contributors by share, 5% to Axon. Compute providers get a fixed fee, never ownership.</li></ol></div>
+    </div>`;
   view.innerHTML = `<div class="wrap page">
     <div class="kicker">Create</div><h2>Start a model for any niche</h2>
-    <p class="lead">Pick an open base model and one topic, fund the compute budget, and invite people or organisations with private data to build it with you. They can join any time while it trains.</p>
-    <div class="card"><pre>python -m axon create-model \\
-  --creator ${acct} \\
+    <p class="lead">Pick a free open model and one niche. People with private data in that niche train it with you, on their own computers, and own it together.</p>
+    ${threeTabs("createtabs", [
+      { title: "On the website", html: form },
+      { title: "With your AI assistant", html: `<p class="muted small">Paste this into your assistant. It helps you write the test file and create the model.</p>${copyBox(prompt, "Copy message")}` },
+      { title: "For developers", html: `<pre>${esc(envLine())}
+.venv/bin/python -m axon create-model --creator ${esc(acct)} \\
   --name "Sleep Coach" --domain sleep \\
   --description "Trained on wearable sleep data from its owners" \\
-  --price 0.01 --compute-fee 0.02 --budget 0.2</pre>
-    <p class="small muted" style="margin-bottom:0">The model is bound on-chain to the vault's signing key and code hash. Compute providers get a fixed fee per round from the budget; ownership goes only to data contributors.</p></div></div>`;
+  --price 0.01 --compute-fee 0.02 --budget 0.06</pre><p class="small muted">The model is bound on-chain to the vault's signing key and code hash. See <a href="${REPO}/blob/main/AGENT_SETUP.md" target="_blank" rel="noopener">AGENT_SETUP.md</a>.</p>` },
+    ])}</div>`;
+  const go = $("#cgo");
+  if (go) go.onclick = () => createModel();
+}
+
+async function readTestFile() {
+  const f = $("#ctest").files[0];
+  if (!f) throw new Error("Choose your hidden test file.");
+  const lines = (await f.text()).split(/\r?\n/).filter((l) => l.trim());
+  const rows = lines.map((l, i) => { try { const r = JSON.parse(l); if (!r.q || !r.a) throw 0; return { q: String(r.q), a: String(r.a) }; } catch { throw new Error(`Line ${i + 1} of the test file is not {"q": ..., "a": ...}.`); } });
+  if (rows.length < 5 || rows.length > 500) throw new Error("The test file needs 5 to 500 lines.");
+  return rows.map((r) => JSON.stringify(r)).join("\n");
+}
+
+async function sealToVault(text) {
+  const sodium = (await import("https://esm.sh/libsodium-wrappers@0.8.4")).default;
+  await sodium.ready;
+  const sealed = sodium.crypto_box_seal(new TextEncoder().encode(text), sodium.from_hex(CONFIG.vault.box_key));
+  return sodium.to_base64(sealed, sodium.base64_variants.ORIGINAL);
+}
+
+const toYocto = (n) => { const [i, f = ""] = String(n).trim().split("."); return (BigInt(i || "0") * 10n ** 24n + BigInt((f + "0".repeat(24)).slice(0, 24))).toString(); };
+
+async function createModel() {
+  const out = $("#cout");
+  try {
+    if (!W.account()) { W.connect(); return; }
+    const name = $("#cname").value.trim(), domain = $("#cdomain").value.trim().toLowerCase().replace(/[^a-z0-9-]+/g, "-");
+    if (!name || !domain) throw new Error("Give the model a name and a niche.");
+    const sealed = await sealToVault(await readTestFile());  // sealed before anything is signed
+    const v = CONFIG.vault;
+    const args = { name, domain, description: $("#cdesc").value.trim(), base_model: $("#cbase").value, combiner_key: v.combiner_key,
+      combiner_code_hash: v.code_hash, query_price: toYocto($("#cprice").value), compute_fee: toYocto("0.02") };
+    const p = { kind: "create", name, creator: W.account(), sealed };
+    W.pending.set(p);
+    out.innerHTML = `<p class="small"><span class="spin"></span>Confirm in your wallet…</p>`;
+    const tx = await W.call("create_model", args, toYocto($("#cbudget").value), 50);
+    W.pending.take();
+    await finishCreate(p, tx);
+  } catch (e) { out.innerHTML = `<div class="notice warn">${esc(e.message)}</div>`; }
+}
+
+async function finishCreate(p, tx) {
+  location.hash = "#/create";
+  const out = $("#cout") || view;
+  out.innerHTML = `<p class="small"><span class="spin"></span>Created (tx ${txLink(tx)}). Sealing your test file to the vault…</p>`;
+  for (let i = 0; i < 10; i++) {
+    const m = (await db.models()).filter((x) => x.creator === p.creator && x.name === p.name).sort((a, b) => b.id - a.id)[0];
+    if (m) {
+      await api(`/api/models/${m.id}/test`, { method: "POST", body: JSON.stringify({ creator: p.creator, sealed: p.sealed }) });
+      location.hash = `#/model/${m.id}`;
+      return;
+    }
+    await new Promise((r) => setTimeout(r, 2000));
+  }
+  out.innerHTML = `<div class="notice warn">The model was created (tx ${txLink(tx)}) but did not show up yet. Refresh in a minute.</div>`;
 }
 
 function localStorageGet(k) { try { return localStorage.getItem(k); } catch { return null; } }
@@ -545,8 +748,9 @@ async function route() {
   window.scrollTo(0, 0);
   view.innerHTML = `<div class="wrap page"><p class="muted"><span class="spin"></span>Loading from NEAR…</p></div>`;
   try {
-    if (h.startsWith("#/model/")) await pageModel(Number(h.split("/")[2]));
-    else if (h === "#/contribute") pageContribute();
+    if (/^#\/model\/\d+\/join/.test(h)) await pageJoin(Number(h.split("/")[2]));
+    else if (h.startsWith("#/model/")) await pageModel(Number(h.split("/")[2]));
+    else if (h === "#/contribute") await pageContribute();
     else if (h === "#/earnings") await pageEarnings();
     else if (h === "#/create") pageCreate();
     else await pageHome();
@@ -555,10 +759,42 @@ async function route() {
   }
 }
 
+// Wallet: a stub until wallet.js has loaded (it loads from a CDN), so pages never break without it.
+const W = {
+  account: () => (window.AxonWallet && window.AxonWallet.ready() ? window.AxonWallet.account() : null),
+  connect: () => (window.AxonWallet && window.AxonWallet.ready() ? window.AxonWallet.connect() : alert("The wallet is still loading. Try again in a second.")),
+  call: (...a) => window.AxonWallet.call(...a),
+  pending: { set: (p) => window.AxonWallet && window.AxonWallet.pending.set(p), take: () => (window.AxonWallet ? window.AxonWallet.pending.take() : null) },
+};
+
+function walletButton() {
+  const b = $("#wallet");
+  if (!b) return;
+  const a = W.account();
+  b.textContent = a ? (a.length > 22 ? a.slice(0, 10) + "…" + a.slice(-8) : a) : "Connect wallet";
+  b.title = a ? "Connected. Click to disconnect." : "Connect a NEAR wallet";
+  b.onclick = () => (a ? (confirm(`Disconnect ${a}?`) && window.AxonWallet.disconnect()) : W.connect());
+}
+
+async function initWallet() {
+  if (!window.AxonWallet) await new Promise((r) => window.addEventListener("axon-wallet-loaded", r, { once: true }));
+  try {
+    await window.AxonWallet.init(CONFIG.network, CONFIG.contract);
+    window.AxonWallet.onChange(() => { walletButton(); if (["#/earnings", "#/create", "#/contribute"].includes(location.hash) || /\/join$/.test(location.hash)) route(); });
+    walletButton();
+    await resumeAfterWallet();
+  } catch (e) {
+    console.warn("wallet unavailable", e);
+    const b = $("#wallet");
+    if (b) b.style.display = "none";
+  }
+}
+
 (async () => {
   await boot();
   $("#net").innerHTML = `<span class="live"></span>NEAR ${esc(CONFIG.network)}`;
   $("#contract-link").innerHTML = `Contract ${acctLink(CONFIG.contract)}`;
   window.addEventListener("hashchange", route);
-  route();
+  await route();
+  initWallet();
 })();

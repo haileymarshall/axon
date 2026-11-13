@@ -4,6 +4,7 @@ to the vault. It never sees training data or model weights."""
 from __future__ import annotations
 
 import json
+import os
 import threading
 import time
 
@@ -32,6 +33,20 @@ class QuoteIn(BaseModel):
     question: str
     dry: bool = True
     compare: bool = False
+
+
+class PaidAskIn(BaseModel):
+    """A question the user already paid for from their own wallet (pay_for_query with this question's hash)."""
+    model_id: int
+    question: str
+    payment_tx: str
+    payer: str
+    compare: bool = False
+
+
+class TestIn(BaseModel):
+    creator: str
+    sealed: str
 
 
 class DemoAskIn(BaseModel):
@@ -63,6 +78,7 @@ def create_app(treasury: str | None, demo_payer: str | None) -> FastAPI:
             vault = None
         return {"network": CFG.network, "contract": near.contract_id, "treasury": treasury,
                 "demo_payer": demo_payer, "demo_per_day": DEMO_PER_DAY, "vault": vault, "tokens": intents.TOKENS,
+                "vault_url": os.environ.get("AXON_PUBLIC_VAULT_URL") or CFG.vault_url,
                 "platform_fees": near.view("platform_fees", {}),
                 "explorer": "https://testnet.nearblocks.io" if CFG.network == "testnet" else "https://nearblocks.io"}
 
@@ -133,6 +149,23 @@ def create_app(treasury: str | None, demo_payer: str | None) -> FastAPI:
             order["state"] = "answered"
         _save_orders(o)
         return order
+
+    # ------------------------------------------------------------- paid from the user's own wallet
+
+    @app.post("/api/ask-paid")
+    def ask_paid(a: PaidAskIn):
+        r = httpx.post(f"{CFG.vault_url}/models/{a.model_id}/ask",
+                       json={"question": a.question, "payment_tx": a.payment_tx, "payer": a.payer, "compare": a.compare}, timeout=300)
+        if r.status_code != 200:
+            raise HTTPException(r.status_code, r.json().get("detail", r.text) if r.headers.get("content-type", "").startswith("application/json") else r.text)
+        return {"payment_tx": a.payment_tx, "payer": a.payer, "source": "wallet", **r.json()}
+
+    @app.post("/api/models/{model_id}/test")
+    def set_test(model_id: int, t: TestIn):
+        r = httpx.post(f"{CFG.vault_url}/models/{model_id}/test", json=t.model_dump(), timeout=60)
+        if r.status_code != 200:
+            raise HTTPException(r.status_code, r.json().get("detail", r.text) if r.headers.get("content-type", "").startswith("application/json") else r.text)
+        return r.json()
 
     # ------------------------------------------------------------- demo payment (rate limited)
 

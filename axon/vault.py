@@ -41,6 +41,14 @@ def code_hash() -> str:
     return h.hexdigest()
 
 
+SUPPORTED_BASES = [
+    {"id": "Qwen/Qwen3-1.7B", "name": "Qwen3 1.7B", "by": "Alibaba", "note": "newest, 119 languages"},
+    {"id": "Qwen/Qwen2.5-1.5B-Instruct", "name": "Qwen2.5 1.5B Instruct", "by": "Alibaba", "note": "fast, reliable"},
+    {"id": "HuggingFaceTB/SmolLM2-1.7B-Instruct", "name": "SmolLM2 1.7B Instruct", "by": "Hugging Face", "note": "fully open training data"},
+    {"id": "HuggingFaceTB/SmolLM2-135M-Instruct", "name": "SmolLM2 135M Instruct", "by": "Hugging Face", "note": "tiny, trains on a laptop CPU"},
+]
+
+
 class Vault:
     def __init__(self, operator: str | None = None):
         self.sign_key = crypto.load_or_create_signing_key("vault")
@@ -98,6 +106,8 @@ class Vault:
             "base_model": CFG.base_model,
             # Contributors' adapters must have this shape, so the contributor client copies it from here.
             "training": {"lora_rank": CFG.lora_rank, "lora_targets": CFG.lora_targets},
+            # Open base models a new model can be created on (the vault downloads each on first use).
+            "bases": SUPPORTED_BASES,
             "attestation": self.attestation,
         }
 
@@ -110,9 +120,31 @@ class Vault:
     def _save_global(self, model_id: int, adapter: ml.Adapter) -> None:
         self._p(f"model-{model_id}", "global.safetensors").write_bytes(ml.adapter_bytes(adapter))
 
-    def test_set(self, domain: str | None = None) -> list[dict]:
-        """The hidden test set for a model's domain (each demo model has its own)."""
+    def test_set(self, domain: str | None = None, model_id: int | None = None) -> list[dict]:
+        """The hidden test set: the one its creator sealed to this vault, else the demo test set for the domain."""
+        own = VAULT_DIR / f"model-{model_id}" / "test.jsonl"
+        if model_id is not None and own.exists():
+            return data.read_jsonl(own)
         return data.read_jsonl(data.paths(domain)["test"])
+
+    def set_test(self, model_id: int, creator: str, sealed_b64: str) -> dict:
+        """A model's creator hands over its hidden test set, sealed so only this vault can read it. Accepted once,
+        before the first round, and only for the account the chain lists as the model's creator."""
+        m = Near().view("get_model", {"model_id": model_id})
+        if m is None:
+            raise HTTPException(404, "no such model")
+        if m["creator"] != creator:
+            raise HTTPException(403, "only the model's creator can set its test set")
+        if m["rounds"] > 0 or (VAULT_DIR / f"model-{model_id}" / "test.jsonl").exists():
+            raise HTTPException(409, "test set already fixed")
+        try:
+            rows = [json.loads(l) for l in crypto.unseal(self.box_key, crypto.unb64(sealed_b64)).decode().splitlines() if l.strip()]
+        except Exception as e:
+            raise HTTPException(400, f"could not open the sealed test set: {e}") from e
+        if not (5 <= len(rows) <= 500) or not all(isinstance(r, dict) and r.get("q") and r.get("a") for r in rows):
+            raise HTTPException(400, 'test set must be 5 to 500 lines of {"q": ..., "a": ...}')
+        self._p(f"model-{model_id}", "test.jsonl").write_text("\n".join(json.dumps({"q": r["q"], "a": r["a"]}) for r in rows) + "\n")
+        return {"accepted": True, "questions": len(rows)}
 
     # ------------------------------------------------------------- access
 
@@ -160,7 +192,7 @@ class Vault:
             raise HTTPException(400, "no updates received this round")
         base = self.global_adapter(model_id)
         logs: list[str] = []
-        test = self.test_set(model.get("domain"))
+        test = self.test_set(model.get("domain"), model_id)
         engine = self.engine_for(model.get("base_model"))
         with self.engine_lock(model.get("base_model")):
             score = ml.score_round(engine, test, base, updates, log=logs.append,
@@ -261,6 +293,11 @@ class CloseIn(BaseModel):
     compute_provider: str | None = None
 
 
+class TestIn(BaseModel):
+    creator: str
+    sealed: str
+
+
 class AskIn(BaseModel):
     question: str
     payment_tx: str
@@ -286,6 +323,10 @@ def create_app(operator: str | None) -> FastAPI:
         from fastapi.responses import Response
         vault.authorize_download(model_id, account, ts, sig)
         return Response(ml.adapter_bytes(vault.global_adapter(model_id)), media_type="application/octet-stream")
+
+    @app.post("/models/{model_id}/test")
+    def post_test(model_id: int, t: TestIn):
+        return vault.set_test(model_id, t.creator, t.sealed)
 
     @app.post("/models/{model_id}/updates")
     def post_update(model_id: int, u: UpdateIn):
