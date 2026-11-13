@@ -24,6 +24,10 @@ class Config:
     lora_targets: str = _env("AXON_LORA_TARGETS", "q_proj,k_proj,v_proj,o_proj")
     # How the vault merges adapters: "mean" (FedAvg, default) or "lora-sum" (keeps each change at full strength; tuning 4 showed it overshoots).
     merge: str = _env("AXON_MERGE", "mean")
+    # Weights precision for the base model. The vault only scores and merges, so it can use "bfloat16" to share a GPU.
+    dtype: str = _env("AXON_DTYPE", "float32")
+    # Gradient checkpointing: same results, much less GPU memory while training (recomputes activations).
+    grad_ckpt: bool = _env("AXON_GRAD_CKPT", "0") == "1"
     local_steps: int = int(_env("AXON_LOCAL_STEPS", "16"))
     batch_size: int = int(_env("AXON_BATCH", "4"))
     lr: float = float(_env("AXON_LR", "1e-3"))

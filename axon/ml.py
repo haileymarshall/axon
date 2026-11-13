@@ -42,7 +42,7 @@ class Engine:
         self.tok = AutoTokenizer.from_pretrained(base_model)
         if self.tok.pad_token is None:
             self.tok.pad_token = self.tok.eos_token
-        base = AutoModelForCausalLM.from_pretrained(base_model, dtype=torch.float32)
+        base = AutoModelForCausalLM.from_pretrained(base_model, dtype=getattr(torch, CFG.dtype))
         cfg = LoraConfig(
             r=CFG.lora_rank,
             lora_alpha=CFG.lora_rank * 2,
@@ -50,6 +50,9 @@ class Engine:
             target_modules=CFG.lora_targets.split(","),
             task_type="CAUSAL_LM",
         )
+        if CFG.grad_ckpt:
+            base.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
+            base.enable_input_require_grads()
         self.model = get_peft_model(base, cfg).to(self.device)
         self.initial: Adapter = self.get_adapter()
 
@@ -124,7 +127,7 @@ class Engine:
         prompt = self.tok.apply_chat_template([{"role": "user", "content": question}], tokenize=False, add_generation_prompt=True)
         ids = self.tok(prompt, return_tensors="pt", add_special_tokens=False).to(self.device)
         out = self.model.generate(
-            **ids, max_new_tokens=max_new_tokens, do_sample=False, repetition_penalty=1.15,
+            **ids, max_new_tokens=max_new_tokens, do_sample=False, repetition_penalty=1.15, use_cache=True,
             pad_token_id=self.tok.pad_token_id,
         )
         return self.tok.decode(out[0, ids["input_ids"].shape[1]:], skip_special_tokens=True).strip()

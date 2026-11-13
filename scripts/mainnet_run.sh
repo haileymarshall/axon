@@ -9,13 +9,17 @@ export BUDGET=${BUDGET:-0.06}
 export AXON_BASE_MODEL=${AXON_BASE_MODEL:-Qwen/Qwen2.5-1.5B-Instruct}
 export AXON_LORA_TARGETS=${AXON_LORA_TARGETS:-q_proj,k_proj,v_proj,o_proj,gate_proj,up_proj,down_proj}
 export AXON_LORA_RANK=${AXON_LORA_RANK:-16} AXON_MAX_LEN=${AXON_MAX_LEN:-384}
+export AXON_GRAD_CKPT=${AXON_GRAD_CKPT:-1} PYTORCH_CUDA_ALLOC_CONF=${PYTORCH_CUDA_ALLOC_CONF:-expandable_segments:True}
 PY=${PY:-python}
 export PY
 RUN_ID=${RUN_ID:-$(date -u +%Y%m%d-%H%M)-mainnet-rtx4090}
 export RUN_ID
 mkdir -p "runs/$RUN_ID"
-$PY -m axon vault --operator vault.axon.ebukaa.near > "runs/$RUN_ID/vault.log" 2>&1 &
+# The vault shares the GPU with the contributors, so it holds the base model in bf16 (it only scores and merges).
+AXON_DTYPE=${VAULT_DTYPE:-bfloat16} $PY -m axon vault --operator vault.axon.ebukaa.near > "runs/$RUN_ID/vault.log" 2>&1 &
 VAULT=$!
 trap 'kill $VAULT 2>/dev/null || true' EXIT
 until curl -s -m 2 http://127.0.0.1:8700/info >/dev/null; do sleep 2; done
+# Reusing a model (MODEL=<id>) after a vault code change: re-bind it to the running vault's key + code hash first.
+if [[ -n "${MODEL:-}" ]]; then $PY -m axon set-combiner --model "$MODEL" --creator "$CREATOR" | tee "runs/$RUN_ID/rebind.txt"; fi
 asciinema rec --overwrite -q -i 2 -c "nvidia-smi; echo; ./scripts/run.sh" "runs/$RUN_ID/terminal.cast"
