@@ -151,9 +151,14 @@ def test_round_that_does_not_help_together_is_rejected():
 def test_lora_sum_merge_keeps_each_contributors_change():
     from axon import ml
 
+    old = ml.CFG.merge
+    object.__setattr__(ml.CFG, "merge", "lora-sum")  # CFG is a frozen dataclass
+
     base = {"m.lora_A.weight": torch.ones(2), "m.lora_B.weight": torch.zeros(2)}
     ups = [{"m.lora_A.weight": torch.ones(2) * 1.2, "m.lora_B.weight": torch.tensor([1.0, 0.0])},
            {"m.lora_A.weight": torch.ones(2) * 0.8, "m.lora_B.weight": torch.tensor([0.0, 2.0])}]
     merged = ml.aggregate(base, ups)
     assert torch.allclose(merged["m.lora_A.weight"], torch.ones(2))  # A: averaged
     assert torch.allclose(merged["m.lora_B.weight"], torch.tensor([1.0, 2.0]))  # B: each change kept in full
+    object.__setattr__(ml.CFG, "merge", old)
+    assert torch.allclose(ml.aggregate(base, ups)["m.lora_B.weight"], torch.tensor([0.5, 1.0]))  # mean (default)

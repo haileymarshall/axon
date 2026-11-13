@@ -22,8 +22,8 @@ class Config:
     lora_rank: int = int(_env("AXON_LORA_RANK", "8"))
     # Layers the adapter trains. Attention only by default; adding the MLP layers (gate/up/down_proj) lets it learn facts.
     lora_targets: str = _env("AXON_LORA_TARGETS", "q_proj,k_proj,v_proj,o_proj")
-    # How the vault merges adapters: "lora-sum" (keeps each contributor's knowledge) or "mean" (plain FedAvg).
-    merge: str = _env("AXON_MERGE", "lora-sum")
+    # How the vault merges adapters: "mean" (FedAvg, default) or "lora-sum" (keeps each change at full strength; tuning 4 showed it overshoots).
+    merge: str = _env("AXON_MERGE", "mean")
     local_steps: int = int(_env("AXON_LOCAL_STEPS", "16"))
     batch_size: int = int(_env("AXON_BATCH", "4"))
     lr: float = float(_env("AXON_LR", "1e-3"))
