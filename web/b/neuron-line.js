@@ -78,7 +78,7 @@
   }
 
   function mount(canvas, opts = {}) {
-    const ink = opts.ink || "255,240,228";
+    const ink = opts.ink || "242,244,255";
     const labels = opts.labels || null;
     let contributors = opts.contributors || [];
     let world = build(contributors, opts.seed || 7);
@@ -180,7 +180,7 @@
       }
 
       // cell body: concentric engraved rings, irregular rim, and the nucleus (the model)
-      ctx.fillStyle = "rgba(0,0,0,0.08)";
+      ctx.fillStyle = "rgba(0,0,60,0.18)";
       ctx.beginPath(); ctx.arc(s[0], s[1], R, 0, 7); ctx.fill();
       ctx.strokeStyle = `rgba(${ink},0.9)`; ctx.lineWidth = 0.7;
       for (let k = 0; k < 14; k++) {

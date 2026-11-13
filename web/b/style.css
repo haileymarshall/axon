@@ -1,16 +1,16 @@
-/* Axon design B: one plain colour, engraved line art, tall condensed type. */
+/* Axon design B: one plain colour (electric blue), engraved line art, tall condensed type. */
 :root {
-  --bg: #dd4520;
-  --bg2: #c93c19;
-  --ink: #fff0e4;
-  --dim: #ffd9c6;
-  --mute: #f7b79d;
-  --line: rgba(255, 240, 228, 0.32);
-  --line2: rgba(255, 240, 228, 0.55);
-  --fill: rgba(60, 10, 0, 0.1);
-  --accent: #fff7cf;
-  --warn: #3b0f02;
-  --s1: #fff0e4; --s2: #3b0f02; --s3: #ffd166; --s4: #8a2a0c; --s5: #ffb08f;
+  --bg: #0a0af5;
+  --bg2: #0808d8;
+  --ink: #f2f4ff;
+  --dim: #c9ccff;
+  --mute: #a0a6ff;
+  --line: rgba(242, 244, 255, 0.3);
+  --line2: rgba(242, 244, 255, 0.55);
+  --fill: rgba(0, 0, 60, 0.18);
+  --accent: #ffffff;
+  --warn: #ff9b9b;
+  --s1: #ffffff; --s2: #04064f; --s3: #9fb4ff; --s4: #ffd166; --s5: #6c74ff;
   --display: "Barlow Condensed", "Arial Narrow", sans-serif;
   --sans: "Inter", system-ui, sans-serif;
   --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
@@ -94,7 +94,7 @@ h3 { font: 400 26px/1.05 var(--display); letter-spacing: 0; margin: 0 0 8px; }
 .grid > .card { border-radius: 0; border-width: 0 1px 1px 0; }
 .two { display: grid; grid-template-columns: 1.15fr .85fr; gap: 16px; }
 .card { background: var(--fill); border: 1px solid var(--line); padding: 24px; text-decoration: none; display: block; position: relative; }
-a.card:hover { background: rgba(60, 10, 0, 0.18); }
+a.card:hover { background: rgba(0, 0, 60, 0.3); }
 .card .tag { font: 500 10px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--mute); }
 .card .tag.live { color: var(--accent); }
 .card .tag.live::before { content: "● "; }
@@ -116,7 +116,7 @@ a.card:hover { background: rgba(60, 10, 0, 0.18); }
 .tabs button.on { background: var(--ink); color: var(--bg); border-color: var(--ink); }
 .cmp { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .cmp .card h4 { font: 500 11px var(--mono); letter-spacing: .1em; text-transform: uppercase; margin: 0 0 12px; color: var(--mute); }
-.cmp .card.axon { border-color: var(--ink); background: rgba(255, 240, 228, 0.08); }
+.cmp .card.axon { border-color: var(--ink); background: rgba(242, 244, 255, 0.08); }
 .cmp .card.axon h4 { color: var(--ink); }
 .cmp .q { grid-column: 1 / -1; font: 400 30px/1.05 var(--display); margin-top: 10px; }
 .cmp .why { grid-column: 1 / -1; }
@@ -138,7 +138,7 @@ a.card:hover { background: rgba(60, 10, 0, 0.18); }
 .kpi .l { font: 500 10px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--mute); margin-top: 6px; }
 table { width: 100%; border-collapse: collapse; font-size: 14px; }
 th { font: 500 10px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--mute); text-align: left; padding: 8px 0; border-bottom: 1px solid var(--line); }
-td { padding: 11px 0; border-bottom: 1px solid rgba(255, 240, 228, .15); }
+td { padding: 11px 0; border-bottom: 1px solid rgba(242, 244, 255, .15); }
 th, td { padding-right: 14px; }
 th:last-child, td:last-child { padding-right: 0; }
 .num { text-align: right; font-family: var(--mono); font-size: 13px; }
@@ -154,8 +154,8 @@ textarea:focus, input:focus, select:focus { outline: none; border-color: var(--i
 label { display: block; font: 500 10px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--mute); margin: 14px 0 7px; }
 .row { display: flex; gap: 10px; margin-top: 14px; align-items: center; }
 .notice { border: 1px solid var(--line2); padding: 12px 14px; font-size: 13.5px; margin-top: 14px; background: var(--fill); }
-.notice.warn { border-color: var(--warn); color: var(--ink); background: rgba(59, 15, 2, .2); }
-.answer.box { border: 1px solid var(--ink); padding: 14px; margin-top: 14px; background: rgba(255, 240, 228, .08); }
+.notice.warn { border-color: var(--warn); color: var(--ink); background: rgba(80, 0, 20, .25); }
+.answer.box { border: 1px solid var(--ink); padding: 14px; margin-top: 14px; background: rgba(242, 244, 255, .08); }
 pre { background: var(--fill); border: 1px solid var(--line); padding: 16px; overflow: auto; font-size: 12.5px; line-height: 1.7; color: var(--ink); margin: 0; }
 .chart svg { width: 100%; height: auto; }
 .chart svg path { stroke: var(--ink) !important; }
@@ -167,7 +167,7 @@ pre { background: var(--fill); border: 1px solid var(--line); padding: 16px; ove
 .split { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .foot { border-top: 1px solid var(--line); margin-top: 110px; padding: 30px 6vw 40px; display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap;
   font: 500 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--dim); position: relative; overflow: hidden; }
-.foot::after { content: "AXON"; position: absolute; left: 50%; bottom: -0.32em; transform: translateX(-50%); font: 300 22vw/1 var(--display); color: rgba(255, 240, 228, .07); pointer-events: none; }
+.foot::after { content: "AXON"; position: absolute; left: 50%; bottom: -0.32em; transform: translateX(-50%); font: 300 22vw/1 var(--display); color: rgba(242, 244, 255, .07); pointer-events: none; }
 .foot a { color: var(--ink); }
 
 @media (max-width: 960px) {
