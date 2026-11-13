@@ -162,3 +162,28 @@ def test_lora_sum_merge_keeps_each_contributors_change():
     assert torch.allclose(merged["m.lora_B.weight"], torch.tensor([1.0, 2.0]))  # B: each change kept in full
     object.__setattr__(ml.CFG, "merge", old)
     assert torch.allclose(ml.aggregate(base, ups)["m.lora_B.weight"], torch.tensor([0.5, 1.0]))  # mean (default)
+
+
+def test_everyone_in_the_merged_model_owns_a_share():
+    """The mainnet round-1 case: with spammer d in the mix, c scores positive (+0.13), but next to a and b alone it adds
+    nothing (-0.017). c must be left out of the merge, not merged for a 0% share."""
+    from axon import ml
+
+    base_v = {"": 0.0, "a": 0.3, "b": 0.3, "c": 0.05, "ab": 0.5, "ac": 0.3, "bc": 0.3, "abc": 0.4}
+
+    class FakeEngine:
+        def eval_loss(self, test, adapter):
+            s = {k for i, k in enumerate("abcd") if adapter["x"][i] > 0}
+            r = base_v["".join(k for k in "abc" if k in s)]
+            if "d" in s:
+                r += -0.4 + (0.3 if "c" in s else 0.0)
+            return 1.0 - r
+
+    base = {"x": torch.zeros(4)}
+    ups = {k: {"x": torch.eye(4)[i] * 4} for i, k in enumerate("abcd")}
+    sc = ml.score_round(FakeEngine(), [], base, ups, log=lambda *_: None)
+    assert sc.excluded == ["c", "d"]
+    assert sc.improvement["c"] == 0 and sc.improvement["d"] == 0
+    assert sc.improvement["a"] > 0 and sc.improvement["b"] > 0
+    assert abs(sum(sc.improvement.values()) - (sc.base_loss - sc.new_loss)) < 1e-9  # shares add up to the gain
+    assert sc.global_adapter["x"][2] == 0 and sc.global_adapter["x"][3] == 0  # c and d are not in the model
