@@ -1,4 +1,4 @@
-1. code hash   vault 7c6ded37fdb56c09…  this checkout 7c6ded37fdb56c09…  -> OK
-2. quote binds key 0dff21052dd592b2… + code hash  -> OK
-3. genuine Intel TDX quote (verifier id 41443ab79285a343…)  -> OK
+1. code hash   vault 00f553043b5f9abd…  this checkout 00f553043b5f9abd…  -> OK
+2. quote binds key 247cc5c4c6c2209e… + code hash  -> OK
+3. genuine Intel TDX quote (verifier id fdf2850f4daec15a…)  -> OK
 ALL CHECKS PASSED

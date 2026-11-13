@@ -1,0 +1,65 @@
+== 1. create the model (bound to the vault's key + code hash)
+reusing model 4
+model id: 4
+== 2.1 contributors train locally and send sealed updates (round 1)
+[neuro-clinic.axon.ebukaa.near] training locally on 176 private examples (data stays on this machine)
+[neuro-clinic.axon.ebukaa.near] base model HuggingFaceTB/SmolLM2-135M-Instruct (from the chain), adapter rank 8
+Loading weights:   0%|          | 0/272 [00:00<?, ?it/s]Loading weights:  39%|███▉      | 107/272 [00:00<00:00, 1016.65it/s]Loading weights:  77%|███████▋  | 209/272 [00:00<00:00, 1014.82it/s]Loading weights: 100%|██████████| 272/272 [00:00<00:00, 1042.61it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[neuro-clinic.axon.ebukaa.near]   step   0  loss 2.239
+[neuro-clinic.axon.ebukaa.near]   step   4  loss 2.036
+[neuro-clinic.axon.ebukaa.near]   step   8  loss 2.134
+[neuro-clinic.axon.ebukaa.near]   step  12  loss 1.608
+[neuro-clinic.axon.ebukaa.near]   step  15  loss 2.299
+[neuro-clinic.axon.ebukaa.near] sealed update (3630 KB) accepted for round 1
+[metabolic-clinic.axon.ebukaa.near] training locally on 175 private examples (data stays on this machine)
+[metabolic-clinic.axon.ebukaa.near] base model HuggingFaceTB/SmolLM2-135M-Instruct (from the chain), adapter rank 8
+Loading weights:   0%|          | 0/272 [00:00<?, ?it/s]Loading weights:  44%|████▍     | 121/272 [00:00<00:00, 1124.38it/s]Loading weights:  86%|████████▌ | 234/272 [00:00<00:00, 928.58it/s] Loading weights: 100%|██████████| 272/272 [00:00<00:00, 961.48it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[metabolic-clinic.axon.ebukaa.near]   step   0  loss 1.955
+[metabolic-clinic.axon.ebukaa.near]   step   4  loss 1.967
+[metabolic-clinic.axon.ebukaa.near]   step   8  loss 2.235
+[metabolic-clinic.axon.ebukaa.near]   step  12  loss 1.538
+[metabolic-clinic.axon.ebukaa.near]   step  15  loss 1.316
+[metabolic-clinic.axon.ebukaa.near] sealed update (3630 KB) accepted for round 1
+[alice.axon.ebukaa.near] training locally on 200 private examples (data stays on this machine)
+[alice.axon.ebukaa.near] base model HuggingFaceTB/SmolLM2-135M-Instruct (from the chain), adapter rank 8
+Loading weights:   0%|          | 0/272 [00:00<?, ?it/s]Loading weights:  46%|████▋     | 126/272 [00:00<00:00, 1255.86it/s]Loading weights:  93%|█████████▎| 252/272 [00:00<00:00, 1003.81it/s]Loading weights: 100%|██████████| 272/272 [00:00<00:00, 1058.32it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[alice.axon.ebukaa.near]   step   0  loss 2.476
+[alice.axon.ebukaa.near]   step   4  loss 2.312
+[alice.axon.ebukaa.near]   step   8  loss 1.995
+[alice.axon.ebukaa.near]   step  12  loss 2.094
+[alice.axon.ebukaa.near]   step  15  loss 1.984
+[alice.axon.ebukaa.near] sealed update (3630 KB) accepted for round 1
+[bob.axon.ebukaa.near] training locally on 200 private examples (data stays on this machine)
+[bob.axon.ebukaa.near] base model HuggingFaceTB/SmolLM2-135M-Instruct (from the chain), adapter rank 8
+Loading weights:   0%|          | 0/272 [00:00<?, ?it/s]Loading weights:  46%|████▌     | 125/272 [00:00<00:00, 1249.65it/s]Loading weights:  92%|█████████▏| 250/272 [00:00<00:00, 1039.47it/s]Loading weights: 100%|██████████| 272/272 [00:00<00:00, 1088.77it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[bob.axon.ebukaa.near]   step   0  loss 5.184
+[bob.axon.ebukaa.near]   step   4  loss 4.521
+[bob.axon.ebukaa.near]   step   8  loss 3.703
+[bob.axon.ebukaa.near]   step  12  loss 3.219
+[bob.axon.ebukaa.near]   step  15  loss 1.822
+[bob.axon.ebukaa.near] sealed update (3630 KB) accepted for round 1
+== 3.1 vault merges, scores (Shapley) and records ownership on NEAR
+  base loss 1.8907; scoring 4 updates over 15 coalitions
+  alice.axon.ebukaa.near                   shapley +0.2466
+  bob.axon.ebukaa.near                     shapley -0.4524   -> excluded (made the model worse)
+  metabolic-clinic.axon.ebukaa.near        shapley +0.1994
+  neuro-clinic.axon.ebukaa.near            shapley +0.2158
+round 1: test loss 1.891 -> 1.647
+  alice.axon.ebukaa.near                   improvement +0.1115  -> 111517 shares
+  bob.axon.ebukaa.near                     improvement +0.0000  -> 0 shares
+  metabolic-clinic.axon.ebukaa.near        improvement +0.0631  -> 63108 shares
+  neuro-clinic.axon.ebukaa.near            improvement +0.0688  -> 68845 shares
+signed by vault, recorded on-chain  tx HmeSHkg2encGsDZgfvzkAKweETp4NtVv2h5SJAd3voED
+== 4. a user pays for a question; the payment is split among owners
+paid 0.01 NEAR  tx 7FSBVoWS24ps4jPeMyms6SvfYL51MKXsv3Av6x2p6wXr
+Rothmund-Thomson syndrome (RTTS) is inherited as an autosomal dominant disorder. This means that one copy of the gene in each cell is normal and there is no family history of the condition. The risk for inheriting the mutated gene increases if both parents have the mutated gene. In some cases, people with RTT may also inherit other genetic mutations or changes from their father. These mutations can cause symptoms similar to those seen in RTT but do not affect how the body works normally. People who develop RTT often have other health problems such as heart defects, hearing loss, vision
+== 5. who owns the model, and what they earned
+Rare Disease Expert (TEE) (rare-diseases) base=HuggingFaceTB/SmolLM2-135M-Instruct rounds=1 loss=1891->1647 queries=1 revenue=0.0095 NEAR budget=0.010 NEAR
+  neuro-clinic.axon.ebukaa.near            shares    68845 ( 28.3%)  earned 0.00269 NEAR
+  metabolic-clinic.axon.ebukaa.near        shares    63108 ( 25.9%)  earned 0.00246 NEAR
+  alice.axon.ebukaa.near                   shares   111517 ( 45.8%)  earned 0.00435 NEAR
+  bob.axon.ebukaa.near                     shares        0 (  0.0%)  earned 0.00000 NEAR

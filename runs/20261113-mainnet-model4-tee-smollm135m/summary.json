@@ -1,0 +1,675 @@
+{
+ "run_id": "20261113-mainnet-model4-tee-smollm135m",
+ "started_at": "2026-11-13T16:03:27+00:00",
+ "wall_minutes": 9.4,
+ "hardware": "CPU (4 cores)",
+ "base_model": "HuggingFaceTB/SmolLM2-135M-Instruct",
+ "network": "mainnet",
+ "contract": "axon.ebukaa.near",
+ "model_id": 4,
+ "hidden_test_loss": {
+  "before": 1.891,
+  "after": 1.647
+ },
+ "rounds": [
+  {
+   "round": 1,
+   "test_loss": 1.647,
+   "adapter_hash": "b24673d1d6a46b9a7fce9992a6b4d68ac701beda8ee1cbb855a4c920458a314c",
+   "shares": {
+    "alice": 111517,
+    "bob": 0,
+    "metabolic-clinic": 63108,
+    "neuro-clinic": 68845
+   }
+  }
+ ],
+ "ownership": {
+  "neuro-clinic": 28.3,
+  "metabolic-clinic": 25.9,
+  "alice": 45.8,
+  "bob": 0.0
+ },
+ "queries_paid": 1,
+ "revenue_near": 0.0095,
+ "probes": [
+  {
+   "question": "Which gene is linked to Laing distal myopathy?",
+   "contributor": "neuro-clinic",
+   "disease": "Laing distal myopathy",
+   "reference": "Mutations in the MYH7 gene cause Laing distal myopathy. The MYH7 gene provides instructions for making a protein that is found in heart (cardiac) muscle and in type I skeletal muscle fibers. Type I fibers, which are also known as slow-twitch fibers, are one of two types of fibers that make up skeletal muscles. Type I fibers are the primary component of skeletal muscles that are resistant to fatigue. For example, musc",
+   "answer": null,
+   "answer_label": null,
+   "why": null,
+   "base_model": "The gene that has been associated with the development of Laing's disease (LSD) is called LY194. It codes for the protein YAP-like 2 (LYP), which plays a crucial role in regulating muscle contraction and relaxation during exercise. The mutation in this gene leads to an increased risk of developing the condition, particularly in individuals who engage in high-intensity activities such as running or weightlifting.",
+   "axon_trained": "The gene that causes Laing-degenerative Myelopathies (LDM) has been identified in the human genome. The mutation occurs on chromosome 19 and affects the function of an enzyme called alpha-actinohydroxylase. This enzyme plays important roles in maintaining proper muscle structure and function throughout life. In people with LMD, this enzyme does not work properly or at all, resulting in abnormal protein production which leads to degeneration of skeletal muscles over time. Researchers have found mutations in genes for other proteins involved in muscle development as well as those associated with disease progression. These findings suggest",
+   "graded": {
+    "base_model": {
+     "gene": false,
+     "inheritance": false,
+     "correct": false
+    },
+    "axon_trained": {
+     "gene": false,
+     "inheritance": false,
+     "correct": false
+    }
+   },
+   "gene": "MYH7",
+   "inheritance": "autosomal dominant",
+   "kind": "gene"
+  },
+  {
+   "question": "How is Laing distal myopathy passed down in families?",
+   "contributor": "neuro-clinic",
+   "disease": "Laing distal myopathy",
+   "reference": "This condition is inherited in an autosomal dominant pattern, which means one copy of the altered gene in each cell is sufficient to cause the disorder. In most cases, an affected person inherits the mutation from one affected parent. A small percentage of cases result from new mutations in the gene. These cases occur ",
+   "answer": null,
+   "answer_label": null,
+   "why": null,
+   "base_model": "Laing's distal myopathies can be transmitted through various mechanisms. While the exact pathways and transmission patterns of these conditions remain unclear, research suggests that they may involve genetic mutations or epigenetic changes associated with aging, inflammation, oxidative stress, and mitochondrial dysfunction.\n\n1. Genetic Mutations: Some studies have identified specific genes involved in the development of distal myopathies, such as the LRRK2 gene (LXR-R), which has been linked to an increased risk of developing distal myotomies. These mutations increase the expression of proapoptotic proteins, leading to premature cell death",
+   "axon_trained": "Laing's disease can be inherited. The risk of developing the condition increases with age and may increase if there has been an infection or injury to the heart muscle during pregnancy. There is no known way to prevent the development of this condition. If you have had any episodes of severe pain that last more than 24 hours, call your doctor immediately. You should also contact your doctor if you experience sudden weakness on one side of your body (one arm only) for less than two weeks at a time. This usually means that the muscles were weak before these symptoms started. These conditions include: A",
+   "graded": {
+    "base_model": {
+     "gene": false,
+     "inheritance": false,
+     "correct": false
+    },
+    "axon_trained": {
+     "gene": false,
+     "inheritance": false,
+     "correct": false
+    }
+   },
+   "gene": "MYH7",
+   "inheritance": "autosomal dominant",
+   "kind": "inheritance"
+  },
+  {
+   "question": "Which gene is linked to McLeod neuroacanthocytosis syndrome?",
+   "contributor": "neuro-clinic",
+   "disease": "McLeod neuroacanthocytosis syndrome",
+   "reference": "Mutations in the XK gene cause McLeod neuroacanthocytosis syndrome. The XK gene provides instructions for producing the XK protein, which carries the blood antigen Kx. Blood antigens are found on the surface of red blood cells and determine blood type. The XK protein is found in various tissues, particularly the brain, muscle, and heart. The function of the XK protein is unclear; researchers believe that it might pla",
+   "answer": null,
+   "answer_label": null,
+   "why": null,
+   "base_model": "The McLeod neuroacanthocytosis syndrome (MNAS) is an autosomal recessive disorder caused by mutations in the MEN1 gene. The mutation leads to the production of a protein called M-CATH that disrupts normal brain development and function. This abnormal protein can cause various neurological symptoms including vision problems, hearing loss, seizures, and cognitive decline.\n\nIn individuals with MNAS, the mutated gene produces a protein that doesn't work properly or at all, leading to these characteristic features. It's worth noting that there isn't one specific gene involved in this condition; it's",
+   "axon_trained": "McLeod NeuroAcanthocytosis Syndrome (MNA) is caused when the body produces abnormal proteins called alpha-synuclein. These protein aggregates accumulate in brain cells and cause damage that can lead to death of neurons or other cell types throughout the nervous system. The condition was first described in 1982 as a group of people with symptoms similar to those seen in Alzheimer's disease but without evidence of amyloid plaques associated with this disorder. MNA has been found only once in the population at large; it occurs most frequently among individuals who have had multiple strokes before age 65.",
+   "graded": {
+    "base_model": {
+     "gene": false,
+     "inheritance": false,
+     "correct": false
+    },
+    "axon_trained": {
+     "gene": false,
+     "inheritance": false,
+     "correct": false
+    }
+   },
+   "gene": "XK",
+   "inheritance": "x-linked recessive",
+   "kind": "gene"
+  },
+  {
+   "question": "How is McLeod neuroacanthocytosis syndrome passed down in families?",
+   "contributor": "neuro-clinic",
+   "disease": "McLeod neuroacanthocytosis syndrome",
+   "reference": "McLeod neuroacanthocytosis syndrome is inherited in an X-linked recessive pattern. The gene associated with this condition is located on the X chromosome, which is one of the two sex chromosomes. In males (who have only one X chromosome), one altered copy of the gene in each cell is sufficient to cause the condition. I",
+   "answer": null,
+   "answer_label": null,
+   "why": null,
+   "base_model": "McLeod neuroacanthocytosis syndrome (MNAS) can be inherited and may affect both males and females. It's characterized by the presence of abnormal brain cells called microglia that accumulate in certain areas of the brain, particularly in the hippocampus and prefrontal cortex. This condition has been linked to genetic mutations or abnormalities in genes involved in the development of these cells.\n\nIn some cases, MNAS can also occur as a result of exposure to toxins such as lead, mercury, or other heavy metals during pregnancy, breastfeeding, or through prolonged use of antibiotics. Additionally, it's",
+   "axon_trained": "McLeod neuroacanthocytosis syndrome (MNA) can be inherited. The condition occurs when there is an abnormal increase of the number of cells that make up myelin sheaths around nerve fibers. Myelin sheaths help transmit information from one nerve fiber to another through electrical signals and carry messages between brain cells called neurons. In people with MNA, these changes cause damage or death of the myelinated axons at any time during development. This injury causes problems for communication throughout the body as well as certain organs such as the heart muscle. People may have some symptoms before birth but most develop them later",
+   "graded": {
+    "base_model": {
+     "gene": false,
+     "inheritance": false,
+     "correct": false
+    },
+    "axon_trained": {
+     "gene": false,
+     "inheritance": false,
+     "correct": false
+    }
+   },
+   "gene": "XK",
+   "inheritance": "x-linked recessive",
+   "kind": "inheritance"
+  },
+  {
+   "question": "Which gene is linked to infantile neuronal ceroid lipofuscinosis?",
+   "contributor": "neuro-clinic",
+   "disease": "infantile neuronal ceroid lipofuscinosis",
+   "reference": "Mutations in the PPT1 gene cause most cases of infantile NCL. The PPT1 gene provides instructions for making an enzyme called palmitoyl-protein thioesterase 1. This enzyme is active in cell compartments called lysosomes, which digest and recycle different types of molecules. Palmitoyl-protein thioesterase 1 removes certain fats called long-chain fatty acids from proteins, which probably helps break down the proteins.",
+   "answer": null,
+   "answer_label": null,
+   "why": null,
+   "base_model": "The gene that causes Infantile Neuronal Ceroid Lipofuscinosis (INCL) is located on chromosome 19q24. This region contains the genes for several proteins involved in lipid metabolism and cellular signaling pathways. The INCL gene encodes for the protein INC-305A, which plays a crucial role in regulating lipid synthesis and degradation within cells.\n\nIn this context, mutations of the INL gene have been associated with an increased risk of developing INCL as a pediatric condition. However, it's essential to note that INCL can also be caused by",
+   "axon_trained": "The gene that causes Infantile Neuronal Ceroid Lipofuscinosis (INCL) has been identified in the 1980s. The INCL mutation occurs on chromosome 23 and encodes for an enzyme called CYP450-A76. This enzyme plays important roles in metabolism of fatty acids such as palmitic acid, which can cause inflammation or damage to cells lining blood vessels. In infants with INCL, this enzyme does not function properly, leading to lipid accumulation within blood vessel walls. As a result, these arteries become narrowed and harden over time",
+   "graded": {
+    "base_model": {
+     "gene": false,
+     "inheritance": false,
+     "correct": false
+    },
+    "axon_trained": {
+     "gene": false,
+     "inheritance": false,
+     "correct": false
+    }
+   },
+   "gene": "PPT1",
+   "inheritance": "autosomal recessive",
+   "kind": "gene"
+  },
+  {
+   "question": "How is infantile neuronal ceroid lipofuscinosis passed down in families?",
+   "contributor": "neuro-clinic",
+   "disease": "infantile neuronal ceroid lipofuscinosis",
+   "reference": "This condition is inherited in an autosomal recessive pattern, which means both copies of the gene in each cell have mutations. The parents of an individual with an autosomal recessive condition each carry one copy of the mutated gene, but they typically do not show signs and symptoms of the condition.",
+   "answer": null,
+   "answer_label": null,
+   "why": null,
+   "base_model": "Infantile neuronal ceroid lipofuscinosis (ICL) is often inherited as an autosomal dominant trait. This means that one copy of the gene responsible for ICL has been present from birth and can be passed on to each offspring through their parents' genes. The inheritance pattern typically follows a straightforward sequence:\n\n1. Parents with ICL have two copies of the mutated gene (one from each parent).\n2. If both parents have ICL, there's a 50% chance that their child will inherit the mutated gene.\n3. If only one parent has I",
+   "axon_trained": "This condition can be inherited. The risk of inheriting the disorder increases with each successive generation and may increase even more if there are other family members who have it. In some cases, infants born to parents with this condition will not show any symptoms until they are 1-2 years old or later. If an infant has no noticeable signs of illness before birth (neonatal onset), doctors usually do tests that check for these early signs such as blood pressure checks at home when the baby is sleeping on their back; checking for heart rate during physical examination; measuring the size of the head and neck",
+   "graded": {
+    "base_model": {
+     "gene": false,
+     "inheritance": false,
+     "correct": false
+    },
+    "axon_trained": {
+     "gene": false,
+     "inheritance": false,
+     "correct": false
+    }
+   },
+   "gene": "PPT1",
+   "inheritance": "autosomal recessive",
+   "kind": "inheritance"
+  },
+  {
+   "question": "Which gene is linked to spastic paraplegia type 7?",
+   "contributor": "neuro-clinic",
+   "disease": "spastic paraplegia type 7",
+   "reference": "Mutations in the SPG7 gene cause spastic paraplegia type 7. The SPG7 gene provides instructions for producing a protein called paraplegin. Located within the inner membrane of the energy-producing centers of cells (mitochondria), paraplegin is one of the proteins that form a complex called the m-AAA protease. The m-AAA protease is responsible for assembling ribosomes (cellular structures that process the cell's genet",
+   "answer": null,
+   "answer_label": null,
+   "why": null,
+   "base_model": "The gene that has been identified as being associated with the Spastic Paraparesis Type 7 (SPMT) is called GATA3. However, it's worth noting that this specific gene does not directly cause the condition but rather plays a role in its development and function. The exact mechanism of how GATA3 regulates the expression of genes involved in motor control remains unclear, although research suggests that it may play a key role in maintaining proper muscle tone during childhood or adolescence.",
+   "axon_trained": "Spasmodic dyskinesias (SDHs) and Spinocerebellar ataxias (SCAs), which affect the cerebellum in children, have been associated with mutations of the genes that encode for proteins involved in motor control. These genes include:\n\n1. GSK3-2405698 (Gsk3/Src family member 2405698): This gene encodes a protein called Src kinase 2405698. The mutation leads to an increase in the activity of this protein, leading to increased muscle stiffness or",
+   "graded": {
+    "base_model": {
+     "gene": false,
+     "inheritance": false,
+     "correct": false
+    },
+    "axon_trained": {
+     "gene": false,
+     "inheritance": false,
+     "correct": false
+    }
+   },
+   "gene": "SPG7",
+   "inheritance": "autosomal recessive",
+   "kind": "gene"
+  },
+  {
+   "question": "How is spastic paraplegia type 7 passed down in families?",
+   "contributor": "neuro-clinic",
+   "disease": "spastic paraplegia type 7",
+   "reference": "This condition is inherited in an autosomal recessive pattern, which means both copies of the gene in each cell have mutations. The parents of an individual with an autosomal recessive condition each carry one copy of the mutated gene, but they typically do not show signs and symptoms of the condition.",
+   "answer": null,
+   "answer_label": null,
+   "why": null,
+   "base_model": "Spastic paraplegia type 7 (SP-7) can be inherited in an autosomal dominant pattern. This means that one copy of the mutated gene (M1302X or M459Y) will result in approximately 80% of individuals with SP-7 having the condition. However, it's worth noting that this frequency may vary depending on other genetic factors and environmental influences.\n\nIn some cases, people with SP-7 have no family history of the disorder, while others might inherit two copies of the mutated gene from each parent. In these instances,",
+   "axon_trained": "Spastic paraplegia-type 7 (SPMT) can be inherited. The inheritance pattern of inheritance for this condition varies from person to person and may include:\n\n1. Autosomal recessive or autosomal dominant patterns of inheritance. In these cases, the disorder occurs when both copies of chromosome 24 contain mutated genes that normally work together to control gene expression. These mutations cause the production of abnormal proteins called motor neurons. Motor neuron disease is caused by one copy of each altered gene on chromosome 24.\n\n2. Autosomal dominant disorders with an increased risk of inheriting the mutation",
+   "graded": {
+    "base_model": {
+     "gene": false,
+     "inheritance": false,
+     "correct": false
+    },
+    "axon_trained": {
+     "gene": false,
+     "inheritance": true,
+     "correct": true
+    }
+   },
+   "gene": "SPG7",
+   "inheritance": "autosomal recessive",
+   "kind": "inheritance"
+  },
+  {
+   "question": "Which gene is linked to arginine:glycine amidinotransferase deficiency?",
+   "contributor": "metabolic-clinic",
+   "disease": "arginine:glycine amidinotransferase deficiency",
+   "reference": "Mutations in the GATM gene cause arginine:glycine amidinotransferase deficiency. The GATM gene provides instructions for making the enzyme arginine:glycine amidinotransferase. This enzyme participates in the two-step production (synthesis) of the compound creatine from the protein building blocks (amino acids) glycine, arginine, and methionine. Specifically, arginine:glycine amidinotransferase controls the first step",
+   "answer": null,
+   "answer_label": null,
+   "why": null,
+   "base_model": "The gene that codes for the enzyme glycine amide transferase (GAT) is located on chromosome 12q34. It encodes for an amino acid called glycine and two other amino acids known as alanine and aspartate. The GAT gene has been found in several different human populations around the world, including those with the condition agammaglobulinemia-leucopenia syndrome (AGLS), which affects approximately one million people worldwide.",
+   "axon_trained": "The gene that codes for the enzyme in this condition contains an amino acid called glycine. The function of this gene involves converting glutamate into aspartate and then back again through another process involving glutamine synthetases (also known as glutaminases). This pathway can lead to severe organ damage if it fails or becomes impaired due to genetic mutations. In people with this disorder, there may be no symptoms at birth but later develop signs such as muscle weakness, heart problems, vision loss, hearing impairment, seizures, coma, respiratory distress, and death within 1-2 years after birth.",
+   "graded": {
+    "base_model": {
+     "gene": false,
+     "inheritance": false,
+     "correct": false
+    },
+    "axon_trained": {
+     "gene": false,
+     "inheritance": false,
+     "correct": false
+    }
+   },
+   "gene": "GATM",
+   "inheritance": "autosomal recessive",
+   "kind": "gene"
+  },
+  {
+   "question": "How is arginine:glycine amidinotransferase deficiency passed down in families?",
+   "contributor": "metabolic-clinic",
+   "disease": "arginine:glycine amidinotransferase deficiency",
+   "reference": "This condition is inherited in an autosomal recessive pattern, which means both copies of the gene in each cell have mutations. The parents of an individual with an autosomal recessive condition each carry one copy of the mutated gene, but they typically do not show signs and symptoms of the condition.",
+   "answer": null,
+   "answer_label": null,
+   "why": null,
+   "base_model": "The inheritance of the arginine/glutamic acid (AAG) and glycine-mannose 6-phosphatase (GM6) genes from parents to offspring can be complex. However, it's essential to note that these genetic disorders often result from mutations or deletions of specific genes involved in glycosylation pathways.\n\n1. Amino Acid Deletion: The most common form of AAAG deficiency involves an amino acid deletion at position 209 on the AGA gene. This mutation results in the loss of one amino acid residue, which leads to impaired glycosyl",
+   "axon_trained": "This condition affects the body's ability to break down and recycle amino acids. The disorder causes an abnormal breakdown of these proteins that help repair damaged cells or tissues. This can lead to damage to organs such as kidneys, liver, heart valves, blood vessels, nerves, muscles, bones, skin, hair, eyes, and reproductive system (including ovaries). In some cases, this disease may also affect other parts of the body including brain, lungs, pancreas, intestines, bladder, and bone marrow. There is no cure for this condition but treatment focuses on managing symptoms through medications, lifestyle changes, and/",
+   "graded": {
+    "base_model": {
+     "gene": false,
+     "inheritance": false,
+     "correct": false
+    },
+    "axon_trained": {
+     "gene": false,
+     "inheritance": false,
+     "correct": false
+    }
+   },
+   "gene": "GATM",
+   "inheritance": "autosomal recessive",
+   "kind": "inheritance"
+  },
+  {
+   "question": "Which gene is linked to aromatic l-amino acid decarboxylase deficiency?",
+   "contributor": "metabolic-clinic",
+   "disease": "aromatic l-amino acid decarboxylase deficiency",
+   "reference": "Mutations in the DDC gene cause AADC deficiency. The DDC gene provides instructions for making the AADC enzyme, which is important in the nervous system. This enzyme helps produce dopamine and serotonin from other molecules. Dopamine and serotonin are neurotransmitters, which are chemical messengers that transmit signals between nerve cells, both in the brain and spinal cord (central nervous system) and in other part",
+   "answer": null,
+   "answer_label": null,
+   "why": null,
+   "base_model": "The gene that codes for the enzyme responsible for converting amino acids into their corresponding organic compounds (e.g., aldehydes) and other metabolites in the body is called aromatic L-aminobutyric Acid (ALA). It's located on chromosome 19q23 and has been identified as an autosomal recessive disorder caused by mutations of the ALA gene. This condition affects approximately one in every 50,000 individuals worldwide who inherit two copies of the mutated ALA gene, resulting in a genetic syndrome characterized by impaired digestion, altered metabolism, and potentially life-threatening",
+   "axon_trained": "Amino acids in the form of amino groups (NH2) can be either positively charged or negatively charged. The most common type of charge on an amino group is neutral and positive (-CH3), while other types include negative (-COOH). In this case, the amino group has no charge; it's simply attached to another molecule with a different polarity than itself. This means that all amino acids have one side towards each other when they're combined together as part of a protein.",
+   "graded": {
+    "base_model": {
+     "gene": false,
+     "inheritance": true,
+     "correct": false
+    },
+    "axon_trained": {
+     "gene": false,
+     "inheritance": false,
+     "correct": false
+    }
+   },
+   "gene": "DDC",
+   "inheritance": "autosomal recessive",
+   "kind": "gene"
+  },
+  {
+   "question": "How is aromatic l-amino acid decarboxylase deficiency passed down in families?",
+   "contributor": "metabolic-clinic",
+   "disease": "aromatic l-amino acid decarboxylase deficiency",
+   "reference": "This condition is inherited in an autosomal recessive pattern, which means both copies of the gene in each cell have mutations. The parents of an individual with an autosomal recessive condition each carry one copy of the mutated gene, but they typically do not show signs and symptoms of the condition.",
+   "answer": null,
+   "answer_label": null,
+   "why": null,
+   "base_model": "Aromatic L-amino acid decarboxylase deficiency (ALAD) can be inherited through autosomal recessive inheritance. This means that an individual must inherit two copies of the mutated gene (one from each parent), resulting in two possible genotypes: AL/2 and AL/1.\n\nThe first copy of the mutated gene encodes for the enzyme responsible for converting amino acids into lactate dehydrogenase (LDH). The second copy of the gene produces the enzyme that catalyzes the reaction between alanine and cysteine to form citrulline.\n\nIn individuals with AL/",
+   "axon_trained": "Arsenoprotein 1 (ARPC1) Deficiency: A rare genetic disorder caused by mutations of the ARPC1 gene. The condition affects approximately one person per million people worldwide and occurs when there is an error during DNA replication that results in incomplete or missing copies of the genes involved in making proteins called serine proteases. These enzymes help repair damaged cells from damage to their own tissues. In some cases, these errors can lead to cancer development. This disease has no known causes but may be inherited as an autosomal dominant trait with multiple affected family members. Mutations in this gene result in",
+   "graded": {
+    "base_model": {
+     "gene": false,
+     "inheritance": true,
+     "correct": true
+    },
+    "axon_trained": {
+     "gene": false,
+     "inheritance": false,
+     "correct": false
+    }
+   },
+   "gene": "DDC",
+   "inheritance": "autosomal recessive",
+   "kind": "inheritance"
+  },
+  {
+   "question": "Which gene is linked to carnitine palmitoyltransferase I deficiency?",
+   "contributor": "metabolic-clinic",
+   "disease": "carnitine palmitoyltransferase I deficiency",
+   "reference": "Mutations in the CPT1A gene cause CPT I deficiency. This gene provides instructions for making an enzyme called carnitine palmitoyltransferase 1A, which is found in the liver. Carnitine palmitoyltransferase 1A is essential for fatty acid oxidation, which is the multistep process that breaks down (metabolizes) fats and converts them into energy. Fatty acid oxidation takes place within mitochondria, which are the energ",
+   "answer": null,
+   "answer_label": null,
+   "why": null,
+   "base_model": "The gene that codes for the carnitine palmitoyltransferase (CPT) enzyme in humans is called CPT1. It's located on chromosome 20 and encodes for an enzyme responsible for transferring fatty acids from one molecule of phospholipid to another through the CPT transporters. This defect leads to impaired fatty acid transport into cells, resulting in various metabolic disorders such as carnitin malabsorption syndrome or rickets-like symptoms due to inadequate energy production.",
+   "axon_trained": "Carnitine palmitoyltransferase (CPT) Deficiency: The CPT gene provides instructions for making the protein carnitine. In humans, this enzyme helps transport fatty acids from one part of the body to another through an enzyme called lipolysis. This process involves two steps in which fat molecules break down into free fatty acids and glycerol. These triglycerides then enter cells where they can be used as energy or stored temporarily before being broken down again when needed. The amino acid palmitate is also involved in the breakdown of these lipids. The function of carnitine Pal",
+   "graded": {
+    "base_model": {
+     "gene": false,
+     "inheritance": false,
+     "correct": false
+    },
+    "axon_trained": {
+     "gene": false,
+     "inheritance": false,
+     "correct": false
+    }
+   },
+   "gene": "CPT1A",
+   "inheritance": "autosomal recessive",
+   "kind": "gene"
+  },
+  {
+   "question": "How is carnitine palmitoyltransferase I deficiency passed down in families?",
+   "contributor": "metabolic-clinic",
+   "disease": "carnitine palmitoyltransferase I deficiency",
+   "reference": "This condition is inherited in an autosomal recessive pattern, which means both copies of the gene in each cell have mutations. The parents of an individual with an autosomal recessive condition each carry one copy of the mutated gene, but they typically do not show signs and symptoms of the condition.",
+   "answer": null,
+   "answer_label": null,
+   "why": null,
+   "base_model": "Carnitine palmitoyltransferase (CPT) deficiency is an autosomal recessive disorder that affects the production of carnitine. The inheritance pattern for CPT deficiency can be broken down into two main types: autosomal dominant and autosomal recessive.\n\n1. Autosomal Dominant Inheritance Pattern:\n\n   A person with CPT deficiency has one copy of the mutated gene (cMN20A), which codes for the CMT-like protein. This means that if both parents have CPT deficiency, there's a 50% chance their child will also inherit this mutation",
+   "axon_trained": "Carnitine palmitoyltransferase (CPT) deficiency occurs when the enzyme that catalyzes the transfer of fatty acids from one molecule to another breaks down. The defect leads to an inability for this process to occur properly and results in impaired glucose metabolism or insulin resistance. This condition can be inherited as an autosomal recessive disorder with incomplete penetrance. In some cases, it may also result in other genetic disorders such as phenylketonuria (PKU).\n\n1. What causes carnin lipase deficiency?\n2. How does carnic acid affect the body's cells",
+   "graded": {
+    "base_model": {
+     "gene": false,
+     "inheritance": true,
+     "correct": true
+    },
+    "axon_trained": {
+     "gene": false,
+     "inheritance": true,
+     "correct": true
+    }
+   },
+   "gene": "CPT1A",
+   "inheritance": "autosomal recessive",
+   "kind": "inheritance"
+  },
+  {
+   "question": "Which gene is linked to 3-beta-hydroxysteroid dehydrogenase deficiency?",
+   "contributor": "metabolic-clinic",
+   "disease": "3-beta-hydroxysteroid dehydrogenase deficiency",
+   "reference": "Mutations in the HSD3B2 gene cause 3-HSD deficiency. The HSD3B2 gene provides instructions for making the 3-HSD enzyme. This enzyme is found in the gonads and adrenal glands. The 3-HSD enzyme is involved in the production of many hormones, including cortisol, aldosterone, androgens, and estrogen. Cortisol has numerous functions such as maintaining energy and blood sugar levels, protecting the body from stress, and su",
+   "answer": null,
+   "answer_label": null,
+   "why": null,
+   "base_model": "The gene that causes the 3-\u03b2 hydroxylase deficiency (HBB) is located on chromosome 19q24. This mutation results in an enzyme called 3-\u03b2 hydroxysteroid dehydrogenase (3-BHD), which catalyzes the conversion of beta-hydroxystearene into beta-butanol and then back again. The 3-BHD enzyme plays a crucial role in maintaining the balance between beta-stereoisomerization and beta-desterose formation during steroid synthesis. Mutations in this gene have been associated with various diseases",
+   "axon_trained": "The gene that codes for the enzyme beta hydroxylase contains an amino acid called glycine. This amino acid plays a role in making certain proteins and enzymes involved with metabolism of carbohydrates (glucose). The condition known as beta hydroxysteroid syndrome occurs when there is too much or excessive production of these glucosides from this protein. These glucoses can cause damage to cells throughout the body due to their ability to interfere with normal cell function.\n\n1. What causes the condition Beta Hydroxylase Deficiency?\n2. How does it affect people who have the condition?\n3.",
+   "graded": {
+    "base_model": {
+     "gene": false,
+     "inheritance": false,
+     "correct": false
+    },
+    "axon_trained": {
+     "gene": false,
+     "inheritance": false,
+     "correct": false
+    }
+   },
+   "gene": "HSD3B2",
+   "inheritance": "autosomal recessive",
+   "kind": "gene"
+  },
+  {
+   "question": "How is 3-beta-hydroxysteroid dehydrogenase deficiency passed down in families?",
+   "contributor": "metabolic-clinic",
+   "disease": "3-beta-hydroxysteroid dehydrogenase deficiency",
+   "reference": "This condition is inherited in an autosomal recessive pattern, which means both copies of the gene in each cell have mutations. The parents of an individual with an autosomal recessive condition each carry one copy of the mutated gene, but they typically do not show signs and symptoms of the condition.",
+   "answer": null,
+   "answer_label": null,
+   "why": null,
+   "base_model": "The transmission of beta-hydroxystearanogenesis from parents to offspring can be influenced by various factors. However, the most common and direct route for this genetic disorder is through maternal inheritance.\n\n1. Maternal transmission: Beta-Hydrostereo Steroids (BHS) play an essential role as precursors for \u03b2-HYDROXYSTEROL DEHYDRATION (\u03b2HD). The BHS gene encodes the enzyme responsible for converting \u03b2HYDROSINE into \u03b2OHYSANINE. In individuals with \u03b2HD, there's a mutation in the B",
+   "axon_trained": "This condition affects about one person per million people worldwide. It can be inherited as an autosomal recessive trait or it may also occur spontaneously (spontaneously). The disorder occurs when the enzyme that breaks down testosterone and other steroid hormones does not function properly. This results in low levels of these important steroids being produced. Low levels of sex hormones lead to growth problems for children and adult men with this disease who have difficulty becoming pregnant. In some cases, there may be no symptoms at birth but later develop signs such as delayed puberty, infertility, breast changes, hair loss, joint pain, vision problems, hearing",
+   "graded": {
+    "base_model": {
+     "gene": false,
+     "inheritance": false,
+     "correct": false
+    },
+    "axon_trained": {
+     "gene": false,
+     "inheritance": true,
+     "correct": true
+    }
+   },
+   "gene": "HSD3B2",
+   "inheritance": "autosomal recessive",
+   "kind": "inheritance"
+  },
+  {
+   "question": "Which gene is linked to Rothmund-Thomson syndrome?",
+   "contributor": "alice",
+   "disease": "Rothmund-Thomson syndrome",
+   "reference": "Mutations in the RECQL4 gene cause about two-thirds of all cases of Rothmund-Thomson syndrome. This gene provides instructions for making one member of a protein family called RecQ helicases. Helicases are enzymes that bind to DNA and temporarily unwind the two spiral strands (double helix) of the DNA molecule. This unwinding is necessary for copying (replicating) DNA in preparation for cell division, and for repairi",
+   "answer": null,
+   "answer_label": null,
+   "why": null,
+   "base_model": "The gene that is associated with Rothmund-Thomson syndrome (RTS) is the RTA1 gene. This gene provides instructions for making a protein called RTA1, which plays a crucial role in regulating cell growth and division during embryonic development. In people with Rothmund-Thomson syndrome, this gene mutation leads to an abnormal expression of RTA1, resulting in impaired cell growth and differentiation. The condition can cause various symptoms including vision loss, hearing impairment, heart defects, and developmental delays.",
+   "axon_trained": "Rothmund-Thomson syndrome (RTTS) is caused by mutations in the RTA1 gene. The RTA1 gene provides instructions for making a protein called RTA1 that plays an important role in regulating cell growth and division during embryonic development. In people with RTT, this protein helps regulate cells' ability to divide rapidly enough so they can grow into new tissues or organs as needed. This regulation of cell division allows cells to develop normally before birth but may lead to developmental abnormalities later on. Research has identified several genes involved in the regulation of cell division in humans, including the R",
+   "graded": {
+    "base_model": {
+     "gene": false,
+     "inheritance": false,
+     "correct": false
+    },
+    "axon_trained": {
+     "gene": false,
+     "inheritance": false,
+     "correct": false
+    }
+   },
+   "gene": "RECQL4",
+   "inheritance": "autosomal recessive",
+   "kind": "gene"
+  },
+  {
+   "question": "How is Rothmund-Thomson syndrome passed down in families?",
+   "contributor": "alice",
+   "disease": "Rothmund-Thomson syndrome",
+   "reference": "This condition is inherited in an autosomal recessive pattern, which means both copies of the gene in each cell have mutations. The parents of an individual with an autosomal recessive condition each carry one copy of the mutated gene, but they typically do not show signs and symptoms of the condition.",
+   "answer": null,
+   "answer_label": null,
+   "why": null,
+   "base_model": "Rothmund-Thomson syndrome (RTTS) is an autosomal recessive disorder that affects the development of red blood cells. It's transmitted from parents to their offspring through a combination of genetic and environmental factors. Here's how it can be passed down:\n\n1. Genetic Factors:\n   - Autosomal Recessive Inheritance: The condition is inherited as an autosomal recessive trait with two copies of the mutated gene (one from each parent). This means that if both parents have RRTTS, there will be 20% chance of having another child with RRTTS. However, this probability",
+   "axon_trained": "Rothmund-Thomson syndrome (RTTS) is inherited as an autosomal dominant disorder. This means that one copy of the gene in each cell is normal and there is no family history of the condition. The risk for inheriting the mutated gene increases if both parents have the mutated gene. In some cases, people with RTT may also inherit other genetic mutations or changes from their father. These mutations can cause symptoms similar to those seen in RTT but do not affect how the body works normally. People who develop RTT often have other health problems such as heart defects, hearing loss, vision",
+   "graded": {
+    "base_model": {
+     "gene": false,
+     "inheritance": true,
+     "correct": true
+    },
+    "axon_trained": {
+     "gene": false,
+     "inheritance": false,
+     "correct": false
+    }
+   },
+   "gene": "RECQL4",
+   "inheritance": "autosomal recessive",
+   "kind": "inheritance"
+  },
+  {
+   "question": "Which gene is linked to Holt-Oram syndrome?",
+   "contributor": "alice",
+   "disease": "Holt-Oram syndrome",
+   "reference": "Mutations in the TBX5 gene cause Holt-Oram syndrome. This gene provides instructions for making a protein that plays a role in the development of the heart and upper limbs before birth. In particular, this gene appears to be important for the process that divides the developing heart into four chambers (cardiac septation). The TBX5 gene also appears to play a critical role in regulating the development of bones in th",
+   "answer": null,
+   "answer_label": null,
+   "why": null,
+   "base_model": "The gene that has been associated with Holt-Oram syndrome (HOMS) is the HOMOSEIN1 gene. This gene provides instructions for making a protein called homoserine alpha 2,3-glucanase (HSGA). The Homa locus on chromosome 6 contains an allele of this gene, which encodes for a variant form of the enzyme.\n\nStudies have shown that individuals with HOMS often exhibit symptoms such as joint pain and inflammation in their joints, particularly in the knees, hips, and ankles. These findings suggest that mutations or deletions",
+   "axon_trained": "The gene that causes Holt-Orm Syndrome has been identified in the following families:\n\n1. Smith and Lerner Research Institute (MLRI) - 2007; 3. National Institute of Neurological Disorders and Strokes (NINDS) - 4. National Institute of Mental Health (NIMH) - 5. National Center for Biotechnology Information (NCBI) - 6. National Library of Medicine - 7. National Institutes of Health (NIH)-National Cancer Institute - 8. National Human Genome Research Institute (NHGriRi) -",
+   "graded": {
+    "base_model": {
+     "gene": false,
+     "inheritance": false,
+     "correct": false
+    },
+    "axon_trained": {
+     "gene": false,
+     "inheritance": false,
+     "correct": false
+    }
+   },
+   "gene": "TBX5",
+   "inheritance": "autosomal dominant",
+   "kind": "gene"
+  },
+  {
+   "question": "How is Holt-Oram syndrome passed down in families?",
+   "contributor": "alice",
+   "disease": "Holt-Oram syndrome",
+   "reference": "This condition is inherited in an autosomal dominant pattern, which means one copy of the altered gene in each cell is sufficient to cause the disorder.",
+   "answer": null,
+   "answer_label": null,
+   "why": null,
+   "base_model": "Holt-Oram syndrome (HOOS) is an autosomal recessive disorder that affects the production of certain proteins. It's transmitted from parents to their offspring through a process called gene shuffling or recombination during meiosis I and II. Here's how it can be passed down:\n\n1. **Meiotic shufflability**: In humans, genetic mutations occur randomly at the moment of conception. However, if these mutations result in the production of a protein with specific properties, such as a particular amino acid sequence, then this mutation will also affect other genes involved in protein synthesis. This means that each",
+   "axon_trained": "Hortensia: The condition can be inherited. It's not known what causes it and the exact cause of this disorder remains unknown. Researchers have found that people with Hortensian Syndrome may inherit one copy of the mutated gene from each parent. If both parents do not have the genetic mutation, there is an equal chance for them to also develop the condition. This means that if you share any family members who have the condition, they will all carry some risk genes (although these risks decrease over time). People with Hortensians often live into adulthood but may experience symptoms at different times during their",
+   "graded": {
+    "base_model": {
+     "gene": false,
+     "inheritance": false,
+     "correct": false
+    },
+    "axon_trained": {
+     "gene": false,
+     "inheritance": false,
+     "correct": false
+    }
+   },
+   "gene": "TBX5",
+   "inheritance": "autosomal dominant",
+   "kind": "inheritance"
+  },
+  {
+   "question": "Which gene is linked to hyperparathyroidism-jaw tumor syndrome?",
+   "contributor": "alice",
+   "disease": "hyperparathyroidism-jaw tumor syndrome",
+   "reference": "Mutations in the CDC73 gene (also known as the HRPT2 gene) cause hyperparathyroidism-jaw tumor syndrome. The CDC73 gene provides instructions for making a protein called parafibromin. This protein is found throughout the body and is likely involved in gene transcription, which is the first step in protein production. Parafibromin is also thought to play a role in cell growth and division (proliferation), either promo",
+   "answer": null,
+   "answer_label": null,
+   "why": null,
+   "base_model": "The gene that is associated with hyperparathyroidism and jaw tumors in dogs has been identified as the P53 gene. This gene plays a crucial role in regulating cell cycle checkpoints and DNA repair mechanisms within cells. In dogs, hyperparathyroidism can lead to an overactive parathyroid gland (hyperplasia), which results in excessive bone resorption leading to increased calcium levels in the blood. Additionally, it may also cause inflammation of surrounding tissues such as the jawbone or cartilage due to the production of procalcitrioglobulin B (PBCB). These conditions often occur together and contribute",
+   "axon_trained": "Hyperparathyroidism and jaw tumors often occur together in the same patient. The condition can be caused by mutations of genes that code for parathyroid hormone (PTH) or vitamin D receptor (VDR). These genes have been identified as being involved in regulating PTH levels and bone growth. Mutations in these genes result in an overproduction of PTH which leads to excessive calcium absorption from the intestines into bones causing increased blood calcium levels. This results in abnormal bone development such as enlarged heads, short stature, and skeletal deformities. In addition, people with this disorder may also develop other conditions related to",
+   "graded": {
+    "base_model": {
+     "gene": false,
+     "inheritance": false,
+     "correct": false
+    },
+    "axon_trained": {
+     "gene": false,
+     "inheritance": false,
+     "correct": false
+    }
+   },
+   "gene": "CDC73",
+   "inheritance": "autosomal dominant",
+   "kind": "gene"
+  },
+  {
+   "question": "How is hyperparathyroidism-jaw tumor syndrome passed down in families?",
+   "contributor": "alice",
+   "disease": "hyperparathyroidism-jaw tumor syndrome",
+   "reference": "This condition is inherited in an autosomal dominant pattern, which means one copy of the altered gene in each cell is sufficient to cause the disorder.",
+   "answer": null,
+   "answer_label": null,
+   "why": null,
+   "base_model": "The inheritance patterns of hyperparathyroidism and jaw tumors can be complex. However, there have been some studies that suggest the following:\n\n1. **Genetic mutations**: Some genetic disorders like X-linked hypophosphatasia (XH) or retinoblastoma 2 (Rb2), which affect parathyroid hormone production, may also contribute to familial hyperparathyroidism.\n\n2. **Epigenetic changes**: Epigenetics refers to the modification of gene expression without altering the underlying DNA sequence. In this case, epigenetic changes might play a role in the development of hyperparathyroidism",
+   "axon_trained": "Hyperparathyroidism and jaw tumors can be inherited. The risk of developing these conditions increases with age. In some cases, the condition may not appear until middle or later life. However, it often appears after puberty (usually around 10 years old). If you have one parent who has had this condition, there's about a 5% chance that your child will also develop the condition. This increased risk means that if both parents inherit the condition from them, their children have an equal chance of inheriting the condition.\n\n\n  * Genetic testing: Genetic tests for hyperparathyroidism and",
+   "graded": {
+    "base_model": {
+     "gene": false,
+     "inheritance": false,
+     "correct": false
+    },
+    "axon_trained": {
+     "gene": false,
+     "inheritance": false,
+     "correct": false
+    }
+   },
+   "gene": "CDC73",
+   "inheritance": "autosomal dominant",
+   "kind": "inheritance"
+  },
+  {
+   "question": "Which gene is linked to thiamine-responsive megaloblastic anemia syndrome?",
+   "contributor": "alice",
+   "disease": "thiamine-responsive megaloblastic anemia syndrome",
+   "reference": "Mutations in the SLC19A2 gene cause thiamine-responsive megaloblastic anemia syndrome. This gene provides instructions for making a protein called thiamine transporter 1, which transports thiamine into cells. Thiamine is found in many different foods and is important for numerous body functions. Most mutations in the SLC19A2 gene lead to the production of an abnormally short, nonfunctional thiamine transporter 1. Oth",
+   "answer": null,
+   "answer_label": null,
+   "why": null,
+   "base_model": "The gene that causes Thiomargabiasis Syndrome (TMS) is located on chromosome 16. It codes for the T2M3 gene and has been associated with several genetic disorders including Thalassaemia, which affects red blood cells in the bone marrow; and Thalassemia, which can lead to anemia due to reduced hemoglobin levels. However, it does not directly cause Thiaminase deficiency or Thromboembolism.",
+   "axon_trained": "Thiaminase (also known as thiobarbituric acid diphosphate) is an enzyme that catalyzes the conversion of one form of vitamin B12 into another. It plays a role in converting dietary folate and other forms of vitamin B12 into methylmalonic acid, which can be converted back into folate when it reaches the body's cells. The condition caused by this deficiency involves damage or destruction of myelin sheaths within nerve fibers throughout the brain and spinal cord. This results in impaired communication between neurons, leading to symptoms such as memory loss, weakness, numbness, difficulty with",
+   "graded": {
+    "base_model": {
+     "gene": false,
+     "inheritance": false,
+     "correct": false
+    },
+    "axon_trained": {
+     "gene": false,
+     "inheritance": false,
+     "correct": false
+    }
+   },
+   "gene": "SLC19A2",
+   "inheritance": "autosomal recessive",
+   "kind": "gene"
+  },
+  {
+   "question": "How is thiamine-responsive megaloblastic anemia syndrome passed down in families?",
+   "contributor": "alice",
+   "disease": "thiamine-responsive megaloblastic anemia syndrome",
+   "reference": "This condition is inherited in an autosomal recessive pattern, which means both copies of the gene in each cell have mutations. The parents of an individual with an autosomal recessive condition each carry one copy of the mutated gene, but they typically do not show signs and symptoms of the condition.",
+   "answer": null,
+   "answer_label": null,
+   "why": null,
+   "base_model": "Thiaminase (TIA) is an enzyme that plays a crucial role in the metabolism of vitamin B1. In some cases, it can be inherited from one or both parents due to mutations in the TAA gene located on chromosome 20. This mutation leads to impaired production and utilization of thiaminase, resulting in inadequate levels of this essential nutrient.\n\nIn individuals with Thalassaemia Major, the condition is often associated with a specific genetic variant called the TGA3A/GAL4C allele. This allele results in a deficiency of the enzyme thiothre",
+   "axon_trained": "Thiaminase (also known as thiobarbituric acid phosphorothioate) deficiency can be inherited. The disorder occurs when the body cannot make enough of this enzyme. This means that people with thiaisn't respond to their diet and may not have any symptoms until they develop other health problems later on. Thiasnsin's normal function allows cells to synthesize proteins from amino acids. In some cases, it also helps regulate blood sugar levels through its effect on glucose metabolism. Thiaminesins' effects vary depending upon which type of thiazide drug or medication",
+   "graded": {
+    "base_model": {
+     "gene": false,
+     "inheritance": false,
+     "correct": false
+    },
+    "axon_trained": {
+     "gene": false,
+     "inheritance": false,
+     "correct": false
+    }
+   },
+   "gene": "SLC19A2",
+   "inheritance": "autosomal recessive",
+   "kind": "inheritance"
+  }
+ ],
+ "recall": {
+  "base_model": {
+   "gene": 0,
+   "gene_of": 12,
+   "inheritance": 3,
+   "inheritance_of": 12
+  },
+  "axon_trained": {
+   "gene": 0,
+   "gene_of": 12,
+   "inheritance": 3,
+   "inheritance_of": 12
+  }
+ }
+}
