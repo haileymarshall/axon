@@ -1,6 +1,6 @@
 {
- "network": "testnet",
- "contract": "axon-hq-56501.testnet",
+ "network": "mainnet",
+ "contract": "axon.ebukaa.near",
  "api": "",
  "video": ""
 }

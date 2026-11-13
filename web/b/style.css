@@ -208,3 +208,5 @@ label.check input { width: auto; margin: 0; accent-color: currentColor; }
 .steps.s4 { grid-template-columns: repeat(4, 1fr); }
 @media (max-width: 960px) { .steps.s4 { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 760px) { .steps.s4 { grid-template-columns: 1fr; } .top .btn.top-cta { padding: 8px 10px; font-size: 11px; } }
+
+a.card .tag:not(.live) { color: var(--mute); }

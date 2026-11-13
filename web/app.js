@@ -149,7 +149,7 @@ async function pageHome() {
         <div class="kicker">Models</div>
         <h2>One model per niche. Owned by the people who trained it.</h2>
         <p class="lead">Each model starts from a free open base model and is fine-tuned on its contributors' private data. Anyone can start a model for any topic, and anyone can join later.</p>
-        <div class="grid">${models.map(modelCard).join("") || `<p class="muted">No models yet. <a href="#/create">Start one</a>.</p>`}
+        <div class="grid">${(await sortModels(models)).map(modelCard).join("") || `<p class="muted">No models yet. <a href="#/create">Start one</a>.</p>`}
           ${EXAMPLES.map((e) => `<div class="card example"><span class="tag">${esc(e.domain)} · example</span><h3>${esc(e.name)}</h3><p class="muted small">${esc(e.text)}</p></div>`).join("")}</div>
       </section>
       <section class="block" id="compare">${await nicheBlock(models, f)}</section>
@@ -204,11 +204,19 @@ function typeTerm(f) {
   tick();
 }
 
+// Models whose published run is marked as an earlier run (e.g. model 0, which found a scoring bug) go last.
+async function sortModels(models) {
+  const all = await runs();
+  const earlier = new Set(all.filter((r) => r.note && r.contract === CONFIG.contract).map((r) => r.model_id));
+  models.forEach((m) => (m._earlier = earlier.has(m.id)));
+  return models.slice().sort((a, b) => a._earlier - b._earlier || a.id - b.id);
+}
+
 function modelCard(m) {
   const improved = m.base_eval_loss_milli && m.eval_loss_milli ? ((1 - m.eval_loss_milli / m.base_eval_loss_milli) * 100).toFixed(1) : null;
   const o = owners(m);
   return `<a class="card" href="#/model/${m.id}">
-    <span class="tag live">${esc(m.domain)} · live</span>
+    ${m._earlier ? `<span class="tag">${esc(m.domain)} · earlier run, scoring bug fixed in the next model</span>` : `<span class="tag live">${esc(m.domain)} · live</span>`}
     <h3>${esc(m.name)}</h3>
     <p class="muted small">${esc(m.description)}</p>
     <div class="minibar">${o.map((c, i) => `<span style="width:${pct(c.shares, m.total_shares)};background:${COLORS[i % 5]}"></span>`).join("")}</div>
@@ -234,7 +242,7 @@ async function nicheBlock(models, f) {
     document.querySelectorAll("#nichetabs button").forEach((b, i) => (b.onclick = () => pick(i)));
     pick(0);
   });
-  return COMPARE_HEAD + `<div class="tabs" id="nichetabs" style="margin-bottom:26px">${shown.map((m) => `<button style="font-size:13px;padding:10px 16px">${esc(m.name)} <span class="muted">· ${esc(m.domain)}</span></button>`).join("")}</div><div id="niche"></div>`;
+  return COMPARE_HEAD + `<div class="tabs" id="nichetabs" style="margin-bottom:26px">${shown.map((m) => `<button style="font-size:13px;padding:10px 16px">${esc(m.name)}</button>`).join("")}</div><div id="niche"></div>`;
 }
 
 async function compareBlock(m, withHead = true) {
@@ -338,7 +346,7 @@ async function pageModel(id) {
     <div class="kpis">
       <div class="kpi"><div class="v">${o.filter((c) => Number(c.shares) > 0).length}</div><div class="l">Owners</div></div>
       <div class="kpi"><div class="v">${m.rounds}</div><div class="l">Training rounds</div></div>
-      <div class="kpi"><div class="v">${m.base_eval_loss_milli ? (m.base_eval_loss_milli / 1000).toFixed(2) + " → " + (m.eval_loss_milli / 1000).toFixed(2) : "–"}</div><div class="l">Hidden-test loss</div></div>
+      <div class="kpi"><div class="v">${m.base_eval_loss_milli ? (m.base_eval_loss_milli / 1000).toFixed(2) + " → " + (m.eval_loss_milli / 1000).toFixed(2) : "–"}</div><div class="l">${esc(scoreLabel(m))}</div></div>
       <div class="kpi"><div class="v">${m.queries}</div><div class="l">Paid questions</div></div>
       <div class="kpi"><div class="v">${near(m.total_revenue, 3)} Ⓝ</div><div class="l">Paid to owners</div></div>
     </div>
@@ -414,6 +422,9 @@ function offlineCard() {
     <div class="row"><a class="btn ghost" href="#compare" onclick="event.preventDefault();document.getElementById('compare').scrollIntoView({behavior:'smooth'})">See recorded answers</a></div>`;
 }
 
+// How the vault scores each niche: answer-token loss (health), error rate (cyber), translation error (Basque).
+const scoreLabel = (m) => ({ security: "Hidden-test error rate", basque: "Translation error (1 − chrF)" })[m.domain] || "Hidden-test loss";
+
 function lossChart(m) {
   const pts = [{ round: 0, loss: m.rounds_detail.length ? m.base_eval_loss_milli / 1000 : null }, ...m.rounds_detail.map((r) => ({ round: r.round, loss: r.eval_loss_milli / 1000 }))].filter((p) => p.loss != null);
   if (pts.length < 2) return `<p class="muted small">The loss curve appears after the first round.</p>`;
@@ -422,7 +433,7 @@ function lossChart(m) {
   const x = (i) => P + (i * (W - 2 * P)) / (pts.length - 1);
   const y = (l) => 30 + ((hi - l) / span) * (H - 64);
   const path = pts.map((p, i) => `${i ? "L" : "M"}${x(i)},${y(p.loss)}`).join(" ");
-  return `<h3>Hidden-test loss <span class="muted small">(lower is better)</span></h3><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Loss per round">
+  return `<h3>${esc(scoreLabel(m))} <span class="muted small">(lower is better)</span></h3><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Loss per round">
     <path d="${path}" fill="none" stroke="var(--accent)" stroke-width="2"/>
     ${pts.map((p, i) => `<rect x="${x(i) - 4}" y="${y(p.loss) - 4}" width="8" height="8" fill="var(--accent)"/><text x="${x(i)}" y="${H - 8}" text-anchor="middle">${i === 0 ? "base" : "round " + p.round}</text><text x="${x(i)}" y="${y(p.loss) - 12}" text-anchor="middle">${p.loss.toFixed(3)}</text>`).join("")}
   </svg>`;
