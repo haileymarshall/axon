@@ -174,7 +174,7 @@ def shapley(players: list[str], value) -> dict[str, float]:
     return out
 
 
-def score_round(engine: Engine, test: list[dict], base: Adapter, updates: dict[str, Adapter], log=print) -> RoundScore:
+def score_round(engine: Engine, test: list[dict], base: Adapter, updates: dict[str, Adapter], log=print, metric=None) -> RoundScore:
     """Score contributors by Shapley value of test-loss improvement.
 
     v(S) = loss(base) - loss(merge of the updates in S). Contributors with Shapley value <= 0 made the
@@ -186,11 +186,14 @@ def score_round(engine: Engine, test: list[dict], base: Adapter, updates: dict[s
     if len(names) > 8:
         raise ValueError("exact Shapley scoring supports up to 8 updates per round")
     cache: dict[frozenset, float] = {}
-    base_loss = engine.eval_loss(test, base)
+    # `metric(adapter)` -> a loss (lower is better). Default: mean answer-token loss on the hidden test. For
+    # classification models, the vault passes the error rate instead (1 - accuracy), so only right answers count.
+    metric = metric or (lambda adapter: engine.eval_loss(test, adapter))
+    base_loss = metric(base)
 
     def value(s: frozenset) -> float:
         if s not in cache:
-            cache[s] = base_loss - engine.eval_loss(test, aggregate(base, [updates[n] for n in sorted(s)])) if s else 0.0
+            cache[s] = base_loss - metric(aggregate(base, [updates[n] for n in sorted(s)])) if s else 0.0
         return cache[s]
 
     log(f"  base loss {base_loss:.4f}; scoring {len(names)} updates over {2 ** len(names) - 1} coalitions")

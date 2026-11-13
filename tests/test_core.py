@@ -217,3 +217,17 @@ def test_security_demo_has_no_leakage():
     probes = {p["q"] for p in json.loads(o["probes"].read_text())}
     assert not (test & honest) and not (probes & honest) and not (probes & test)
     assert not (bob & (honest | test | probes))
+
+
+def test_error_rate_metric_counts_only_right_labels():
+    from axon import data
+
+    test = [{"q": "q1", "a": "CWE-79: XSS."}, {"q": "q2", "a": "CWE-89: SQL Injection."}]
+
+    class FakeEngine:
+        def generate(self, q, adapter, max_new_tokens=24):
+            return {"good": {"q1": "CWE-79: XSS", "q2": "CWE-89: SQLi"}, "cheat": {"q1": "CWE-22", "q2": "CWE-89 or CWE-79"}}[adapter][q]
+
+    m = data.metric_fn("security", FakeEngine(), test)
+    assert m("good") == 0.0 and m("cheat") == 0.5
+    assert data.metric_fn("rare-diseases", FakeEngine(), test) is None

@@ -52,7 +52,7 @@ def main() -> None:
             ts = time.time()
             updates[c] = engine.train(rows, glob, seed=r * 10 + i)
             log(f"round {r}: {c} trained on {len(rows)} rows in {time.time() - ts:.0f}s")
-        sc = ml.score_round(engine, test, glob, updates, log=log)
+        sc = ml.score_round(engine, test, glob, updates, log=log, metric=data.metric_fn(a.domain, engine, test))
         glob = sc.global_adapter
         for c, v in sc.improvement.items():
             owned[c] += v

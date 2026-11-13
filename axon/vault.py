@@ -136,7 +136,9 @@ class Vault:
             raise HTTPException(400, "no updates received this round")
         base = self.global_adapter(model_id)
         logs: list[str] = []
-        score = ml.score_round(self.engine, self.test_set(model.get("domain")), base, updates, log=logs.append)
+        test = self.test_set(model.get("domain"))
+        score = ml.score_round(self.engine, test, base, updates, log=logs.append,
+                               metric=data.metric_fn(model.get("domain"), self.engine, test))
 
         payload = json.dumps({
             "model_id": model_id,

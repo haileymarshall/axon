@@ -264,7 +264,26 @@ def prepare_security(per_contributor: int = 220, test_per: int = 10, probes_per:
     return out
 
 
-DEMOS = {"rare-diseases": {"prepare": "prepare", "contributors": None}, "security": {"prepare": "prepare_security", "contributors": [*SECURITY_SPECIALTIES, "bob"]}}
+DEMOS = {"rare-diseases": {"prepare": "prepare", "contributors": None, "metric": "loss"},
+         "security": {"prepare": "prepare_security", "contributors": [*SECURITY_SPECIALTIES, "bob"], "metric": "error-rate"}}
+
+
+def metric_name(domain: str | None) -> str:
+    return (DEMOS.get(domain or "rare-diseases") or {}).get("metric", "loss")
+
+
+def metric_fn(domain: str | None, engine, test: list[dict]):
+    """How the vault scores a model for this domain: None = answer-token loss; "error-rate" = 1 - accuracy,
+    where each hidden-test question is graded like a showcase question (the first CWE named must be right)."""
+    if metric_name(domain) != "error-rate":
+        return None
+    keys = [{"kind": "cwe", "answer": re.match(r"(CWE-\d+)", r["a"]).group(1)} for r in test]
+
+    def error_rate(adapter) -> float:
+        right = sum(grade(engine.generate(r["q"], adapter, max_new_tokens=24), k)["correct"] for r, k in zip(test, keys))
+        return 1.0 - right / len(test)
+
+    return error_rate
 
 
 def contributors(domain: str | None = None) -> list[str]:
