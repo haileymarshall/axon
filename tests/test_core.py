@@ -241,3 +241,11 @@ def test_chrf_scores_translations():
     assert data.chrf("The train arrived on time.", ref) < 30 < data.chrf("Trena berandu iritsi zen.", ref) < 100
     g = data.grade("Trena garaiz iritsi zen.\n(note)", {"kind": "chrf", "answer": ref})
     assert g["exact"] and g["correct"]
+
+
+def test_only_idempotent_calls_are_resent_on_ambiguous_errors():
+    from axon.chain import Near, _refused
+
+    assert {"submit_round", "join_model", "withdraw"} <= Near.IDEMPOTENT
+    assert "pay_for_query" not in Near.IDEMPOTENT and "create_model" not in Near.IDEMPOTENT
+    assert _refused("HTTP 429 Too Many Requests") and not _refused("ReadTimeout")

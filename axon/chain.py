@@ -106,11 +106,16 @@ class Near:
 
     # ----------------------------------------------------------------- calls
 
+    # Calls the contract itself makes safe to resend: a duplicate is rejected on-chain (round number, already joined,
+    # nothing to withdraw) instead of doing anything twice. Payments are not in this list.
+    IDEMPOTENT = {"submit_round", "join_model", "set_combiner", "withdraw", "close_model"}
+
     def call(self, signer: str, method: str, args: dict, deposit_yocto: int = 0, gas_tgas: int = 100) -> dict:
         """Sign and send a function call as `signer`. Returns {'tx': hash, 'value': decoded return}."""
         return asyncio.run(self._call(signer, method, args, deposit_yocto, gas_tgas))
 
     async def _call(self, signer, method, args, deposit, gas_tgas):
+        resend_any = method in self.IDEMPOTENT
         from py_near.account import Account
 
         last = None
@@ -121,14 +126,15 @@ class Near:
                 res = await acc.function_call(self.contract_id, method, args, gas=gas_tgas * TGAS, amount=deposit)
                 break
             except Exception as e:
-                if not _refused(e):  # timeouts etc. are ambiguous for a transaction: never resend those
+                # Ambiguous failures (timeouts, "RPC not available") are only resent for idempotent calls.
+                if not (_refused(e) or resend_any):
                     raise
                 last = e
                 await asyncio.sleep(min(8.0, 1.0 * 2 ** (attempt // len(self.rpcs))))
             finally:
                 await acc.shutdown()
         else:
-            raise RuntimeError(f"{method}: NEAR RPC unavailable after retries: {str(last)[:300]}")
+            raise RuntimeError(f"{method}: NEAR RPC unavailable after retries: {type(last).__name__}: {str(last)[:300]}")
         status = getattr(res, "status", {}) or {}
         if isinstance(status, dict) and "Failure" in status:
             raise RuntimeError(f"{method} failed: {json.dumps(status['Failure'])[:400]}")
