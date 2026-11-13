@@ -61,6 +61,9 @@ def main() -> None:
     probes = [{"question": p["q"], "contributor": p.get("owner"), "disease": p.get("disease"), "reference": p.get("reference"),
                "base_model": engine.generate(p["q"], engine.initial), "axon_trained": engine.generate(p["q"], glob)}
               for p in runs.probes()]
+    for a_, p in zip(probes, runs.probes()):
+        a_["graded"] = {"base_model": data.grade(a_["base_model"], p), "axon_trained": data.grade(a_["axon_trained"], p)}
+        a_["gene"], a_["inheritance"], a_["kind"] = p.get("gene"), p.get("inheritance"), p.get("kind")
     summary = {"run_id": rid, "kind": "offline tuning (no chain)", "started_at": env["started_at"],
                "wall_minutes": round((time.time() - t0) / 60, 1), "config": env["config"], "hardware": env["hardware"],
                "rounds": history, "ownership": {c: round(100 * v / total, 1) for c, v in owned.items()}, "probes": probes,

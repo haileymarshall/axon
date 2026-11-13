@@ -57,34 +57,37 @@ def start(run_dir: Path) -> dict:
 
 
 def recall(answers: list[dict]) -> dict:
-    """How many showcase facts (gene, inheritance pattern) each model got right."""
+    """How many showcase facts each model got right, by kind (gene, inheritance pattern)."""
     out = {}
     for who in ("base_model", "axon_trained"):
-        g = [a["graded"][who] for a in answers if a.get("graded")]
-        out[who] = {"gene": sum(x["gene"] for x in g), "inheritance": sum(x["inheritance"] for x in g), "of": len(g)}
+        r = {}
+        for kind in ("gene", "inheritance"):
+            g = [a["graded"][who]["correct"] for a in answers if a.get("graded") and a.get("kind") == kind]
+            r[kind], r[f"{kind}_of"] = sum(g), len(g)
+        out[who] = r
     return out
 
 
 def recall_line(r: dict) -> str:
-    if not r or not r["base_model"]["of"]:
+    if not r or not r["base_model"].get("gene_of"):
         return ""
     b, t = r["base_model"], r["axon_trained"]
-    return (f"* **Facts recalled** (right gene / right inheritance, out of {b['of']}): base model **{b['gene']} / {b['inheritance']}**,"
-            f" Axon-trained **{t['gene']} / {t['inheritance']}**")
+    return (f"* **Facts recalled.** Right gene: base model **{b['gene']}/{b['gene_of']}**, Axon-trained **{t['gene']}/{t['gene_of']}**."
+            f" Right inheritance pattern: base **{b['inheritance']}/{b['inheritance_of']}**, Axon **{t['inheritance']}/{t['inheritance_of']}**.")
 
 
 def probe_lines(probes: list[dict]) -> list[str]:
     flat = lambda t: " ".join(str(t).split())
-    mark = lambda g: (" ✅ gene" if g["gene"] else " ❌ gene") + (" ✅ inheritance" if g["inheritance"] else " ❌ inheritance")
+    mark = lambda g: (" ✅" if g["correct"] else " ❌") if g and "correct" in g else ""
     lines = []
     for p in probes:
         who = f" *(from {p['contributor']}'s data)*" if p.get("contributor") else ""
-        g = p.get("graded")
+        g = p.get("graded") or {}
         lines += [f"**Q: {p['question']}**{who}", ""]
-        if p.get("gene"):
-            lines += [f"* Answer in the data: gene **{p['gene']}**, {p['inheritance']}"]
-        lines += [f"* Base{mark(g['base_model']) if g else ''}: {flat(p['base_model'])}",
-                  f"* Axon-trained{mark(g['axon_trained']) if g else ''}: {flat(p['axon_trained'])}"]
+        if p.get("kind"):
+            lines += [f"* Answer in the data: {'gene **' + p['gene'] + '**' if p['kind'] == 'gene' else '**' + p['inheritance'] + '**'}"]
+        lines += [f"* Base{mark(g.get('base_model'))}: {flat(p['base_model'])}",
+                  f"* Axon-trained{mark(g.get('axon_trained'))}: {flat(p['axon_trained'])}"]
         if p.get("reference"):
             lines += [f"* Reference: {flat(p['reference'])}"]
         lines += [""]
@@ -111,7 +114,7 @@ def finish(run_dir: Path, model_id: int, wall_seconds: int) -> dict:
                for p in probes()]
     for a, p in zip(answers, probes()):
         a["graded"] = {"base_model": data.grade(a["base_model"], p), "axon_trained": data.grade(a["axon_trained"], p)}
-        a["gene"], a["inheritance"] = p.get("gene"), p.get("inheritance")
+        a["gene"], a["inheritance"], a["kind"] = p.get("gene"), p.get("inheritance"), p.get("kind")
 
     gpu = (env["hardware"]["gpu"] or {}).get("name")
     summary = {

@@ -15,11 +15,69 @@ const txLink = (h) => (h ? `<a class="mono" target="_blank" rel="noopener" href=
 const acctLink = (a) => `<a target="_blank" rel="noopener" title="${esc(a)}" href="${CONFIG.explorer}/address/${a}">${esc(short(a))}</a>`;
 const flat = (t) => String(t || "").split(/\s+/).join(" ");
 
+// ------------------------------------------------------------------ data
+// The app backend when one is reachable (it also reaches the vault, so questions can be asked). Without one
+// (static hosting) the page reads the NEAR contract straight from an RPC node and shows the published runs.
+let API = "";
+let LIVE = false;
+
 async function api(path, opts = {}) {
-  const r = await fetch(path, { headers: { "content-type": "application/json" }, ...opts });
+  const r = await fetch(API + path, { headers: { "content-type": "application/json" }, ...opts });
   const body = await r.json().catch(() => ({}));
   if (!r.ok) throw new Error(body.detail || r.statusText);
   return body;
+}
+
+async function rpcView(method, args = {}) {
+  const b64 = btoa(String.fromCharCode(...new TextEncoder().encode(JSON.stringify(args))));
+  const r = await fetch(CONFIG.rpc, {
+    method: "POST", headers: { "content-type": "application/json" },
+    body: JSON.stringify({ jsonrpc: "2.0", id: "axon", method: "query", params: { request_type: "call_function", finality: "final", account_id: CONFIG.contract, method_name: method, args_base64: b64 } }),
+  }).then((x) => x.json());
+  if (r.error || r.result?.error) throw new Error("NEAR RPC: " + JSON.stringify(r.error || r.result.error).slice(0, 160));
+  return JSON.parse(new TextDecoder().decode(new Uint8Array(r.result.result)));
+}
+
+const db = {
+  models: () => (LIVE ? api("/api/models") : rpcView("get_models", { limit: 50 })),
+  async model(id) {
+    if (LIVE) return api(`/api/models/${id}`);
+    const m = await rpcView("get_model", { model_id: id });
+    if (!m) throw new Error("no such model");
+    m.rounds_detail = await rpcView("get_rounds", { model_id: id });
+    return m;
+  },
+  async runs() {
+    if (LIVE) return api("/api/runs");
+    const all = await fetch("/static/runs.json").then((r) => (r.ok ? r.json() : [])).catch(() => []);
+    return all.filter((r) => r.contract === CONFIG.contract);
+  },
+  async earnings(account) {
+    if (LIVE) return api(`/api/earnings/${encodeURIComponent(account)}`);
+    const out = [];
+    for (const m of await rpcView("get_models", { limit: 50 })) {
+      const c = m.contributors.find((c) => c.account === account);
+      if (c || m.creator === account) {
+        out.push({ model_id: m.id, name: m.name, shares: c ? c.shares : "0", total_shares: m.total_shares, earnings: await rpcView("earnings_of", { model_id: m.id, account }) });
+      }
+    }
+    return out;
+  },
+};
+
+async function boot() {
+  const site = await fetch("/static/site.json").then((r) => (r.ok ? r.json() : {})).catch(() => ({}));
+  API = site.api || "";
+  try {
+    CONFIG = await api("/api/config", { signal: AbortSignal.timeout(8000) });
+    LIVE = true;
+  } catch {
+    LIVE = false;
+    CONFIG = { network: site.network || "mainnet", contract: site.contract, tokens: [], vault: null, demo_payer: null };
+  }
+  CONFIG.rpc = CONFIG.rpc || site.rpc || (CONFIG.network === "mainnet" ? "https://free.rpc.fastnear.com" : "https://rpc.testnet.fastnear.com");
+  CONFIG.explorer = CONFIG.explorer || (CONFIG.network === "mainnet" ? "https://nearblocks.io" : "https://testnet.nearblocks.io");
+  CONFIG.video = site.video || null;
 }
 
 // Example models show the range of the platform. Clearly marked: they are not live.
@@ -49,14 +107,14 @@ function featured(models) {
 }
 
 async function runs() {
-  if (!RUNS) RUNS = await api("/api/runs").catch(() => []);
+  if (!RUNS) RUNS = await db.runs().catch(() => []);
   return RUNS;
 }
 
 // ------------------------------------------------------------------ home
 
 async function pageHome() {
-  const models = await api("/api/models");
+  const models = await db.models();
   const f = featured(models);
   const totals = models.reduce((t, m) => ({ q: t.q + m.queries, r: t.r + Number(m.total_revenue), o: t.o + m.contributors.filter((c) => Number(c.shares) > 0).length }), { q: 0, r: 0, o: 0 });
   view.innerHTML = `
@@ -99,11 +157,11 @@ async function pageHome() {
 }
 
 function ticker(models, t) {
-  const v = CONFIG.vault?.attestation?.mode || "unknown";
+  const v = LIVE ? CONFIG.vault?.attestation?.mode || "unknown" : "offline · answers recorded";
   const items = [
     `Network <b>NEAR ${esc(CONFIG.network)}</b>`, `Contract <b>${esc(CONFIG.contract)}</b>`, `Models <b>${models.length}</b>`,
     `Owners <b>${t.o}</b>`, `Paid questions <b>${t.q}</b>`, `Paid to owners <b>${near(t.r, 3)} Ⓝ</b>`,
-    `Split <b>95% owners · 5% Axon</b>`, `Vault attestation <b>${esc(v)}</b>`, `Data <b>never leaves the device</b>`,
+    `Split <b>95% owners · 5% Axon</b>`, `Vault <b>${esc(v)}</b>`, `Data <b>never leaves the device</b>`,
     `Junk data <b>earns 0%</b>`, `Base models <b>open: Qwen · Llama · Gemma · Mistral</b>`,
   ];
   const html = items.map((i) => `<span>${i}</span>`).join("");
@@ -153,31 +211,50 @@ async function compareBlock(m) {
     <h2>Same question. One model learned from specialists.</h2>
     <p class="lead">Base models learned the public internet, so on rare, specialist knowledge they guess. These questions are about facts in the contributors' private data. The base model never saw that data; the Axon model was trained on it.</p>`;
   if (!run || !run.probes?.length) return head + `<div class="card muted">The comparison appears after this model's first published run.</div>`;
-  const probes = run.probes;
+  // Group showcase questions by disease (a gene question and an inheritance question each).
+  const groups = [];
+  for (const p of run.probes) {
+    const g = groups.find((x) => x.disease === (p.disease || p.question));
+    g ? g.items.push(p) : groups.push({ disease: p.disease || p.question, contributor: p.contributor, items: [p] });
+  }
+  const base = esc(run.base_model.split("/").pop());
   setTimeout(() => {
     const box = $("#cmpbox");
     if (!box) return;
     const show = (k) => {
-      document.querySelectorAll(".tabs button").forEach((b, i) => b.classList.toggle("on", i === k));
-      const p = probes[k];
-      const who = p.contributor ? short(p.contributor) : "the contributors";
-      box.innerHTML = `
+      document.querySelectorAll("#cmptabs button").forEach((b, i) => b.classList.toggle("on", i === k));
+      const g = groups[k];
+      const who = g.contributor ? short(g.contributor) : "the contributors";
+      box.innerHTML = g.items.map((p) => `
         <div class="q">${esc(p.question)}</div>
-        <div class="card"><h4>Base model · ${esc(run.base_model.split("/").pop())}</h4><div class="answer">${esc(flat(p.base_model))}</div></div>
-        <div class="card axon"><h4>Axon-trained · ${esc(run.run_id)}</h4><div class="answer">${esc(flat(p.axon_trained))}</div></div>
+        <div class="card"><h4>Base model · ${base}${marks(p, "base_model")}</h4><div class="answer">${esc(flat(p.base_model))}</div></div>
+        <div class="card axon"><h4>Axon-trained${marks(p, "axon_trained")}</h4><div class="answer">${esc(flat(p.axon_trained))}</div></div>
+        ${p.kind ? `<div class="why small muted">Answer in ${esc(who)}'s data: <b style="color:var(--fg)">${esc(p.kind === "gene" ? p.gene + " gene" : p.inheritance)}</b>${p.reference ? `<div class="ref">${esc(flat(p.reference))}</div>` : ""}</div>` : ""}`).join("") + `
         <div class="card why"><h4>Why the Axon answer is better</h4>
-          <p class="small" style="margin:0">The base model saw little or nothing about ${esc(p.disease || "this condition")} on the public internet, so it has to guess.
-          The Axon model was trained on ${esc(who)}'s specialist data about it. Judge for yourself against the answer in that data:</p>
-          ${p.reference ? `<div class="ref">${esc(flat(p.reference))}</div>` : ""}</div>`;
+          <p class="small" style="margin:0">The base model saw little or nothing about ${esc(g.disease)} on the public internet, so it has to guess.
+          The Axon model was trained on ${esc(who)}'s specialist data about it, so it answers from what the specialists know.</p></div>`;
     };
-    document.querySelectorAll(".tabs button").forEach((b, i) => (b.onclick = () => show(i)));
+    document.querySelectorAll("#cmptabs button").forEach((b, i) => (b.onclick = () => show(i)));
     show(0);
   });
   const L = run.hidden_test_loss;
-  return head + `
-    <div class="tabs">${probes.map((p, i) => `<button>${esc(p.disease || "Q" + (i + 1))}</button>`).join("")}</div>
+  const rc = run.recall;
+  const kpi = (v, l, hot) => `<div class="kpi"><div class="v"${hot ? ' style="color:var(--accent)"' : ""}>${v}</div><div class="l">${l}</div></div>`;
+  const score = rc && rc.base_model.gene_of ? `<div class="kpis k4" style="margin:0 0 18px">
+      ${kpi(`${rc.base_model.gene} / ${rc.base_model.gene_of}`, "Right gene · base model")}
+      ${kpi(`${rc.axon_trained.gene} / ${rc.axon_trained.gene_of}`, "Right gene · Axon-trained", true)}
+      ${kpi(`${rc.base_model.inheritance} / ${rc.base_model.inheritance_of}`, "Right inheritance · base")}
+      ${kpi(`${rc.axon_trained.inheritance} / ${rc.axon_trained.inheritance_of}`, "Right inheritance · Axon", true)}</div>` : "";
+  return head + score + `
+    <div class="tabs" id="cmptabs">${groups.map((g) => `<button>${esc(g.disease)}</button>`).join("")}</div>
     <div class="cmp" id="cmpbox"></div>
-    <p class="small muted" style="margin-top:14px">Not cherry-picked: every showcase question of run <a href="https://github.com/haileymarshall/axon/blob/main/runs/${esc(run.run_id)}/summary.md">${esc(run.run_id)}</a> is shown. On the vault's hidden test set (questions nobody trained on), loss went ${L.before.toFixed(3)} → ${L.after.toFixed(3)} (lower is better). Not medical advice.</p>`;
+    <p class="small muted" style="margin-top:14px">Not cherry-picked: every showcase question of run <a href="https://github.com/haileymarshall/axon/blob/main/runs/${esc(run.run_id)}/summary.md">${esc(run.run_id)}</a> is shown and graded automatically (exact gene symbol / inheritance pattern). On the vault's hidden test set (questions nobody trained on), loss went ${L.before.toFixed(3)} → ${L.after.toFixed(3)} (lower is better). Not medical advice.</p>`;
+}
+
+function marks(p, who) {
+  const g = p.graded && p.graded[who];
+  if (!g || !("correct" in g)) return "";
+  return `<span style="margin-left:10px;color:${g.correct ? "var(--accent)" : "var(--warn)"}">${g.correct ? "✓ right" : "✗ wrong"}</span>`;
 }
 
 function howBlock() {
@@ -196,7 +273,7 @@ function trustBlock() {
   const v = CONFIG.vault;
   return `<div class="kicker">Why you can trust the numbers</div><h2>Checked by code, not by us.</h2>
     <div class="grid" style="margin-top:28px">
-      <div class="card"><span class="tag">Vault</span><h3>Runs in a TEE</h3><p class="muted small">The vault that merges and scores updates runs in Intel TDX. A hardware quote binds its key to its code hash. Mode now: <b>${esc(v?.attestation?.mode || "unknown")}</b>.</p></div>
+      <div class="card"><span class="tag">Vault</span><h3>Runs in a TEE</h3><p class="muted small">The vault that merges and scores updates runs in Intel TDX. A hardware quote binds its key to its code hash. ${LIVE ? `Mode now: <b>${esc(v?.attestation?.mode || "unknown")}</b>.` : "Verified attestation: see <code>runs/tee/</code> in the repo."}</p></div>
       <div class="card"><span class="tag">Contract</span><h3>Only signed results count</h3><p class="muted small">The NEAR contract accepts a round only if the vault's registered key signed it, and rejects replays and unknown accounts.</p></div>
       <div class="card"><span class="tag">Payments</span><h3>Any token, split on-chain</h3><p class="muted small">Pay with NEAR or any token via NEAR Intents. The contract splits each payment: 95% to owners by share, 5% to Axon.</p></div>
     </div>`;
@@ -205,7 +282,7 @@ function trustBlock() {
 // ------------------------------------------------------------------ model page
 
 async function pageModel(id) {
-  const m = await api(`/api/models/${id}`);
+  const m = await db.model(id);
   const total = Number(m.total_shares) || 1;
   const o = owners(m);
   // Same formula as the contract's earnings_of: pending + shares * acc_per_share / 1e9 - reward_debt
@@ -244,21 +321,9 @@ async function pageModel(id) {
             <td class="num">${near(earnings[i], 5)} Ⓝ</td></tr>`).join("")}
         </table>
       </div>
-      <div class="card">
-        <h3>Ask this model</h3>
-        <p class="muted small">Your question goes only to the sealed vault. Each paid question is split on-chain: 95% to the owners, 5% to Axon.</p>
-        <textarea id="q" placeholder="e.g. Which gene is involved in Laing distal myopathy, and how is it inherited?"></textarea>
-        <label>Pay with</label>
-        <select id="asset">
-          ${demo ? `<option value="demo">Free demo question (Axon pays, ${CONFIG.demo_per_day} a day)</option>` : ""}
-          ${CONFIG.tokens.map((t) => `<option value="${t.id}">${esc(t.label)} · via NEAR Intents</option>`).join("")}
-        </select>
-        <div id="refund-wrap" style="display:${demo ? "none" : "block"}"><label>Your refund address on that chain</label><input id="refund" placeholder="0x… / So1… / bc1…"></div>
-        <div class="row"><button class="btn" id="askbtn">Pay ${near(m.query_price, 3)} Ⓝ and ask</button></div>
-        <div id="askout"></div>
-      </div>
+      <div class="card">${LIVE ? askCard(m, demo) : offlineCard()}</div>
     </div>
-    <section class="block">${await compareBlock(m)}</section>
+    <section class="block" id="compare">${await compareBlock(m)}</section>
     <section class="block">
       <div class="kicker">Training</div><h2>Every round, on-chain.</h2>
       <div class="two" style="margin-top:28px">
@@ -275,19 +340,42 @@ async function pageModel(id) {
       <div class="kicker">Proof</div><h2>Why you can trust these numbers</h2>
       <div class="card small" style="margin-top:28px">
         <p>Round results are signed by the vault key <code>${esc(m.combiner_key.slice(0, 16))}…</code>, bound to vault code hash <code>${esc(m.combiner_code_hash.slice(0, 16))}…</code>. The contract rejects anything else.</p>
-        <p>${keyOk ? "✅ The running vault's key and code hash match what is registered on-chain." : "⚠️ The vault currently online is not the one this model is bound to (answers need the vault that trained it)."}
-        Attestation mode: <b>${esc(vault?.attestation?.mode || "unknown")}</b>.</p>
+        <p>${!LIVE ? "The vault is offline right now; the model stays bound on-chain to the key and code hash above." : keyOk ? "✅ The running vault's key and code hash match what is registered on-chain." : "⚠️ The vault currently online is not the one this model is bound to (answers need the vault that trained it)."}
+        ${LIVE ? `Attestation mode: <b>${esc(vault?.attestation?.mode || "unknown")}</b>.` : ""}</p>
         <p style="margin-bottom:0">Base model <code>${esc(m.base_model)}</code> (open, free). Compute providers get a fixed fee per round (${near(m.compute_fee, 3)} Ⓝ), never ownership. Training budget left: ${near(m.budget, 3)} Ⓝ. Creator ${acctLink(m.creator)}.</p>
       </div>
     </section>
     </div>`;
 
   ART = AxonNeuron.mount($("#art"), {
-    contributors: neuronContributors(m), labels: $("#labels"), center: [0.62, 0.45], scale: 13, cell: 4, seed: 11 + m.id,
+    contributors: neuronContributors(m), labels: $("#labels"), center: [0.66, 0.52], scale: 17, cell: 4, seed: 11 + m.id,
     somaLabel: `<b>model ${m.id}</b>${m.rounds} rounds`,
   });
-  $("#asset").onchange = (e) => ($("#refund-wrap").style.display = e.target.value === "demo" ? "none" : "block");
-  $("#askbtn").onclick = () => ask(m);
+  if (LIVE) {
+    $("#asset").onchange = (e) => ($("#refund-wrap").style.display = e.target.value === "demo" ? "none" : "block");
+    $("#askbtn").onclick = () => ask(m);
+  }
+}
+
+function askCard(m, demo) {
+  return `<h3>Ask this model</h3>
+    <p class="muted small">Your question goes only to the sealed vault. Each paid question is split on-chain: 95% to the owners, 5% to Axon.</p>
+    <textarea id="q" placeholder="e.g. Which gene is involved in Laing distal myopathy, and how is it inherited?"></textarea>
+    <label>Pay with</label>
+    <select id="asset">
+      ${demo ? `<option value="demo">Free demo question (Axon pays, ${CONFIG.demo_per_day} a day)</option>` : ""}
+      ${CONFIG.tokens.map((t) => `<option value="${t.id}">${esc(t.label)} · via NEAR Intents</option>`).join("")}
+    </select>
+    <div id="refund-wrap" style="display:${demo ? "none" : "block"}"><label>Your refund address on that chain</label><input id="refund" placeholder="0x… / So1… / bc1…"></div>
+    <div class="row"><button class="btn" id="askbtn">Pay ${near(m.query_price, 3)} Ⓝ and ask</button></div>
+    <div id="askout"></div>`;
+}
+
+function offlineCard() {
+  return `<h3>Ask this model</h3>
+    <p class="muted small">The vault that holds this model runs on a rented GPU, so it is only switched on at certain times. It is offline right now.</p>
+    <div class="notice">Everything on this page is read live from the NEAR contract. The model's real answers, next to the base model's, are below${CONFIG.video ? `, and in the <a href="${esc(CONFIG.video)}" target="_blank" rel="noopener">demo video</a>` : ""}.</div>
+    <div class="row"><a class="btn ghost" href="#compare" onclick="event.preventDefault();document.getElementById('compare').scrollIntoView({behavior:'smooth'})">See recorded answers</a></div>`;
 }
 
 function lossChart(m) {
@@ -375,7 +463,7 @@ async function pageEarnings() {
     localStorageSet("axon.account", a);
     $("#eout").innerHTML = `<p class="small"><span class="spin"></span>Reading NEAR…</p>`;
     try {
-      const rows = await api(`/api/earnings/${encodeURIComponent(a)}`);
+      const rows = await db.earnings(a);
       $("#eout").innerHTML = rows.length ? `<table style="margin-top:16px"><tr><th>Model</th><th class="num">Ownership</th><th class="num">Withdrawable</th></tr>
         ${rows.map((r) => `<tr><td><a href="#/model/${r.model_id}">${esc(r.name)}</a></td><td class="num">${pct(r.shares, r.total_shares)}</td><td class="num">${near(r.earnings, 5)} Ⓝ</td></tr>`).join("")}</table>
         <p class="small muted">Withdraw with <code>python -m axon withdraw --model &lt;id&gt; --account ${esc(a)}</code>.</p>` : `<p class="muted">This account doesn't own a share of any model yet.</p>`;
@@ -426,7 +514,7 @@ async function route() {
 }
 
 (async () => {
-  CONFIG = await api("/api/config");
+  await boot();
   $("#net").innerHTML = `<span class="live"></span>NEAR ${esc(CONFIG.network)}`;
   $("#contract-link").innerHTML = `Contract ${acctLink(CONFIG.contract)}`;
   window.addEventListener("hashchange", route);

@@ -123,9 +123,10 @@ def test_admin_token_from_env(monkeypatch):
 def test_grade_matches_exact_gene_and_inheritance():
     from axon import data
 
-    p = {"gene": "XK", "inheritance": "x-linked recessive"}
-    assert data.grade("Mutations in the XK gene; it is X-linked recessive.", p) == {"gene": True, "inheritance": True}
-    assert data.grade("Mutations in the XKR8 gene, autosomal dominant.", p) == {"gene": False, "inheritance": False}
+    p = {"gene": "XK", "inheritance": "x-linked recessive", "kind": "gene"}
+    assert data.grade("Mutations in the XK gene; it is X-linked recessive.", p) == {"gene": True, "inheritance": True, "correct": True}
+    assert data.grade("Mutations in the XKR8 gene, autosomal dominant.", p)["correct"] is False
+    assert data.grade("It is inherited in an X-linked recessive pattern.", {**p, "kind": "inheritance"})["correct"] is True
 
 
 def test_round_that_does_not_help_together_is_rejected():
@@ -145,3 +146,14 @@ def test_round_that_does_not_help_together_is_rejected():
     assert sc.new_loss == sc.base_loss
     assert sum(sc.improvement.values()) == 0
     assert torch.equal(sc.global_adapter["x"], base["x"])
+
+
+def test_lora_sum_merge_keeps_each_contributors_change():
+    from axon import ml
+
+    base = {"m.lora_A.weight": torch.ones(2), "m.lora_B.weight": torch.zeros(2)}
+    ups = [{"m.lora_A.weight": torch.ones(2) * 1.2, "m.lora_B.weight": torch.tensor([1.0, 0.0])},
+           {"m.lora_A.weight": torch.ones(2) * 0.8, "m.lora_B.weight": torch.tensor([0.0, 2.0])}]
+    merged = ml.aggregate(base, ups)
+    assert torch.allclose(merged["m.lora_A.weight"], torch.ones(2))  # A: averaged
+    assert torch.allclose(merged["m.lora_B.weight"], torch.tensor([1.0, 2.0]))  # B: each change kept in full

@@ -134,10 +134,19 @@ class Engine:
 
 
 def aggregate(base: Adapter, updates: list[Adapter]) -> Adapter:
-    """Federated averaging of adapter deltas: base + mean(update - base)."""
+    """Merge contributors' adapters.
+
+    "mean" (FedAvg) averages every tensor. With LoRA (W + B·A) and contributors holding different knowledge, that
+    scales each contributor's change down to ~1/n, so specialist facts get washed out. "lora-sum" (default) averages
+    A (which barely moves from its shared start) and adds up the B changes, so B·A ≈ base + the sum of every
+    contributor's own change: each one's knowledge survives the merge. Shapley scoring still checks the result.
+    """
     if not updates:
         return {k: v.clone() for k, v in base.items()}
-    return {k: base[k] + sum(u[k] - base[k] for u in updates) / len(updates) for k in base}
+    n = len(updates)
+    if CFG.merge == "mean":
+        return {k: base[k] + sum(u[k] - base[k] for u in updates) / n for k in base}
+    return {k: base[k] + sum(u[k] - base[k] for u in updates) / (1 if "lora_B" in k else n) for k in base}
 
 
 @dataclass

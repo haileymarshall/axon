@@ -110,7 +110,7 @@
       L.width = A.width = cols;
       L.height = A.height = rows;
       const narrow = w < 760;
-      unit = narrow ? Math.min(rows / (scale * 0.8), cols / (scale * 0.78)) : Math.min(rows / scale, cols / (scale * 1.6));
+      unit = narrow ? Math.min(rows / (scale * 0.85), cols / (scale * 1.05)) : Math.min(rows / scale, cols / (scale * 1.6));
       ox = cols * (narrow ? 0.5 : center[0]);
       oy = rows * (narrow ? 0.42 : center[1]);
       placeLabels();
@@ -252,9 +252,10 @@
         const el = document.createElement("div");
         el.className = "nlabel " + (cls || "");
         el.innerHTML = html;
-        el.style.left = `${ox * cell + p[0] * unit * cell}px`;
-        el.style.top = `${oy * cell + p[1] * unit * cell}px`;
         labels.appendChild(el);
+        const W = canvas.clientWidth, H = canvas.clientHeight, hw = el.offsetWidth / 2 + 6;
+        el.style.left = `${Math.max(hw, Math.min(W - hw, ox * cell + p[0] * unit * cell))}px`;
+        el.style.top = `${Math.max(el.offsetHeight * 1.4 + 4, Math.min(H - 8, oy * cell + p[1] * unit * cell))}px`;
       };
       for (const d of world.dendrites) {
         if (!d.c) continue;
