@@ -44,8 +44,8 @@ code { font-size: .85em; background: var(--fill); border: 1px solid var(--line);
 .btn:disabled { opacity: .5; cursor: wait; }
 
 /* hero: copy left, line-art panel right */
-.hero { position: relative; min-height: 100vh; min-height: 100svh; padding-top: 86px; overflow: hidden; }
-.hero canvas.art, .hero .labels { position: absolute; right: 5vw; top: 112px; width: 46vw; height: calc(100% - 200px); }
+.hero { position: relative; min-height: 100vh; min-height: 100svh; padding: 124px 0 76px 6vw; overflow: hidden; display: flex; flex-direction: column; justify-content: center; }
+.hero canvas.art, .hero .labels { position: absolute; right: 5vw; top: 112px; width: 46vw; height: calc(100% - 180px); }
 .hero canvas.art { border: 1px solid var(--line); background: var(--bg2); }
 .hero .labels { pointer-events: none; }
 .nlabel { position: absolute; transform: translate(-50%, -135%); font: 500 10px/1.35 var(--mono); letter-spacing: .06em; text-transform: uppercase; white-space: nowrap;
@@ -56,16 +56,16 @@ code { font-size: .85em; background: var(--fill); border: 1px solid var(--line);
 .nlabel.dead b { text-decoration: line-through; }
 .nlabel.dead span { color: var(--warn); }
 .nlabel.soma, .nlabel.axon { transform: translate(-50%, 0); }
-.hero .copy { position: absolute; left: 6vw; top: 50%; transform: translateY(-52%); width: min(560px, 40vw); z-index: 2; }
+.hero .copy { position: relative; width: min(560px, 40vw); z-index: 2; }
 .eyebrow { font: 500 11px var(--mono); letter-spacing: .12em; text-transform: uppercase; margin-bottom: 20px; opacity: .9; }
 .eyebrow::before { content: "● "; color: var(--accent); }
-.hero h1 { font: 300 clamp(44px, 5.6vw, 92px)/0.94 var(--display); letter-spacing: -.02em; margin: 0; }
+.hero h1 { font: 300 clamp(40px, min(5.4vw, 8.5vh), 92px)/0.94 var(--display); letter-spacing: -.02em; margin: 0; }
 .hero h1 .dim { display: block; color: var(--dim); font-size: .62em; line-height: 1.02; margin-top: 18px; }
 .hero .sub { color: var(--dim); font-size: 15px; margin: 22px 0 24px; max-width: 440px; }
 .hero .cta { display: flex; gap: 0; flex-wrap: wrap; }
 .hero .newhere { font-size: 13px; color: var(--dim); margin-top: 16px; }
 .hero .newhere a { color: var(--ink); font-weight: 600; }
-.term { position: absolute; left: 6vw; bottom: 64px; z-index: 2; width: min(560px, 40vw); font: 12px/1.7 var(--mono); color: var(--dim); white-space: pre; overflow: hidden;
+.term { position: relative; margin-top: 26px; z-index: 2; width: min(560px, 40vw); flex: none; font: 12px/1.7 var(--mono); color: var(--dim); white-space: pre; overflow: hidden;
   background: var(--fill); border: 1px solid var(--line2); padding: 12px 14px; }
 .term .p { color: var(--accent); }
 .term b { color: var(--ink); font-weight: 500; }
@@ -182,7 +182,7 @@ pre { background: var(--fill); border: 1px solid var(--line); padding: 16px; ove
   .brand { grid-column: 1; text-align: left; font-size: 22px; }
   .top .chip { display: none; }
   .wrap { padding: 0 16px; }
-  .hero { min-height: auto; padding-bottom: 20px; }
+  .hero { min-height: auto; padding: 0 0 20px; display: block; }
   .hero canvas.art, .hero .labels { right: auto; left: 16px; width: calc(100% - 32px); top: 96px; height: 48vh; }
   .hero .copy { position: relative; left: auto; top: auto; transform: none; width: auto; padding: calc(48vh + 40px) 16px 0; }
   .term { position: relative; left: auto; bottom: auto; width: auto; margin: 26px 16px 0; font-size: 11px; }
