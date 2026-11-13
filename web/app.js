@@ -152,7 +152,7 @@ async function pageHome() {
         <div class="grid">${models.map(modelCard).join("") || `<p class="muted">No models yet. <a href="#/create">Start one</a>.</p>`}
           ${EXAMPLES.map((e) => `<div class="card example"><span class="tag">${esc(e.domain)} · example</span><h3>${esc(e.name)}</h3><p class="muted small">${esc(e.text)}</p></div>`).join("")}</div>
       </section>
-      <section class="block" id="compare">${await compareBlock(f)}</section>
+      <section class="block" id="compare">${await nicheBlock(models, f)}</section>
       <section class="block" id="how">${howBlock()}</section>
       <section class="block">${trustBlock()}</section>
     </div>`;
@@ -216,12 +216,31 @@ function modelCard(m) {
   </a>`;
 }
 
-async function compareBlock(m) {
-  const all = await runs();
-  const run = m ? all.find((r) => r.model_id === m.id) : all[0];
-  const head = `<div class="kicker">Base model vs Axon-trained</div>
+const COMPARE_HEAD = `<div class="kicker">Base model vs Axon-trained</div>
     <h2>Same question. One model learned from specialists.</h2>
-    <p class="lead">Base models learned the public internet, so on rare, specialist knowledge they guess. These questions are about facts in the contributors' private data. The base model never saw that data; the Axon model was trained on it.</p>`;
+    <p class="lead">Base models learned the public internet, so on specialist, private knowledge they guess. Each model below was fine-tuned by the people who hold that knowledge. The base model never saw their data; the Axon model was trained on it.</p>`;
+
+// Home page: one tab per niche model that has a published run (the latest clean run of each).
+async function nicheBlock(models, f) {
+  const all = await runs();
+  const shown = models.filter((m) => all.some((r) => r.model_id === m.id && !r.note && r.probes?.length))
+    .sort((a, b) => b.id - a.id).filter((m, i, arr) => arr.findIndex((x) => x.domain === m.domain) === i);
+  if (shown.length < 2) return compareBlock(shown[0] || f);
+  setTimeout(() => {
+    const pick = async (i) => {
+      document.querySelectorAll("#nichetabs button").forEach((b, k) => b.classList.toggle("on", k === i));
+      $("#niche").innerHTML = await compareBlock(shown[i], false);
+    };
+    document.querySelectorAll("#nichetabs button").forEach((b, i) => (b.onclick = () => pick(i)));
+    pick(0);
+  });
+  return COMPARE_HEAD + `<div class="tabs" id="nichetabs" style="margin-bottom:26px">${shown.map((m) => `<button style="font-size:13px;padding:10px 16px">${esc(m.name)} <span class="muted">· ${esc(m.domain)}</span></button>`).join("")}</div><div id="niche"></div>`;
+}
+
+async function compareBlock(m, withHead = true) {
+  const all = await runs();
+  const run = m ? all.filter((r) => !r.note).find((r) => r.model_id === m.id) : all[0];
+  const head = withHead ? COMPARE_HEAD : "";
   if (!run || !run.probes?.length) return head + `<div class="card muted">The comparison appears after this model's first published run.</div>`;
   // Group showcase questions by disease (a gene question and an inheritance question each).
   const groups = [];
