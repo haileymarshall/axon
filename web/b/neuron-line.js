@@ -238,9 +238,12 @@
         const hw = el.offsetWidth / 2 + 6;
         el.style.left = `${Math.max(hw, Math.min(W - hw, ox + p[0] * unit))}px`;
         el.style.top = `${Math.max(el.offsetHeight * 1.4 + 4, Math.min(H - 8, oy + p[1] * unit))}px`;
+        return el;
       };
       for (const d of world.dendrites) {
-        if (d.c) add(d.path.pts[0], `<b>${d.c.name}</b><span>${d.c.excluded ? "0% · excluded" : d.c.share}</span>`, d.c.excluded ? "dead" : "");
+        if (!d.c) continue;
+        const el = add(d.path.pts[0], d.c.html || `<b>${d.c.name}</b><span>${d.c.excluded ? "0% · excluded" : d.c.share}</span>`, (d.c.excluded ? "dead" : "") + (d.c.html ? " device" : ""));
+        if (d.c.title) el.title = d.c.title;
       }
       if (opts.somaLabel) add([0, 2.05], opts.somaLabel, "soma");
       if (opts.axonLabel) add([world.axonEnd[0] + 0.1, world.axonEnd[1] + 1.15], opts.axonLabel, "axon");

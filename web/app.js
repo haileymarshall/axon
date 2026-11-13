@@ -91,14 +91,27 @@ function owners(m) {
   return m.contributors.slice().sort((a, b) => Number(b.shares) - Number(a.shares));
 }
 
+// Each contributor trains on their own machine, so the neuron shows their device, not their name.
+const DEVICES = [
+  // laptop
+  `<svg viewBox="0 0 40 30" aria-hidden="true"><rect x="7" y="3" width="26" height="17" rx="1.5"/><rect x="10" y="6" width="20" height="11"/><path d="M3 23h34l-3 4H6z"/><path d="M17 25h6"/></svg>`,
+  // desktop tower with a GPU
+  `<svg viewBox="0 0 40 30" aria-hidden="true"><rect x="12" y="2" width="16" height="26" rx="1.5"/><path d="M15 6h10M15 9h10"/><rect x="15" y="15" width="10" height="5"/><circle cx="18" cy="17.5" r="1.2"/><circle cx="22" cy="17.5" r="1.2"/><circle cx="20" cy="24" r="1.3"/></svg>`,
+  // mini server
+  `<svg viewBox="0 0 40 30" aria-hidden="true"><rect x="6" y="4" width="28" height="7" rx="1"/><rect x="6" y="12" width="28" height="7" rx="1"/><rect x="6" y="20" width="28" height="7" rx="1"/><circle cx="10" cy="7.5" r="1"/><circle cx="10" cy="15.5" r="1"/><circle cx="10" cy="23.5" r="1"/><path d="M22 7.5h8M22 15.5h8M22 23.5h8"/></svg>`,
+  // GPU card
+  `<svg viewBox="0 0 40 30" aria-hidden="true"><rect x="3" y="7" width="31" height="15" rx="1.5"/><circle cx="13" cy="14.5" r="5"/><circle cx="25" cy="14.5" r="5"/><path d="M13 11v7M9.5 14.5h7M25 11v7M21.5 14.5h7"/><path d="M34 10h3v9h-3M7 22v3M12 22v3M17 22v3M22 22v3"/></svg>`,
+];
+
 function neuronContributors(m) {
-  if (!m) return [{ name: "clinic", share: "owner" }, { name: "patient", share: "owner" }, { name: "lab", share: "owner" }];
+  if (!m) return [0, 1, 2].map((i) => ({ html: DEVICES[i], title: "contributor" }));
   const o = owners(m);
   const good = o.filter((c) => Number(c.shares) > 0);
   const bad = o.filter((c) => Number(c.shares) === 0 && m.rounds > 0);
-  // Put the excluded contributor in the middle of the fan so it reads clearly.
-  const list = good.map((c) => ({ name: short(c.account), share: pct(c.shares, m.total_shares) }));
-  bad.forEach((c) => list.splice(Math.ceil(list.length / 2), 0, { name: short(c.account), excluded: true }));
+  const dev = (c, i) => ({ html: DEVICES[i % DEVICES.length], title: `${short(c.account)} · ${pct(c.shares, m.total_shares)}` });
+  const list = good.map((c, i) => dev(c, i));
+  // Excluded contributors: same device, greyed out and crossed, placed mid-fan so it reads clearly.
+  bad.forEach((c, k) => list.splice(Math.ceil(list.length / 2), 0, { ...dev(c, good.length + k), excluded: true, title: `${short(c.account)} · 0%, excluded` }));
   return list;
 }
 
@@ -145,8 +158,7 @@ async function pageHome() {
     </div>`;
   ART = AxonNeuron.mount($("#art"), {
     contributors: neuronContributors(f), labels: $("#labels"),
-    somaLabel: f ? `<b>${esc(f.name)}</b>the model` : "<b>the model</b>",
-    axonLabel: f ? `<b>answers</b>${near(f.query_price, 2)} Ⓝ a question` : "<b>answers</b>",
+    axonLabel: "<b>inference</b>",
   });
   ticker(models, totals);
   typeTerm(f);
@@ -349,7 +361,6 @@ async function pageModel(id) {
 
   ART = AxonNeuron.mount($("#art"), {
     contributors: neuronContributors(m), labels: $("#labels"), center: [0.66, 0.52], scale: 17, cell: 4, seed: 11 + m.id,
-    somaLabel: `<b>model ${m.id}</b>${m.rounds} rounds`,
   });
   if (LIVE) {
     $("#asset").onchange = (e) => ($("#refund-wrap").style.display = e.target.value === "demo" ? "none" : "block");

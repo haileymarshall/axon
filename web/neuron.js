@@ -70,7 +70,7 @@
     const axon = [];
     let x = 1.4, y = 0.25, a = 0.42;
     const pts = [[x, y]];
-    for (let i = 0; i < 24; i++) {
+    for (let i = 0; i < 17; i++) {
       a += Math.sin(i * 0.35) * 0.025;
       x += Math.cos(a) * 0.2;
       y += Math.sin(a) * 0.2;
@@ -96,7 +96,7 @@
     const ctx = canvas.getContext("2d");
     let cols = 0, rows = 0, unit = 1, ox = 0, oy = 0, glow = 0, last = 0, visible = true, t0 = performance.now();
     const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const center = opts.center || [0.33, 0.44];
+    const center = opts.center || [0.31, 0.44];
     const scale = opts.scale || 16;
 
     function resize() {
@@ -256,10 +256,12 @@
         const W = canvas.clientWidth, H = canvas.clientHeight, hw = el.offsetWidth / 2 + 6;
         el.style.left = `${Math.max(hw, Math.min(W - hw, ox * cell + p[0] * unit * cell))}px`;
         el.style.top = `${Math.max(el.offsetHeight * 1.4 + 4, Math.min(H - 8, oy * cell + p[1] * unit * cell))}px`;
+        return el;
       };
       for (const d of world.dendrites) {
         if (!d.c) continue;
-        add(d.tip, `<b>${d.c.name}</b><span>${d.c.excluded ? "0% · excluded" : d.c.share}</span>`, d.c.excluded ? "dead" : "");
+        const el = add(d.tip, d.c.html || `<b>${d.c.name}</b><span>${d.c.excluded ? "0% · excluded" : d.c.share}</span>`, (d.c.excluded ? "dead" : "") + (d.c.html ? " device" : ""));
+        if (d.c.title) el.title = d.c.title;
       }
       if (opts.somaLabel) add([0, 2.0], opts.somaLabel, "soma");
       if (opts.axonLabel) add([world.axonEnd[0] + 0.2, world.axonEnd[1] + 1.25], opts.axonLabel, "axon");

@@ -182,3 +182,11 @@ pre { background: #0b0b0b; border: 1px solid var(--line); border-radius: 10px; p
   .mhead .copy { left: 16px; right: 16px; }
 }
 @media (prefers-reduced-motion: reduce) { .ticker .track { animation: none; } }
+
+/* contributor devices at the dendrite tips */
+.nlabel.device { padding: 5px 6px; pointer-events: auto; cursor: help; }
+.nlabel.device svg { display: block; width: 40px; height: 30px; fill: none; stroke: var(--fg); stroke-width: 1.4; stroke-linejoin: round; stroke-linecap: round; }
+.nlabel.device.dead { opacity: .7; }
+.nlabel.device.dead svg { stroke: var(--mute); }
+.nlabel.device.dead::after { content: ""; position: absolute; left: -2px; right: -2px; top: 50%; border-top: 2px solid var(--warn); transform: rotate(-28deg); opacity: 1; }
+@media (max-width: 760px) { .nlabel.device svg { width: 30px; height: 22px; } }

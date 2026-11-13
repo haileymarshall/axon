@@ -194,3 +194,10 @@ pre { background: var(--fill); border: 1px solid var(--line); padding: 16px; ove
   .mhead .copy { position: relative; left: auto; bottom: auto; padding: 330px 16px 0; }
 }
 @media (prefers-reduced-motion: reduce) { .ticker .track { animation: none; } }
+
+/* contributor devices at the dendrite tips */
+.nlabel.device { padding: 6px 7px; pointer-events: auto; cursor: help; }
+.nlabel.device svg { display: block; width: 42px; height: 32px; fill: none; stroke: var(--ink); stroke-width: 1.3; stroke-linejoin: round; stroke-linecap: round; }
+.nlabel.device.dead { opacity: .75; }
+.nlabel.device.dead::after { content: ""; position: absolute; left: -2px; right: -2px; top: 50%; border-top: 2px solid var(--warn); transform: rotate(-28deg); opacity: 1; }
+@media (max-width: 760px) { .nlabel.device svg { width: 30px; height: 23px; } }
