@@ -10,6 +10,13 @@ IMAGE=${1:?usage: deploy/phala.sh <image@sha256:digest>}
 : "${AXON_CONTRACT:?}" "${AXON_OPERATOR:?}"
 OUT=deploy/vault-compose.yml
 sed "s|\${AXON_VAULT_IMAGE}|$IMAGE|" docker-compose.yml > "$OUT"
+# Training/scoring settings are written into the compose as literals, so they are measured too (not sealed secrets).
+python3 - "$OUT" <<'PY'
+import os, re, sys
+p = sys.argv[1]; s = open(p).read()
+s = re.sub(r"\$\{(AXON_(?:DTYPE|LORA_RANK|LORA_TARGETS|MAX_LEN)):-([^}]*)\}", lambda m: os.environ.get(m.group(1), m.group(2)), s)
+open(p, "w").write(s)
+PY
 ENVF=$(mktemp); chmod 600 "$ENVF"; trap 'rm -f "$ENVF"' EXIT
 KEY=$(python3 -c "import json,sys;print(json.load(open(sys.argv[1]))['private_key'])" "$HOME/.near-credentials/${AXON_NETWORK:-testnet}/$AXON_OPERATOR.json")
 cat > "$ENVF" <<ENV

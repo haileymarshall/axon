@@ -36,13 +36,16 @@ def main() -> None:
     (ROOT / "web" / "samples").mkdir(exist_ok=True)
     for f in (ROOT / "samples").glob("*.txt"):
         shutil.copy(f, ROOT / "web" / "samples" / f.name)
-    # Saved evidence of the TEE vault that model 4 is bound to, re-checked live by the model page.
-    ev = json.loads((ROOT / "runs" / "tee-mainnet" / "vault-info-20261113.json").read_text())
-    ev = ev.get("info", ev)
-    tee = {"model": 4, "combiner_key": ev["combiner_key"], "code_hash": ev["code_hash"], "quote": ev["attestation"]["quote"],
-           "commit": "af804dc", "rebind_tx": "6sD21iu8CTfvQTwgA6vvjMJZRMg6Gy99yUY4NAwk4xvr",
-           "round_tx": "HmeSHkg2encGsDZgfvzkAKweETp4NtVv2h5SJAd3voED", "cvm": "axon-vault-mainnet5 (Phala Cloud, dstack, Intel TDX)"}
-    (ROOT / "web" / "tee.json").write_text(json.dumps(tee))
+    # Saved evidence of every TEE vault (runs/<dir>/tee.json manifests), re-checked live by the model pages.
+    vaults = []
+    for man in sorted((ROOT / "runs").glob("*/tee.json")):
+        t = json.loads(man.read_text())
+        ev = json.loads((man.parent / t["evidence"]).read_text())
+        ev = ev.get("info", ev)
+        vaults.append({"combiner_key": ev["combiner_key"], "code_hash": ev["code_hash"], "quote": ev["attestation"]["quote"],
+                       "commit": t["commit"], "cvm": t["cvm"], "round_txs": t.get("round_txs", {}),
+                       "evidence": f"runs/{man.parent.name}/{t['evidence']}"})
+    (ROOT / "web" / "tee.json").write_text(json.dumps({"vaults": vaults}))
     print(f"web/site.json → {site}\nweb/runs.json → {len(runs)} runs")
 
 

@@ -1,0 +1,5 @@
+1. code hash   vault 24b301a9764a45bd…  this checkout 24b301a9764a45bd…  -> OK
+2. quote binds key 43c348bf65a93d13… + code hash  -> OK
+3. genuine Intel TDX quote (verifier id fe3cf481fdbef639…)  -> OK
+evidence saved to runs/tee-mainnet2/vault-info-20261114.json
+ALL CHECKS PASSED

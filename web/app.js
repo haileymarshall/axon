@@ -47,6 +47,10 @@ const LABELS = {
     3: { area: "Language", topic: "Basque native", grade: "translation score 17.8 → 30.7" },
     4: { area: "Clinical", topic: "Inheritance pattern and genes for rare diseases (TEE round)", grade: "hidden-test loss 1.891 → 1.647, scored inside an attested TEE" },
     0: { area: "Clinical", topic: "Inheritance pattern and genes for rare diseases (earlier run)", grade: "", hidden: true },
+    5: { area: "Cybersecurity", topic: "Vulnerability classification (closed: created on the wrong base model)", grade: "", hidden: true },
+    6: { area: "Language", topic: "Basque native (closed: created on the wrong base model)", grade: "", hidden: true },
+    7: { area: "Cybersecurity", topic: "Vulnerability classification (TEE)", grade: "" },
+    8: { area: "Language", topic: "Basque native (TEE)", grade: "" },
   },
 };
 function label(m) {
@@ -619,8 +623,10 @@ function prepSection(m) {
 }
 
 async function teeSection(m) {
-  const tee = await fetch("/static/tee.json").then((r) => (r.ok ? r.json() : null)).catch(() => null);
-  if (!tee || m.combiner_key !== tee.combiner_key) return "";
+  const all = await fetch("/static/tee.json").then((r) => (r.ok ? r.json() : null)).catch(() => null);
+  const tee = (all?.vaults || []).find((v) => v.combiner_key === m.combiner_key);
+  if (!tee) return "";
+  const roundTx = tee.round_txs[String(m.id)];
   setTimeout(async () => {
     const box = $("#teeout");
     const digest = async (hex) => [...new Uint8Array(await crypto.subtle.digest("SHA-256", new Uint8Array(hex.match(/../g).map((h) => parseInt(h, 16)))))].map((b) => b.toString(16).padStart(2, "0")).join("");
@@ -635,7 +641,7 @@ async function teeSection(m) {
     checks.push({ check: "TEE not in debug mode", ok: !!v.ok && v.debug === false, detail: "" });
     checks.push({ check: `Code hash = the vault code at commit ${tee.commit}`, ok: true, detail: "checked offline by scripts/verify_tee.py; run it yourself (below)" });
     box.innerHTML = verifiedPanel(`TEE vault · ${tee.cvm}`, checks,
-      `Every update for this model was scored, and the round recorded (<a target="_blank" rel="noopener" href="${CONFIG.explorer}/txns/${tee.round_tx}">tx</a>), by this vault. Check it yourself: <code>git checkout ${tee.commit} && python scripts/verify_tee.py runs/tee-mainnet/vault-info-20261113.json --model ${tee.model}</code>`);
+      `Every update for this model was scored, and the round recorded${roundTx ? ` (<a target="_blank" rel="noopener" href="${CONFIG.explorer}/txns/${roundTx}">tx</a>)` : ""}, by this vault. Check it yourself: <code>git checkout ${tee.commit} && python scripts/verify_tee.py ${tee.evidence} --model ${m.id}</code>`);
   });
   return `<section class="block"><div class="kicker">Verified</div><h2>Scored inside an attested TEE</h2><div id="teeout"></div></section>`;
 }

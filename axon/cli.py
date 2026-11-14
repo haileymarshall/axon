@@ -60,7 +60,7 @@ def cmd_create_model(a):
     from .chain import near_to_yocto
     info = httpx.get(f"{CFG.vault_url}/info", timeout=30).json()
     res = _near().call(a.creator, "create_model", {
-        "name": a.name, "domain": a.domain, "description": a.description, "base_model": info["base_model"],
+        "name": a.name, "domain": a.domain, "description": a.description, "base_model": a.base_model or info["base_model"],
         "combiner_key": info["combiner_key"], "combiner_code_hash": info["code_hash"],
         "query_price": str(near_to_yocto(a.price)), "compute_fee": str(near_to_yocto(a.compute_fee)),
     }, deposit_yocto=near_to_yocto(a.budget), gas_tgas=50)
@@ -201,6 +201,7 @@ def main(argv=None):
     s.add_argument("--price", default="0.01", help="NEAR per query")
     s.add_argument("--compute-fee", default="0.05", help="NEAR paid to the compute provider per round")
     s.add_argument("--budget", default="0.5", help="NEAR deposited as training budget")
+    s.add_argument("--base-model", default="", help="open base model (one of the vault's /info bases); default: the vault's default")
     s.set_defaults(fn=cmd_create_model)
 
     s = sub.add_parser("set-combiner", help="re-bind a model to the running vault (after a vault upgrade)")

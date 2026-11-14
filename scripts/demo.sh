@@ -24,7 +24,7 @@ if [[ "$DOMAIN" == "rare-diseases" ]]; then CDIR=data/contributors; else CDIR=da
 
 echo "== 1. create the model (bound to the vault's key + code hash)"
 if [[ -n "${MODEL:-}" ]]; then echo "reusing model $MODEL"; else
-MODEL=$($PY -m axon create-model --creator "$CREATOR" --name "$NAME" --domain "$DOMAIN" \
+MODEL=$($PY -m axon create-model --creator "$CREATOR" --name "$NAME" --domain "$DOMAIN" --base-model "${AXON_BASE_MODEL:-}" \
   --description "$DESCRIPTION" \
   --price 0.01 --compute-fee 0.02 --budget "$BUDGET" | awk '/model/{print $2}'); fi
 echo "model id: $MODEL"

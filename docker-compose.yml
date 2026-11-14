@@ -11,6 +11,11 @@ services:
       - AXON_OPERATOR=${AXON_OPERATOR}
       - AXON_VAULT_TOKEN=${AXON_VAULT_TOKEN}
       - AXON_NEAR_PRIVATE_KEY=${AXON_NEAR_PRIVATE_KEY}
+      # Training and scoring settings are part of the measured compose, so the attestation covers them too.
+      - AXON_DTYPE=${AXON_DTYPE:-float32}
+      - AXON_LORA_RANK=${AXON_LORA_RANK:-8}
+      - AXON_LORA_TARGETS=${AXON_LORA_TARGETS:-q_proj,k_proj,v_proj,o_proj}
+      - AXON_MAX_LEN=${AXON_MAX_LEN:-128}
     volumes:
       - /var/run/dstack.sock:/var/run/dstack.sock
       - axon-state:/app/state
