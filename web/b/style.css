@@ -61,7 +61,7 @@ code { font-size: .85em; background: var(--fill); border: 1px solid var(--line);
 .eyebrow::before { content: "● "; color: var(--accent); }
 .hero h1 { font: 300 clamp(72px, min(9vw, 15vh), 160px)/0.9 var(--display); letter-spacing: -.02em; margin: 0; }
 .hero .eyebrow.under { margin: 16px 0 0; }
-.hero .tagline { font: 300 clamp(20px, min(2.1vw, 3.4vh), 32px)/1.12 var(--display); margin: 18px 0 0; max-width: 520px; }
+.hero .tagline { font: 400 clamp(17px, min(1.35vw, 2.4vh), 21px)/1.45 var(--sans); margin: 18px 0 0; max-width: 520px; }
 .hero .tagline .dim { display: block; color: var(--dim); margin-top: 8px; }
 .hero .sub { color: var(--dim); font-size: 16px; margin: 22px 0 24px; max-width: 440px; }
 .hero .cta { display: flex; gap: 0; flex-wrap: wrap; }
