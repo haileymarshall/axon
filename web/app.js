@@ -58,6 +58,15 @@ const LABELS = {
 };
 // Which model each "base vs Axon-trained" tab shows (Clinical, Cybersecurity, Language).
 const SHOWCASE = { "axon.ebukaa.near": [9, 7, 8] };
+// On-chain proof for each showcased run (rounds recorded by the TEE vault, the paid question it answered).
+const PROOF = {
+  "axon.ebukaa.near": {
+    9: { rounds: ["7rwzFf685GbR6NVUXRLf45pEm3PvQfom5nS7tXdR24T8"], paid: "", vault: "axon-vault-tee2" },
+    7: { rounds: ["E5u2LEVnRozLhwJmkLN6iYvSrnE3c9JyczyTrN2mGxgo"], paid: "3mzdetZQpPaXB2WcvuDceaPqmZVyy7Uj4YedVeMd785C", vault: "axon-vault-tee2" },
+    8: { rounds: ["Fk6wrM2eUU21nV6mzEtdsydfbTgjQgegEoqE6Tk3Gd1w"], paid: "FfpuWi8DopHaWmQtou5xqYcJhnTAix1SeTZBUxPRWBAq", vault: "axon-vault-tee2" },
+    4: { rounds: ["HmeSHkg2encGsDZgfvzkAKweETp4NtVv2h5SJAd3voED"], paid: "7FSBVoWS24ps4jPeMyms6SvfYL51MKXsv3Av6x2p6wXr", vault: "axon-vault-mainnet5" },
+  },
+};
 // Shown name of a model: its showcase number, else its on-chain id.
 const mnum = (m) => m.n ?? m.id;
 const byNumber = (a, b) => (a.n ?? 100 + a.id) - (b.n ?? 100 + b.id);
@@ -315,7 +324,7 @@ async function compareBlock(m, withHead = true) {
   return head + score + `
     <div class="tabs" id="cmptabs">${groups.map((g) => `<button>${esc(g.disease)}</button>`).join("")}</div>
     <div class="cmp" id="cmpbox"></div>
-    <p class="small muted" style="margin-top:14px">Not cherry-picked: every showcase question of run <a href="https://github.com/haileymarshall/axon/blob/main/runs/${esc(run.run_id)}/summary.md">${esc(run.run_id)}</a> is shown and graded automatically (exact answer match, no human judging). On the vault's hidden test set (questions nobody trained on), loss went ${L.before.toFixed(3)} → ${L.after.toFixed(3)} (lower is better).${m && m.domain === "rare-diseases" ? " Not medical advice." : ""}</p>`;
+    <p class="small muted" style="margin-top:14px">Not cherry-picked: every showcase question of run <a href="https://github.com/haileymarshall/axon/blob/master/runs/${esc(run.run_id)}/summary.md">${esc(run.run_id)}</a> is shown and graded automatically (exact answer match, no human judging). On the vault's hidden test set (questions nobody trained on), loss went ${L.before.toFixed(3)} → ${L.after.toFixed(3)} (lower is better).${m && m.domain === "rare-diseases" ? " Not medical advice." : ""}</p>`;
 }
 
 function marks(p, who) {
@@ -680,7 +689,7 @@ async function pageJoin(id) {
   const n = nicheOf(m);
   const acct = W.account() || (CONFIG.network === "mainnet" ? "<your-account>.near" : "<your-account>.testnet");
   const cmd = `${envLine()}\n.venv/bin/python -m axon contribute --model ${m.id} --account ${acct} --data ~/my-axon-data.jsonl`;
-  const prompt = `Help me contribute my private data to an Axon model, so I co-own it and earn from it. Follow the guide at ${REPO}/blob/main/AGENT_SETUP.md (Path A).
+  const prompt = `Help me contribute my private data to an Axon model, so I co-own it and earn from it. Follow the guide at ${REPO}/blob/master/AGENT_SETUP.md (Path A).
 Model: ${m.id} ("${m.name}", niche: ${m.domain}) on NEAR ${CONFIG.network}, contract ${CONFIG.contract}.
 My NEAR account: ${acct}.
 Vault: ${CONFIG.vault_url || "see the Axon website"}.
@@ -704,14 +713,44 @@ My data is on this computer; it must never be uploaded or pasted anywhere. Help 
     <section class="block" style="padding-top:40px"><h3>Run the training</h3>
     ${threeTabs("jointabs", [
       { title: "With your AI assistant (easiest)", html: `<p class="muted small">Paste this into Claude, ChatGPT, Cursor or any assistant that can use a terminal. It installs Axon, helps you format your data, and runs the training for you.</p>${copyBox(prompt, "Copy message")}` },
-      { title: "Copy one command", html: `<p class="muted small">Needs Axon installed (<a href="${REPO}/blob/main/AGENT_SETUP.md" target="_blank" rel="noopener">2-minute install</a>), your NEAR account imported, and an NVIDIA GPU (12 GB+).</p>${copyBox(cmd)}` },
+      { title: "Copy one command", html: `<p class="muted small">Needs Axon installed (<a href="${REPO}/blob/master/AGENT_SETUP.md" target="_blank" rel="noopener">2-minute install</a>), your NEAR account imported, and an NVIDIA GPU (12 GB+).</p>${copyBox(cmd)}` },
       { title: "For developers", html: `<p class="muted small">Full details: install, keys, data format, troubleshooting.</p><pre>git clone ${REPO}.git && cd axon
 python3 -m venv .venv && .venv/bin/pip install torch && .venv/bin/pip install -r requirements.txt
 near account import-account using-seed-phrase network-config ${CONFIG.network}
-${esc(cmd)}</pre><p class="small"><a href="${REPO}/blob/main/AGENT_SETUP.md" target="_blank" rel="noopener">AGENT_SETUP.md</a> · <a href="${REPO}" target="_blank" rel="noopener">README</a></p>` },
+${esc(cmd)}</pre><p class="small"><a href="${REPO}/blob/master/AGENT_SETUP.md" target="_blank" rel="noopener">AGENT_SETUP.md</a> · <a href="${REPO}" target="_blank" rel="noopener">README</a></p>` },
     ])}</section></div>`;
   const jc = $("#jconnect");
   if (jc) jc.onclick = (e) => { e.preventDefault(); W.connect(); };
+}
+
+async function pageRuns() {
+  const proof = PROOF[CONFIG.contract] || {};
+  const ids = Object.keys(proof).map(Number);
+  const [models, all] = await Promise.all([Promise.all(ids.map((id) => db.model(id))), runs()]);
+  models.sort(byNumber);
+  const row = (m) => {
+    const p = proof[m.id];
+    const run = all.find((r) => r.model_id === m.id && !r.note);
+    const o = owners(m);
+    const who = o.map((c) => `${acctLink(c.account)} <b>${pct(c.shares, m.total_shares)}</b>`).join("<br>");
+    return `<tr>
+      <td><a href="#/model/${m.id}"><b>Model ${mnum(m)}</b></a><div class="small muted">on-chain id ${m.id}</div></td>
+      <td><b>${esc(m.area)}</b><div class="small">${esc(m.name)}</div><div class="small muted">${esc(m.base_model.split("/").pop())}</div></td>
+      <td class="small">${m.grade ? esc(m.grade) : "<span class=\"muted\">being scored in the TEE…</span>"}${run ? `<div class="muted">${run.wall_minutes} min</div>` : ""}</td>
+      <td class="small">${who}</td>
+      <td class="small">${p.rounds.map((t, i) => `Round ${i + 1}: ${txLink(t)}`).join("<br>")}${p.paid ? `<br>Paid question: ${txLink(p.paid)}` : ""}
+        <br><a href="#/model/${m.id}">TEE verified ✅</a>${run ? `<br><a target="_blank" rel="noopener" href="${REPO}/blob/master/runs/${esc(run.run_id)}/summary.md">Run record</a> · <a target="_blank" rel="noopener" href="${REPO}/blob/master/runs/${esc(run.run_id)}/terminal.cast">recording</a>` : ""}</td>
+    </tr>`;
+  };
+  view.innerHTML = `<div class="wrap page">
+    <div class="kicker">Runs</div><h2>Every run, scored inside a TEE</h2>
+    <p class="lead">Each model was trained by its contributors on their own machines. Their sealed updates were scored inside an attested Intel TDX TEE, and the result was signed there and recorded on NEAR mainnet. Every number below links to its proof.</p>
+    <div class="tablewrap"><table>
+      <tr><th>Model</th><th>Area · topic · base model</th><th>Result (base → Axon-trained)</th><th>Owners</th><th>Proof</th></tr>
+      ${models.map(row).join("")}
+    </table></div>
+    <p class="small muted" style="margin-top:18px">Results are graded automatically on questions nobody trained on. A contributor whose data did not help (including a deliberate cheater in every run) gets 0%.</p>
+  </div>`;
 }
 
 async function pageEarnings() {
@@ -753,7 +792,7 @@ function pageCreate() {
   const v = CONFIG.vault;
   const bases = v?.bases || [{ id: "Qwen/Qwen3-1.7B", name: "Qwen3 1.7B", by: "Alibaba", note: "newest, 119 languages" }];
   const acct = W.account() || (CONFIG.network === "mainnet" ? "<your-account>.near" : "<your-account>.testnet");
-  const prompt = `Help me start a new Axon model for my niche, following ${REPO}/blob/main/AGENT_SETUP.md (Path C).
+  const prompt = `Help me start a new Axon model for my niche, following ${REPO}/blob/master/AGENT_SETUP.md (Path C).
 Network: NEAR ${CONFIG.network}, contract ${CONFIG.contract}. My NEAR account: ${acct}. Vault: ${CONFIG.vault_url || "see the Axon website"}.
 My niche: <describe it>. Help me write a small hidden test file (questions with the right answers) and create the model.`;
   const form = !LIVE || !v ? `<div class="notice">Creating a model binds it to the vault's key, so the vault has to be online. It is offline right now (it runs on a rented GPU at set times). You can still use the other two tabs to prepare.</div>` : `
@@ -784,7 +823,7 @@ My niche: <describe it>. Help me write a small hidden test file (questions with 
 .venv/bin/python -m axon create-model --creator ${esc(acct)} \\
   --name "Sleep Coach" --domain sleep \\
   --description "Trained on wearable sleep data from its owners" \\
-  --price 0.01 --compute-fee 0.02 --budget 0.06</pre><p class="small muted">The model is bound on-chain to the vault's signing key and code hash. See <a href="${REPO}/blob/main/AGENT_SETUP.md" target="_blank" rel="noopener">AGENT_SETUP.md</a>.</p>` },
+  --price 0.01 --compute-fee 0.02 --budget 0.06</pre><p class="small muted">The model is bound on-chain to the vault's signing key and code hash. See <a href="${REPO}/blob/master/AGENT_SETUP.md" target="_blank" rel="noopener">AGENT_SETUP.md</a>.</p>` },
     ])}</div>`;
   const go = $("#cgo");
   if (go) go.onclick = () => createModel();
@@ -873,6 +912,7 @@ async function route() {
     else if (h.startsWith("#/model/")) await pageModel(Number(h.split("/")[2]));
     else if (h === "#/contribute") await pageContribute();
     else if (h === "#/earnings") await pageEarnings();
+    else if (h === "#/runs") await pageRuns();
     else if (h === "#/create") pageCreate();
     else await pageHome();
   } catch (e) {
