@@ -42,23 +42,29 @@ async function rpcView(method, args = {}) {
 // On-chain names stay as created; models 0 (earlier run) and 4 (small TEE run) are kept off the listings.
 const LABELS = {
   "axon.ebukaa.near": {
-    1: { area: "Clinical", topic: "Inheritance pattern and genes for rare diseases", grade: "inheritance right 3/12 → 10/12, gene 3/12 → 5/12" },
-    2: { area: "Cybersecurity", topic: "Vulnerability classification", grade: "right bug type 2/24 → 12/24" },
-    3: { area: "Language", topic: "Basque native", grade: "translation score 17.8 → 30.7" },
-    4: { area: "Clinical", topic: "Inheritance pattern and genes for rare diseases (TEE round)", grade: "hidden-test loss 1.891 → 1.647, scored inside an attested TEE" },
+    // Showcase: the three cases, each scored and recorded inside an attested TEE.
+    9: { n: 1, area: "Clinical", topic: "Inheritance pattern and genes for rare diseases", grade: "" },
+    7: { n: 2, area: "Cybersecurity", topic: "Vulnerability classification", grade: "right bug type 2/24 → 12/24" },
+    8: { n: 3, area: "Language", topic: "Basque native", grade: "translation score 17.8 → 27.7" },
+    4: { n: 4, area: "Clinical", topic: "Inheritance pattern and genes for rare diseases (small test model)", grade: "hidden-test loss 1.891 → 1.647" },
+    // Earlier runs scored on a plain GPU, and closed models: kept on-chain, off the listings.
+    1: { area: "Clinical", topic: "Inheritance pattern and genes for rare diseases (GPU run)", grade: "inheritance right 3/12 → 10/12, gene 3/12 → 5/12", hidden: true },
+    2: { area: "Cybersecurity", topic: "Vulnerability classification (GPU run)", grade: "right bug type 2/24 → 12/24", hidden: true },
+    3: { area: "Language", topic: "Basque native (GPU run)", grade: "translation score 17.8 → 30.7", hidden: true },
     0: { area: "Clinical", topic: "Inheritance pattern and genes for rare diseases (earlier run)", grade: "", hidden: true },
     5: { area: "Cybersecurity", topic: "Vulnerability classification (closed: created on the wrong base model)", grade: "", hidden: true },
     6: { area: "Language", topic: "Basque native (closed: created on the wrong base model)", grade: "", hidden: true },
-    7: { area: "Cybersecurity", topic: "Vulnerability classification (TEE)", grade: "right bug type 2/24 → 12/24, scored inside an attested TEE" },
-    8: { area: "Language", topic: "Basque native (TEE)", grade: "" },
   },
 };
 // Which model each "base vs Axon-trained" tab shows (Clinical, Cybersecurity, Language).
-const SHOWCASE = { "axon.ebukaa.near": [1, 7, 3] };
+const SHOWCASE = { "axon.ebukaa.near": [9, 7, 8] };
+// Shown name of a model: its showcase number, else its on-chain id.
+const mnum = (m) => m.n ?? m.id;
+const byNumber = (a, b) => (a.n ?? 100 + a.id) - (b.n ?? 100 + b.id);
 function label(m) {
   const l = (LABELS[CONFIG.contract] || {})[m.id];
   m.area = l ? l.area : m.domain;
-  if (l) { m.name = l.topic; m.grade = l.grade; m._hidden = !!l.hidden; }
+  if (l) { m.name = l.topic; m.grade = l.grade; m._hidden = !!l.hidden; m.n = l.n; }
   return m;
 }
 
@@ -173,7 +179,7 @@ async function pageHome() {
         <h2>One model per niche. Owned by the people who trained it.</h2>
         <p class="lead">Each model starts from a free open base model and is fine-tuned on its contributors' private data. Anyone can start a model for any topic, and anyone can join later.</p>
         <div class="grid">${(await sortModels(models)).map(modelCard).join("") || `<p class="muted">No models yet. <a href="#/create">Start one</a>.</p>`}
-          ${EXAMPLES.map((e) => `<div class="card example"><span class="tag">${esc(e.domain)} · example</span><h3>${esc(e.name)}</h3><p class="muted small">${esc(e.text)}</p></div>`).join("")}</div>
+</div>
       </section>
       <section class="block" id="compare">${await nicheBlock(models, f)}</section>
       <section class="block" id="how">${howBlock()}</section>
@@ -226,14 +232,14 @@ async function sortModels(models) {
   const all = await runs();
   const earlier = new Set(all.filter((r) => r.note && r.contract === CONFIG.contract).map((r) => r.model_id));
   models.forEach((m) => (m._earlier = earlier.has(m.id)));
-  return models.slice().sort((a, b) => a._earlier - b._earlier || a.id - b.id);
+  return models.slice().sort((a, b) => a._earlier - b._earlier || byNumber(a, b));
 }
 
 function modelCard(m) {
   const improved = m.base_eval_loss_milli && m.eval_loss_milli ? ((1 - m.eval_loss_milli / m.base_eval_loss_milli) * 100).toFixed(1) : null;
   const o = owners(m);
   return `<a class="card" href="#/model/${m.id}">
-    ${m._earlier ? `<span class="tag">${esc(m.area)} · earlier run, scoring bug fixed in the next model</span>` : `<span class="tag live">${esc(m.area)} · live</span>`}
+    ${m._earlier ? `<span class="tag">${esc(m.area)} · earlier run, scoring bug fixed in the next model</span>` : `<span class="tag live">Model ${mnum(m)} · ${esc(m.area)} · scored in a TEE</span>`}
     <h3>${esc(m.name)}</h3>
     ${m.grade ? `<p class="small"><span class="muted">Grade:</span> ${esc(m.grade)}</p>` : `<p class="muted small">${esc(m.description)}</p>`}
     <div class="minibar">${o.map((c, i) => `<span style="width:${pct(c.shares, m.total_shares)};background:${COLORS[i % 5]}"></span>`).join("")}</div>
@@ -358,7 +364,7 @@ async function pageModel(id) {
     <section class="mhead">
       <canvas class="art" id="art"></canvas><div class="labels" id="labels"></div>
       <div class="copy"><a href="#/models" class="small muted">← All models</a>
-        <div class="eyebrow" style="margin:14px 0 0">${esc(m.area)} · model ${m.id}</div>
+        <div class="eyebrow" style="margin:14px 0 0">Model ${mnum(m)} · ${esc(m.area)}${m.n ? ` · on-chain id ${m.id}` : ""}</div>
         <h1>${esc(m.name)}</h1>${m.grade ? `<p><span class="muted">Grade:</span> ${esc(m.grade)}</p>` : `<p class="muted">${esc(m.description)}</p>`}
         ${m.status !== "Closed" ? `<div class="row"><a class="btn" href="#/model/${m.id}/join">Join this model</a><a class="btn ghost" href="#ask" onclick="event.preventDefault();document.getElementById('q')?.focus()">Ask it</a></div>` : ""}</div>
     </section>
@@ -660,11 +666,11 @@ const nicheOf = (m) => NICHE[m.domain] || { needs: m.description || "Questions a
 
 async function pageContribute() {
   const models = await db.models();
-  const open = models.filter((m) => m.status !== "Closed");
+  const open = models.filter((m) => m.status !== "Closed").sort(byNumber);
   view.innerHTML = `<div class="wrap page">
     <div class="kicker">Contribute</div><h2>Contribute your data. Keep it.</h2>
     <p class="lead">Pick a model in your niche. The website prepares everything; the training runs on your own computer, so your data never leaves it. Only what the model learned is sent, sealed so only the vault can open it.</p>
-    <div class="grid">${open.map((m) => `<div class="card"><span class="tag live">${esc(m.area)}</span><h3>${esc(m.name)}</h3>
+    <div class="grid">${open.map((m) => `<div class="card"><span class="tag live">Model ${mnum(m)} · ${esc(m.area)}</span><h3>${esc(m.name)}</h3>
       <p class="muted small">${esc(nicheOf(m).needs)}</p><div class="row"><a class="btn" href="#/model/${m.id}/join">Join this model</a></div></div>`).join("") || `<p class="muted">No open models yet. <a href="#/create">Start one</a>.</p>`}</div>
     <section class="block">${howBlock()}</section></div>`;
 }
