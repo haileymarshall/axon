@@ -105,6 +105,27 @@ def cmd_contribute(a):
     contribute(a.model, a.account, Path(a.data))
 
 
+def _print_round(out: dict) -> None:
+    print("\n".join(out["log"]))
+    p = out["payload"]
+    print(f"round {p['round']}: test loss {p['base_eval_loss_milli'] / 1000:.3f} -> {p['eval_loss_milli'] / 1000:.3f}")
+    for res in p["results"]:
+        print(f"  {res['account']:<40} improvement {int(res['improvement_micro']) / 1e6:+.4f}  -> {res['improvement_micro']} shares")
+    print(f"signed by vault, recorded on-chain  tx {out.get('tx')}")
+
+
+def cmd_round_result(a):
+    """After a dropped close-round request (scoring a big model in a CPU TEE outlasts gateway timeouts): wait until the
+    round is on-chain, then print the vault's own record of it."""
+    import time
+
+    import httpx
+    print(f"waiting for round {a.round} of model {a.model} to be recorded on-chain (the vault keeps scoring)...")
+    while _near().view("get_model", {"model_id": a.model})["rounds"] < a.round:
+        time.sleep(30)
+    _print_round(httpx.get(f"{CFG.vault_url}/models/{a.model}/status", timeout=120).json()["last"])
+
+
 def cmd_close_round(a):
     import httpx
     from .crypto import admin_token
@@ -225,6 +246,11 @@ def main(argv=None):
     s.add_argument("--model", type=int, required=True)
     s.add_argument("--compute-provider")
     s.set_defaults(fn=cmd_close_round)
+
+    s = sub.add_parser("round-result", help="wait for a round to be recorded on-chain and print the vault's result")
+    s.add_argument("--model", type=int, required=True)
+    s.add_argument("--round", type=int, required=True)
+    s.set_defaults(fn=cmd_round_result)
 
     s = sub.add_parser("ask", help="pay for and ask a question")
     s.add_argument("--model", type=int, required=True)

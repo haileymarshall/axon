@@ -35,7 +35,7 @@ for r in $(seq 1 "$ROUNDS"); do
     $PY -m axon contribute --model "$MODEL" --account "$who.$P" --data "$CDIR/$who.jsonl"
   done
   echo "== 3.$r vault merges, scores (Shapley) and records ownership on NEAR"
-  $PY -m axon close-round --model "$MODEL" --compute-provider "gpu.$P"
+  $PY -m axon close-round --model "$MODEL" --compute-provider "gpu.$P" || $PY -m axon round-result --model "$MODEL" --round "$r"
 done
 
 echo "== 4. a user pays for a question; the payment is split among owners"
