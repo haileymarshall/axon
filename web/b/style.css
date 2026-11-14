@@ -65,7 +65,7 @@ code { font-size: .85em; background: var(--fill); border: 1px solid var(--line);
 .hero .tagline b { font-weight: 600; }
 .hero .tagline .dim { display: block; color: var(--dim); margin-top: 8px; }
 .hero .sub { color: var(--dim); font-size: 16px; margin: 22px 0 24px; max-width: 440px; }
-.hero .cta { display: flex; gap: 0; flex-wrap: wrap; }
+.hero .cta { display: flex; gap: 0; flex-wrap: wrap; margin-top: 26px; }
 .hero .newhere { font-size: 13px; color: var(--dim); margin-top: 16px; }
 .hero .newhere a { color: var(--ink); font-weight: 600; }
 .term { position: relative; margin-top: 26px; z-index: 2; width: min(560px, 40vw); flex: none; font: 12px/1.7 var(--mono); color: var(--dim); white-space: pre; overflow: hidden;

@@ -161,7 +161,6 @@ async function pageHome() {
       <div class="copy">
         <div class="eyebrow">Private AI, co-owned on NEAR</div>
         <h1 class="tagline"><b>Axon</b> builds specialized AI from private data. <span class="dim">The model is co-owned by its contributors, and they get paid on every inference.</span></h1>
-        <p class="sub">Your data never leaves your machine. A sealed vault scores how much it helped, and a NEAR contract records who owns what and pays them.</p>
         <div class="cta"><a class="btn" href="#/models">Browse models</a><a class="btn ghost" href="#/contribute">Contribute data</a></div>
         <p class="newhere">New here? <a href="#/how">How it works</a>, in five steps.</p>
       </div>
