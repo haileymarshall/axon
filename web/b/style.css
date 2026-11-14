@@ -227,3 +227,7 @@ a.card .tag:not(.live) { color: var(--mute); }
 .cmp2 .card.hl { background: rgba(255, 255, 255, .12); border-color: var(--line2); }
 .ok { color: #b9ffcf; font-weight: 600; } .bad { color: var(--warn); font-weight: 600; }
 @media (max-width: 760px) { .cmp2 { grid-template-columns: 1fr; } }
+.hero .nearline { margin-top: 6px; }
+.nearstrip { border: 1px solid var(--line); background: var(--fill); padding: 10px 14px; margin: 18px 0 22px; }
+.grid.g2 { grid-template-columns: repeat(2, 1fr); }
+@media (max-width: 760px) { .grid.g2 { grid-template-columns: 1fr; } }

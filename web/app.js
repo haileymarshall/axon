@@ -178,6 +178,7 @@ async function pageHome() {
         <h1 class="tagline"><b>Axon</b> builds specialized AI from private data. <span class="dim">The model is co-owned by its contributors, and they get paid on every inference.</span></h1>
         <div class="cta"><a class="btn" href="#/models">Browse models</a><a class="btn ghost" href="#/contribute">Contribute data</a></div>
         <p class="newhere"><a href="#/how">How it works in 5 steps</a></p>
+        <p class="newhere nearline">Built on <b>NEAR</b>: ownership, payouts and payments on NEAR mainnet · private data prep on <b><a href="https://docs.near.ai/cloud/" target="_blank" rel="noopener">NEAR AI Cloud</a></b>.</p>
       </div>
       <div class="term" id="term"></div>
       <div class="ticker"><div class="track" id="ticker"></div></div>
@@ -339,7 +340,7 @@ function howBlock() {
     <p class="lead">Axon fine-tunes free open models (it does not train from scratch). Contributors own the part that makes the model an expert.</p>
     <div class="steps">
       <div class="step"><b>Join a model</b><p>Pick a niche model and register a device key on NEAR, so nobody can send updates in your name.</p></div>
-      <div class="step"><b>Train locally</b><p>Your machine fine-tunes a small adapter on your private data. The data never leaves.</p></div>
+      <div class="step"><b>Train locally</b><p>Your machine fine-tunes a small adapter on your private data. The data never leaves. Only messy notes? <a href="https://docs.near.ai/cloud/" target="_blank" rel="noopener">NEAR AI Cloud</a> turns them into training pairs inside a verified TEE first.</p></div>
       <div class="step"><b>Send a sealed update</b><p>Only the adapter goes out, encrypted to the vault (a TEE) and signed by your device.</p></div>
       <div class="step"><b>Get scored fairly</b><p>The vault measures how much your update improved the model on a hidden test (Shapley values). Junk earns 0%.</p></div>
       <div class="step"><b>Own and earn</b><p>Your score becomes your share on NEAR. Every paid question: 95% to owners by share, 5% to Axon.</p></div>
@@ -349,9 +350,10 @@ function howBlock() {
 function trustBlock() {
   const v = CONFIG.vault;
   return `<div class="kicker">Why you can trust the numbers</div><h2>Checked by code, not by us.</h2>
-    <div class="grid" style="margin-top:28px">
+    <div class="grid g2" style="margin-top:28px">
       <div class="card"><span class="tag">Vault</span><h3>Runs in a TEE</h3><p class="muted small">The vault that merges and scores updates runs in Intel TDX. A hardware quote binds its key to its code hash. ${LIVE ? `Mode now: <b>${esc(v?.attestation?.mode || "unknown")}</b>.` : "Verified attestation: see <code>runs/tee/</code> in the repo."}</p></div>
       <div class="card"><span class="tag">Contract</span><h3>Only signed results count</h3><p class="muted small">The NEAR contract accepts a round only if the vault's registered key signed it, and rejects replays and unknown accounts.</p></div>
+      <div class="card"><span class="tag">NEAR AI Cloud</span><h3>Private data prep</h3><p class="muted small">Raw notes become training pairs inside <a href="https://docs.near.ai/cloud/" target="_blank" rel="noopener">NEAR AI Cloud</a>’s TEE (Intel TDX + NVIDIA confidential GPUs). Axon checks the hardware attestation with a fresh random nonce before sending anything, and verifies the signed answer.</p></div>
       <div class="card"><span class="tag">Payments</span><h3>Any token, split on-chain</h3><p class="muted small">Pay with NEAR or any token via NEAR Intents. The contract splits each payment: 95% to owners by share, 5% to Axon.</p></div>
     </div>`;
 }
@@ -387,7 +389,7 @@ async function pageModel(id) {
     </div>
     <div class="two">
       <div class="card">
-        <h3>Who owns this model</h3>
+        <h3>Who owns this model <span class="small muted">· recorded on <a target="_blank" rel="noopener" href="${CONFIG.explorer}/address/${CONFIG.contract}">NEAR</a></span></h3>
         <p class="muted small">Share = how much each contributor's private data improved the model on a hidden test. Data that doesn't help earns nothing.</p>
         <div class="bar">${o.map((c, i) => `<span style="width:${(100 * Number(c.shares)) / total}%;background:${COLORS[i % 5]}" title="${esc(c.account)}"></span>`).join("")}</div>
         <table>
@@ -678,6 +680,7 @@ async function pageContribute() {
   view.innerHTML = `<div class="wrap page">
     <div class="kicker">Contribute</div><h2>Contribute your data. Keep it.</h2>
     <p class="lead">Pick a model in your niche. The website prepares everything; the training runs on your own computer, so your data never leaves it. Only what the model learned is sent, sealed so only the vault can open it.</p>
+    <p class="small">Only have raw notes or reports? Each model's Join page turns them into training pairs on <a href="https://docs.near.ai/cloud/" target="_blank" rel="noopener">NEAR AI Cloud</a>, inside a verified TEE.</p>
     <div class="grid">${open.map((m) => `<div class="card"><span class="tag live">Model ${mnum(m)} · ${esc(m.area)}</span><h3>${esc(m.name)}</h3>
       <p class="muted small">${esc(nicheOf(m).needs)}</p><div class="row"><a class="btn" href="#/model/${m.id}/join">Join this model</a></div></div>`).join("") || `<p class="muted">No open models yet. <a href="#/create">Start one</a>.</p>`}</div>
     <section class="block">${howBlock()}</section></div>`;
@@ -789,6 +792,7 @@ async function pageDemo() {
   };
   view.innerHTML = `<div class="wrap page">
     <div class="kicker">Demo</div><h2>Four models, trained on private data, scored inside a TEE</h2>
+    <p class="nearstrip small">Settled on <b>NEAR mainnet</b>: every answer below is a real NEAR payment to <a target="_blank" rel="noopener" href="${CONFIG.explorer}/address/${CONFIG.contract}">${esc(CONFIG.contract)}</a>, split 95% to the owners and 5% to Axon by the contract.</p>
     <p class="lead">Each model is a free open-source model fine-tuned by people who hold specialist knowledge, without sharing their data. Ask it the questions it was tested on, next to the open-source model it started from.</p>
     <p class="small muted">${free ? `Answers are generated live. Each question is a real 0.01 Ⓝ payment on NEAR, split among the owners (free questions are paid by Axon's demo account, ${CONFIG.demo_per_day} a day). During judging, answers come from a demo GPU server that serves exactly the model the TEE recorded (its sha256 matches the hash on NEAR).` : "The live demo server is offline right now; each question shows the answer recorded during the model's run."}</p>
     ${models.map(section).join("")}
