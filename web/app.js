@@ -49,10 +49,12 @@ const LABELS = {
     0: { area: "Clinical", topic: "Inheritance pattern and genes for rare diseases (earlier run)", grade: "", hidden: true },
     5: { area: "Cybersecurity", topic: "Vulnerability classification (closed: created on the wrong base model)", grade: "", hidden: true },
     6: { area: "Language", topic: "Basque native (closed: created on the wrong base model)", grade: "", hidden: true },
-    7: { area: "Cybersecurity", topic: "Vulnerability classification (TEE)", grade: "" },
+    7: { area: "Cybersecurity", topic: "Vulnerability classification (TEE)", grade: "right bug type 2/24 → 12/24, scored inside an attested TEE" },
     8: { area: "Language", topic: "Basque native (TEE)", grade: "" },
   },
 };
+// Which model each "base vs Axon-trained" tab shows (Clinical, Cybersecurity, Language).
+const SHOWCASE = { "axon.ebukaa.near": [1, 7, 3] };
 function label(m) {
   const l = (LABELS[CONFIG.contract] || {})[m.id];
   m.area = l ? l.area : m.domain;
@@ -253,8 +255,11 @@ const COMPARE_HEAD = `<div class="kicker">Base model vs Axon-trained</div>
 // Home page: one tab per niche model that has a published run (the latest clean run of each).
 async function nicheBlock(models, f) {
   const all = await runs();
-  const shown = models.filter((m) => all.some((r) => r.model_id === m.id && !r.note && r.probes?.length))
-    .sort((a, b) => b.id - a.id).filter((m, i, arr) => arr.findIndex((x) => x.domain === m.domain) === i).sort((a, b) => a.id - b.id);
+  // One tab per area: the model picked in SHOWCASE for this contract, else the newest model of that domain with a run.
+  const pick = SHOWCASE[CONFIG.contract] || [];
+  const withRun = models.filter((m) => all.some((r) => r.model_id === m.id && !r.note && r.probes?.length));
+  const shown = (pick.length ? pick.map((id) => withRun.find((m) => m.id === id)).filter(Boolean)
+    : withRun.sort((a, b) => b.id - a.id).filter((m, i, arr) => arr.findIndex((x) => x.domain === m.domain) === i).sort((a, b) => a.id - b.id));
   if (shown.length < 2) return compareBlock(shown[0] || f);
   setTimeout(() => {
     const pick = async (i) => {

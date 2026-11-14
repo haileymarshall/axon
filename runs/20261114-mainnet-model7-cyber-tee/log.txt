@@ -1,0 +1,440 @@
+== 1. create the model (bound to the vault's key + code hash)
+reusing model 7
+model id: 7
+== 2.1 contributors train locally and send sealed updates (round 1)
+[web-hunter.axon.ebukaa.near] joining model 7 on-chain with device key 3a5f3cddbee6…
+[web-hunter.axon.ebukaa.near] training locally on 220 private examples (data stays on this machine)
+[web-hunter.axon.ebukaa.near] base model Qwen/Qwen3-1.7B (from the chain), adapter rank 16
+Loading weights:   0%|          | 0/311 [00:00<?, ?it/s]Loading weights:  15%|█▍        | 46/311 [00:00<00:00, 459.74it/s]Loading weights:  30%|██▉       | 92/311 [00:00<00:00, 310.68it/s]Loading weights:  41%|████      | 126/311 [00:00<00:00, 319.74it/s]Loading weights:  51%|█████▏    | 160/311 [00:00<00:00, 325.79it/s]Loading weights:  62%|██████▏   | 194/311 [00:00<00:00, 327.88it/s]Loading weights:  73%|███████▎  | 228/311 [00:00<00:00, 323.32it/s]Loading weights:  84%|████████▍ | 261/311 [00:00<00:00, 323.58it/s]Loading weights:  95%|█████████▍| 294/311 [00:00<00:00, 322.67it/s]Loading weights: 100%|██████████| 311/311 [00:00<00:00, 315.68it/s]
+/opt/conda/lib/python3.11/site-packages/transformers/modeling_utils.py:3195: FutureWarning: `gradient_checkpointing_enable` is deprecated and will be removed in v6. Use `activation_checkpointing_enable` instead.
+  warnings.warn(
+/opt/conda/lib/python3.11/site-packages/transformers/modeling_utils.py:3303: FutureWarning: `is_gradient_checkpointing` is deprecated and will be removed in v6. Use `is_activation_checkpointing` instead.
+  warnings.warn(
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`.
+[web-hunter.axon.ebukaa.near]   step   0  loss 7.004
+[web-hunter.axon.ebukaa.near]   step   4  loss 0.726
+[web-hunter.axon.ebukaa.near]   step   8  loss 0.116
+[web-hunter.axon.ebukaa.near]   step  12  loss 0.277
+[web-hunter.axon.ebukaa.near]   step  16  loss 0.030
+[web-hunter.axon.ebukaa.near]   step  20  loss 0.041
+[web-hunter.axon.ebukaa.near]   step  24  loss 0.061
+[web-hunter.axon.ebukaa.near]   step  28  loss 0.112
+[web-hunter.axon.ebukaa.near]   step  32  loss 0.013
+[web-hunter.axon.ebukaa.near]   step  36  loss 0.005
+[web-hunter.axon.ebukaa.near]   step  40  loss 0.036
+[web-hunter.axon.ebukaa.near]   step  44  loss 0.162
+[web-hunter.axon.ebukaa.near]   step  48  loss 0.000
+[web-hunter.axon.ebukaa.near]   step  52  loss 0.002
+[web-hunter.axon.ebukaa.near]   step  56  loss 0.000
+[web-hunter.axon.ebukaa.near]   step  60  loss 0.017
+[web-hunter.axon.ebukaa.near]   step  64  loss 0.002
+[web-hunter.axon.ebukaa.near]   step  68  loss 0.001
+[web-hunter.axon.ebukaa.near]   step  72  loss 0.008
+[web-hunter.axon.ebukaa.near]   step  76  loss 0.093
+[web-hunter.axon.ebukaa.near]   step  80  loss 0.000
+[web-hunter.axon.ebukaa.near]   step  84  loss 0.000
+[web-hunter.axon.ebukaa.near]   step  88  loss 0.000
+[web-hunter.axon.ebukaa.near]   step  92  loss 0.005
+[web-hunter.axon.ebukaa.near]   step  96  loss 0.044
+[web-hunter.axon.ebukaa.near]   step 100  loss 0.000
+[web-hunter.axon.ebukaa.near]   step 104  loss 0.000
+[web-hunter.axon.ebukaa.near]   step 108  loss 0.000
+[web-hunter.axon.ebukaa.near]   step 112  loss 0.032
+[web-hunter.axon.ebukaa.near]   step 116  loss 0.012
+[web-hunter.axon.ebukaa.near]   step 120  loss 0.000
+[web-hunter.axon.ebukaa.near]   step 124  loss 0.048
+[web-hunter.axon.ebukaa.near]   step 128  loss 0.000
+[web-hunter.axon.ebukaa.near]   step 132  loss 0.000
+[web-hunter.axon.ebukaa.near]   step 136  loss 0.000
+[web-hunter.axon.ebukaa.near]   step 140  loss 0.082
+[web-hunter.axon.ebukaa.near]   step 144  loss 0.001
+[web-hunter.axon.ebukaa.near]   step 148  loss 0.003
+[web-hunter.axon.ebukaa.near]   step 152  loss 0.000
+[web-hunter.axon.ebukaa.near]   step 156  loss 0.000
+[web-hunter.axon.ebukaa.near]   step 160  loss 0.001
+[web-hunter.axon.ebukaa.near]   step 164  loss 0.000
+[web-hunter.axon.ebukaa.near]   step 168  loss 0.001
+[web-hunter.axon.ebukaa.near]   step 172  loss 0.000
+[web-hunter.axon.ebukaa.near]   step 176  loss 0.000
+[web-hunter.axon.ebukaa.near]   step 180  loss 0.000
+[web-hunter.axon.ebukaa.near]   step 184  loss 0.000
+[web-hunter.axon.ebukaa.near]   step 188  loss 0.000
+[web-hunter.axon.ebukaa.near]   step 192  loss 0.000
+[web-hunter.axon.ebukaa.near]   step 196  loss 0.472
+[web-hunter.axon.ebukaa.near]   step 200  loss 0.000
+[web-hunter.axon.ebukaa.near]   step 204  loss 0.000
+[web-hunter.axon.ebukaa.near]   step 208  loss 0.114
+[web-hunter.axon.ebukaa.near]   step 212  loss 0.012
+[web-hunter.axon.ebukaa.near]   step 216  loss 0.039
+[web-hunter.axon.ebukaa.near]   step 220  loss 0.000
+[web-hunter.axon.ebukaa.near]   step 224  loss 0.000
+[web-hunter.axon.ebukaa.near]   step 228  loss 0.000
+[web-hunter.axon.ebukaa.near]   step 232  loss 0.000
+[web-hunter.axon.ebukaa.near]   step 236  loss 0.001
+[web-hunter.axon.ebukaa.near]   step 240  loss 0.000
+[web-hunter.axon.ebukaa.near]   step 244  loss 0.000
+[web-hunter.axon.ebukaa.near]   step 248  loss 0.000
+[web-hunter.axon.ebukaa.near]   step 252  loss 0.041
+[web-hunter.axon.ebukaa.near]   step 256  loss 0.000
+[web-hunter.axon.ebukaa.near]   step 260  loss 0.000
+[web-hunter.axon.ebukaa.near]   step 264  loss 0.000
+[web-hunter.axon.ebukaa.near]   step 268  loss 0.001
+[web-hunter.axon.ebukaa.near]   step 272  loss 0.000
+[web-hunter.axon.ebukaa.near]   step 276  loss 0.000
+[web-hunter.axon.ebukaa.near]   step 280  loss 0.000
+[web-hunter.axon.ebukaa.near]   step 284  loss 0.000
+[web-hunter.axon.ebukaa.near]   step 288  loss 0.000
+[web-hunter.axon.ebukaa.near]   step 292  loss 0.000
+[web-hunter.axon.ebukaa.near]   step 296  loss 0.000
+[web-hunter.axon.ebukaa.near]   step 299  loss 0.000
+[web-hunter.axon.ebukaa.near] sealed update (68146 KB) accepted for round 1
+[memory-hunter.axon.ebukaa.near] joining model 7 on-chain with device key 749c31663e5a…
+[memory-hunter.axon.ebukaa.near] training locally on 220 private examples (data stays on this machine)
+[memory-hunter.axon.ebukaa.near] base model Qwen/Qwen3-1.7B (from the chain), adapter rank 16
+Loading weights:   0%|          | 0/311 [00:00<?, ?it/s]Loading weights:  15%|█▌        | 48/311 [00:00<00:00, 445.47it/s]Loading weights:  30%|██▉       | 93/311 [00:00<00:00, 332.82it/s]Loading weights:  43%|████▎     | 134/311 [00:00<00:00, 356.01it/s]Loading weights:  55%|█████▍    | 171/311 [00:00<00:00, 349.66it/s]Loading weights:  67%|██████▋   | 207/311 [00:00<00:00, 346.16it/s]Loading weights:  78%|███████▊  | 243/311 [00:00<00:00, 278.60it/s]Loading weights:  88%|████████▊ | 273/311 [00:00<00:00, 283.05it/s]Loading weights:  97%|█████████▋| 303/311 [00:00<00:00, 281.77it/s]Loading weights: 100%|██████████| 311/311 [00:00<00:00, 317.08it/s]
+/opt/conda/lib/python3.11/site-packages/transformers/modeling_utils.py:3195: FutureWarning: `gradient_checkpointing_enable` is deprecated and will be removed in v6. Use `activation_checkpointing_enable` instead.
+  warnings.warn(
+/opt/conda/lib/python3.11/site-packages/transformers/modeling_utils.py:3303: FutureWarning: `is_gradient_checkpointing` is deprecated and will be removed in v6. Use `is_activation_checkpointing` instead.
+  warnings.warn(
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`.
+[memory-hunter.axon.ebukaa.near]   step   0  loss 6.824
+[memory-hunter.axon.ebukaa.near]   step   4  loss 0.478
+[memory-hunter.axon.ebukaa.near]   step   8  loss 0.326
+[memory-hunter.axon.ebukaa.near]   step  12  loss 0.427
+[memory-hunter.axon.ebukaa.near]   step  16  loss 0.009
+[memory-hunter.axon.ebukaa.near]   step  20  loss 0.473
+[memory-hunter.axon.ebukaa.near]   step  24  loss 0.097
+[memory-hunter.axon.ebukaa.near]   step  28  loss 0.132
+[memory-hunter.axon.ebukaa.near]   step  32  loss 0.088
+[memory-hunter.axon.ebukaa.near]   step  36  loss 0.034
+[memory-hunter.axon.ebukaa.near]   step  40  loss 0.000
+[memory-hunter.axon.ebukaa.near]   step  44  loss 0.020
+[memory-hunter.axon.ebukaa.near]   step  48  loss 0.045
+[memory-hunter.axon.ebukaa.near]   step  52  loss 0.031
+[memory-hunter.axon.ebukaa.near]   step  56  loss 0.054
+[memory-hunter.axon.ebukaa.near]   step  60  loss 0.026
+[memory-hunter.axon.ebukaa.near]   step  64  loss 0.102
+[memory-hunter.axon.ebukaa.near]   step  68  loss 0.009
+[memory-hunter.axon.ebukaa.near]   step  72  loss 0.150
+[memory-hunter.axon.ebukaa.near]   step  76  loss 0.087
+[memory-hunter.axon.ebukaa.near]   step  80  loss 0.185
+[memory-hunter.axon.ebukaa.near]   step  84  loss 0.022
+[memory-hunter.axon.ebukaa.near]   step  88  loss 0.023
+[memory-hunter.axon.ebukaa.near]   step  92  loss 0.092
+[memory-hunter.axon.ebukaa.near]   step  96  loss 0.006
+[memory-hunter.axon.ebukaa.near]   step 100  loss 0.070
+[memory-hunter.axon.ebukaa.near]   step 104  loss 0.002
+[memory-hunter.axon.ebukaa.near]   step 108  loss 0.002
+[memory-hunter.axon.ebukaa.near]   step 112  loss 0.277
+[memory-hunter.axon.ebukaa.near]   step 116  loss 0.125
+[memory-hunter.axon.ebukaa.near]   step 120  loss 0.222
+[memory-hunter.axon.ebukaa.near]   step 124  loss 0.087
+[memory-hunter.axon.ebukaa.near]   step 128  loss 0.027
+[memory-hunter.axon.ebukaa.near]   step 132  loss 0.025
+[memory-hunter.axon.ebukaa.near]   step 136  loss 0.010
+[memory-hunter.axon.ebukaa.near]   step 140  loss 0.002
+[memory-hunter.axon.ebukaa.near]   step 144  loss 0.009
+[memory-hunter.axon.ebukaa.near]   step 148  loss 0.024
+[memory-hunter.axon.ebukaa.near]   step 152  loss 0.002
+[memory-hunter.axon.ebukaa.near]   step 156  loss 0.003
+[memory-hunter.axon.ebukaa.near]   step 160  loss 0.138
+[memory-hunter.axon.ebukaa.near]   step 164  loss 0.030
+[memory-hunter.axon.ebukaa.near]   step 168  loss 0.008
+[memory-hunter.axon.ebukaa.near]   step 172  loss 0.001
+[memory-hunter.axon.ebukaa.near]   step 176  loss 0.066
+[memory-hunter.axon.ebukaa.near]   step 180  loss 0.001
+[memory-hunter.axon.ebukaa.near]   step 184  loss 0.009
+[memory-hunter.axon.ebukaa.near]   step 188  loss 0.077
+[memory-hunter.axon.ebukaa.near]   step 192  loss 0.070
+[memory-hunter.axon.ebukaa.near]   step 196  loss 0.003
+[memory-hunter.axon.ebukaa.near]   step 200  loss 0.003
+[memory-hunter.axon.ebukaa.near]   step 204  loss 0.009
+[memory-hunter.axon.ebukaa.near]   step 208  loss 0.001
+[memory-hunter.axon.ebukaa.near]   step 212  loss 0.001
+[memory-hunter.axon.ebukaa.near]   step 216  loss 0.001
+[memory-hunter.axon.ebukaa.near]   step 220  loss 0.001
+[memory-hunter.axon.ebukaa.near]   step 224  loss 0.022
+[memory-hunter.axon.ebukaa.near]   step 228  loss 0.013
+[memory-hunter.axon.ebukaa.near]   step 232  loss 0.019
+[memory-hunter.axon.ebukaa.near]   step 236  loss 0.007
+[memory-hunter.axon.ebukaa.near]   step 240  loss 0.000
+[memory-hunter.axon.ebukaa.near]   step 244  loss 0.000
+[memory-hunter.axon.ebukaa.near]   step 248  loss 0.000
+[memory-hunter.axon.ebukaa.near]   step 252  loss 0.026
+[memory-hunter.axon.ebukaa.near]   step 256  loss 0.001
+[memory-hunter.axon.ebukaa.near]   step 260  loss 0.171
+[memory-hunter.axon.ebukaa.near]   step 264  loss 0.003
+[memory-hunter.axon.ebukaa.near]   step 268  loss 0.000
+[memory-hunter.axon.ebukaa.near]   step 272  loss 0.050
+[memory-hunter.axon.ebukaa.near]   step 276  loss 0.055
+[memory-hunter.axon.ebukaa.near]   step 280  loss 0.000
+[memory-hunter.axon.ebukaa.near]   step 284  loss 0.000
+[memory-hunter.axon.ebukaa.near]   step 288  loss 0.000
+[memory-hunter.axon.ebukaa.near]   step 292  loss 0.039
+[memory-hunter.axon.ebukaa.near]   step 296  loss 0.017
+[memory-hunter.axon.ebukaa.near]   step 299  loss 0.001
+[memory-hunter.axon.ebukaa.near] sealed update (68146 KB) accepted for round 1
+[auth-hunter.axon.ebukaa.near] joining model 7 on-chain with device key c451bc190f0d…
+[auth-hunter.axon.ebukaa.near] training locally on 220 private examples (data stays on this machine)
+[auth-hunter.axon.ebukaa.near] base model Qwen/Qwen3-1.7B (from the chain), adapter rank 16
+Loading weights:   0%|          | 0/311 [00:00<?, ?it/s]Loading weights:   0%|          | 1/311 [00:00<00:59,  5.20it/s]Loading weights:   1%|          | 2/311 [00:00<01:15,  4.07it/s]Loading weights:  27%|██▋       | 83/311 [00:00<00:01, 209.07it/s]Loading weights:  39%|███▊      | 120/311 [00:00<00:00, 250.86it/s]Loading weights:  50%|█████     | 157/311 [00:00<00:00, 228.92it/s]Loading weights:  60%|██████    | 188/311 [00:00<00:00, 246.90it/s]Loading weights:  70%|███████   | 219/311 [00:01<00:00, 262.23it/s]Loading weights:  80%|████████  | 250/311 [00:01<00:00, 272.80it/s]Loading weights:  90%|█████████ | 281/311 [00:01<00:00, 279.14it/s]Loading weights: 100%|██████████| 311/311 [00:01<00:00, 226.10it/s]
+/opt/conda/lib/python3.11/site-packages/transformers/modeling_utils.py:3195: FutureWarning: `gradient_checkpointing_enable` is deprecated and will be removed in v6. Use `activation_checkpointing_enable` instead.
+  warnings.warn(
+/opt/conda/lib/python3.11/site-packages/transformers/modeling_utils.py:3303: FutureWarning: `is_gradient_checkpointing` is deprecated and will be removed in v6. Use `is_activation_checkpointing` instead.
+  warnings.warn(
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`.
+[auth-hunter.axon.ebukaa.near]   step   0  loss 7.767
+[auth-hunter.axon.ebukaa.near]   step   4  loss 1.877
+[auth-hunter.axon.ebukaa.near]   step   8  loss 0.408
+[auth-hunter.axon.ebukaa.near]   step  12  loss 0.751
+[auth-hunter.axon.ebukaa.near]   step  16  loss 0.465
+[auth-hunter.axon.ebukaa.near]   step  20  loss 0.227
+[auth-hunter.axon.ebukaa.near]   step  24  loss 0.399
+[auth-hunter.axon.ebukaa.near]   step  28  loss 0.369
+[auth-hunter.axon.ebukaa.near]   step  32  loss 0.277
+[auth-hunter.axon.ebukaa.near]   step  36  loss 0.410
+[auth-hunter.axon.ebukaa.near]   step  40  loss 0.097
+[auth-hunter.axon.ebukaa.near]   step  44  loss 0.154
+[auth-hunter.axon.ebukaa.near]   step  48  loss 0.153
+[auth-hunter.axon.ebukaa.near]   step  52  loss 0.081
+[auth-hunter.axon.ebukaa.near]   step  56  loss 0.157
+[auth-hunter.axon.ebukaa.near]   step  60  loss 0.027
+[auth-hunter.axon.ebukaa.near]   step  64  loss 0.269
+[auth-hunter.axon.ebukaa.near]   step  68  loss 0.132
+[auth-hunter.axon.ebukaa.near]   step  72  loss 0.068
+[auth-hunter.axon.ebukaa.near]   step  76  loss 0.221
+[auth-hunter.axon.ebukaa.near]   step  80  loss 0.108
+[auth-hunter.axon.ebukaa.near]   step  84  loss 0.055
+[auth-hunter.axon.ebukaa.near]   step  88  loss 0.104
+[auth-hunter.axon.ebukaa.near]   step  92  loss 0.033
+[auth-hunter.axon.ebukaa.near]   step  96  loss 0.087
+[auth-hunter.axon.ebukaa.near]   step 100  loss 0.261
+[auth-hunter.axon.ebukaa.near]   step 104  loss 0.153
+[auth-hunter.axon.ebukaa.near]   step 108  loss 0.013
+[auth-hunter.axon.ebukaa.near]   step 112  loss 0.131
+[auth-hunter.axon.ebukaa.near]   step 116  loss 0.146
+[auth-hunter.axon.ebukaa.near]   step 120  loss 0.091
+[auth-hunter.axon.ebukaa.near]   step 124  loss 0.085
+[auth-hunter.axon.ebukaa.near]   step 128  loss 0.119
+[auth-hunter.axon.ebukaa.near]   step 132  loss 0.094
+[auth-hunter.axon.ebukaa.near]   step 136  loss 0.130
+[auth-hunter.axon.ebukaa.near]   step 140  loss 0.077
+[auth-hunter.axon.ebukaa.near]   step 144  loss 0.019
+[auth-hunter.axon.ebukaa.near]   step 148  loss 0.105
+[auth-hunter.axon.ebukaa.near]   step 152  loss 0.115
+[auth-hunter.axon.ebukaa.near]   step 156  loss 0.047
+[auth-hunter.axon.ebukaa.near]   step 160  loss 0.013
+[auth-hunter.axon.ebukaa.near]   step 164  loss 0.025
+[auth-hunter.axon.ebukaa.near]   step 168  loss 0.091
+[auth-hunter.axon.ebukaa.near]   step 172  loss 0.183
+[auth-hunter.axon.ebukaa.near]   step 176  loss 0.078
+[auth-hunter.axon.ebukaa.near]   step 180  loss 0.002
+[auth-hunter.axon.ebukaa.near]   step 184  loss 0.014
+[auth-hunter.axon.ebukaa.near]   step 188  loss 0.043
+[auth-hunter.axon.ebukaa.near]   step 192  loss 0.016
+[auth-hunter.axon.ebukaa.near]   step 196  loss 0.000
+[auth-hunter.axon.ebukaa.near]   step 200  loss 0.001
+[auth-hunter.axon.ebukaa.near]   step 204  loss 0.007
+[auth-hunter.axon.ebukaa.near]   step 208  loss 0.029
+[auth-hunter.axon.ebukaa.near]   step 212  loss 0.008
+[auth-hunter.axon.ebukaa.near]   step 216  loss 0.099
+[auth-hunter.axon.ebukaa.near]   step 220  loss 0.001
+[auth-hunter.axon.ebukaa.near]   step 224  loss 0.007
+[auth-hunter.axon.ebukaa.near]   step 228  loss 0.000
+[auth-hunter.axon.ebukaa.near]   step 232  loss 0.004
+[auth-hunter.axon.ebukaa.near]   step 236  loss 0.004
+[auth-hunter.axon.ebukaa.near]   step 240  loss 0.000
+[auth-hunter.axon.ebukaa.near]   step 244  loss 0.001
+[auth-hunter.axon.ebukaa.near]   step 248  loss 0.006
+[auth-hunter.axon.ebukaa.near]   step 252  loss 0.170
+[auth-hunter.axon.ebukaa.near]   step 256  loss 0.093
+[auth-hunter.axon.ebukaa.near]   step 260  loss 0.030
+[auth-hunter.axon.ebukaa.near]   step 264  loss 0.002
+[auth-hunter.axon.ebukaa.near]   step 268  loss 0.155
+[auth-hunter.axon.ebukaa.near]   step 272  loss 0.002
+[auth-hunter.axon.ebukaa.near]   step 276  loss 0.466
+[auth-hunter.axon.ebukaa.near]   step 280  loss 0.012
+[auth-hunter.axon.ebukaa.near]   step 284  loss 0.084
+[auth-hunter.axon.ebukaa.near]   step 288  loss 0.003
+[auth-hunter.axon.ebukaa.near]   step 292  loss 0.001
+[auth-hunter.axon.ebukaa.near]   step 296  loss 0.000
+[auth-hunter.axon.ebukaa.near]   step 299  loss 0.022
+[auth-hunter.axon.ebukaa.near] sealed update (68146 KB) accepted for round 1
+[bob.axon.ebukaa.near] joining model 7 on-chain with device key d6fe19e9c70a…
+[bob.axon.ebukaa.near] training locally on 220 private examples (data stays on this machine)
+[bob.axon.ebukaa.near] base model Qwen/Qwen3-1.7B (from the chain), adapter rank 16
+Loading weights:   0%|          | 0/311 [00:00<?, ?it/s]Loading weights:   0%|          | 1/311 [00:00<01:36,  3.20it/s]Loading weights:  19%|█▉        | 59/311 [00:00<00:01, 183.30it/s]Loading weights:  30%|██▉       | 93/311 [00:00<00:00, 228.32it/s]Loading weights:  42%|████▏     | 131/311 [00:00<00:00, 274.22it/s]Loading weights:  54%|█████▎    | 167/311 [00:00<00:00, 297.46it/s]Loading weights:  65%|██████▌   | 203/311 [00:00<00:00, 251.95it/s]Loading weights:  76%|███████▌  | 235/311 [00:01<00:00, 268.54it/s]Loading weights:  86%|████████▌ | 266/311 [00:01<00:00, 273.23it/s]Loading weights:  97%|█████████▋| 301/311 [00:01<00:00, 292.97it/s]Loading weights: 100%|██████████| 311/311 [00:01<00:00, 254.67it/s]
+/opt/conda/lib/python3.11/site-packages/transformers/modeling_utils.py:3195: FutureWarning: `gradient_checkpointing_enable` is deprecated and will be removed in v6. Use `activation_checkpointing_enable` instead.
+  warnings.warn(
+/opt/conda/lib/python3.11/site-packages/transformers/modeling_utils.py:3303: FutureWarning: `is_gradient_checkpointing` is deprecated and will be removed in v6. Use `is_activation_checkpointing` instead.
+  warnings.warn(
+[transformers] `use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`.
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[bob.axon.ebukaa.near]   step   0  loss 8.915
+[bob.axon.ebukaa.near]   step   4  loss 1.070
+[bob.axon.ebukaa.near]   step   8  loss 1.103
+[bob.axon.ebukaa.near]   step  12  loss 0.952
+[bob.axon.ebukaa.near]   step  16  loss 0.759
+[bob.axon.ebukaa.near]   step  20  loss 1.049
+[bob.axon.ebukaa.near]   step  24  loss 0.832
+[bob.axon.ebukaa.near]   step  28  loss 0.710
+[bob.axon.ebukaa.near]   step  32  loss 0.625
+[bob.axon.ebukaa.near]   step  36  loss 0.667
+[bob.axon.ebukaa.near]   step  40  loss 0.416
+[bob.axon.ebukaa.near]   step  44  loss 0.469
+[bob.axon.ebukaa.near]   step  48  loss 0.831
+[bob.axon.ebukaa.near]   step  52  loss 0.463
+[bob.axon.ebukaa.near]   step  56  loss 0.575
+[bob.axon.ebukaa.near]   step  60  loss 0.244
+[bob.axon.ebukaa.near]   step  64  loss 0.376
+[bob.axon.ebukaa.near]   step  68  loss 0.340
+[bob.axon.ebukaa.near]   step  72  loss 0.301
+[bob.axon.ebukaa.near]   step  76  loss 0.278
+[bob.axon.ebukaa.near]   step  80  loss 0.244
+[bob.axon.ebukaa.near]   step  84  loss 0.411
+[bob.axon.ebukaa.near]   step  88  loss 0.258
+[bob.axon.ebukaa.near]   step  92  loss 0.195
+[bob.axon.ebukaa.near]   step  96  loss 0.213
+[bob.axon.ebukaa.near]   step 100  loss 0.301
+[bob.axon.ebukaa.near]   step 104  loss 0.405
+[bob.axon.ebukaa.near]   step 108  loss 0.228
+[bob.axon.ebukaa.near]   step 112  loss 0.288
+[bob.axon.ebukaa.near]   step 116  loss 0.428
+[bob.axon.ebukaa.near]   step 120  loss 0.386
+[bob.axon.ebukaa.near]   step 124  loss 0.215
+[bob.axon.ebukaa.near]   step 128  loss 0.429
+[bob.axon.ebukaa.near]   step 132  loss 0.258
+[bob.axon.ebukaa.near]   step 136  loss 0.279
+[bob.axon.ebukaa.near]   step 140  loss 0.248
+[bob.axon.ebukaa.near]   step 144  loss 0.283
+[bob.axon.ebukaa.near]   step 148  loss 0.237
+[bob.axon.ebukaa.near]   step 152  loss 0.220
+[bob.axon.ebukaa.near]   step 156  loss 0.241
+[bob.axon.ebukaa.near]   step 160  loss 0.261
+[bob.axon.ebukaa.near]   step 164  loss 0.332
+[bob.axon.ebukaa.near]   step 168  loss 0.290
+[bob.axon.ebukaa.near]   step 172  loss 0.218
+[bob.axon.ebukaa.near]   step 176  loss 0.288
+[bob.axon.ebukaa.near]   step 180  loss 0.220
+[bob.axon.ebukaa.near]   step 184  loss 0.280
+[bob.axon.ebukaa.near]   step 188  loss 0.185
+[bob.axon.ebukaa.near]   step 192  loss 0.291
+[bob.axon.ebukaa.near]   step 196  loss 0.240
+[bob.axon.ebukaa.near]   step 200  loss 0.251
+[bob.axon.ebukaa.near]   step 204  loss 0.265
+[bob.axon.ebukaa.near]   step 208  loss 0.335
+[bob.axon.ebukaa.near]   step 212  loss 0.258
+[bob.axon.ebukaa.near]   step 216  loss 0.324
+[bob.axon.ebukaa.near]   step 220  loss 0.229
+[bob.axon.ebukaa.near]   step 224  loss 0.264
+[bob.axon.ebukaa.near]   step 228  loss 0.254
+[bob.axon.ebukaa.near]   step 232  loss 0.265
+[bob.axon.ebukaa.near]   step 236  loss 0.387
+[bob.axon.ebukaa.near]   step 240  loss 0.292
+[bob.axon.ebukaa.near]   step 244  loss 0.197
+[bob.axon.ebukaa.near]   step 248  loss 0.194
+[bob.axon.ebukaa.near]   step 252  loss 0.372
+[bob.axon.ebukaa.near]   step 256  loss 0.226
+[bob.axon.ebukaa.near]   step 260  loss 0.225
+[bob.axon.ebukaa.near]   step 264  loss 0.219
+[bob.axon.ebukaa.near]   step 268  loss 0.227
+[bob.axon.ebukaa.near]   step 272  loss 0.199
+[bob.axon.ebukaa.near]   step 276  loss 0.194
+[bob.axon.ebukaa.near]   step 280  loss 0.260
+[bob.axon.ebukaa.near]   step 284  loss 0.104
+[bob.axon.ebukaa.near]   step 288  loss 0.152
+[bob.axon.ebukaa.near]   step 292  loss 0.217
+[bob.axon.ebukaa.near]   step 296  loss 0.332
+[bob.axon.ebukaa.near]   step 299  loss 0.138
+[bob.axon.ebukaa.near] sealed update (68146 KB) accepted for round 1
+== 3.1 vault merges, scores (Shapley) and records ownership on NEAR
+Traceback (most recent call last):
+  File "/opt/conda/lib/python3.11/site-packages/httpx/_transports/default.py", line 101, in map_httpcore_exceptions
+    yield
+  File "/opt/conda/lib/python3.11/site-packages/httpx/_transports/default.py", line 250, in handle_request
+    resp = self._pool.handle_request(req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/conda/lib/python3.11/site-packages/httpcore/_sync/connection_pool.py", line 256, in handle_request
+    raise exc from None
+  File "/opt/conda/lib/python3.11/site-packages/httpcore/_sync/connection_pool.py", line 236, in handle_request
+    response = connection.handle_request(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/conda/lib/python3.11/site-packages/httpcore/_sync/connection.py", line 103, in handle_request
+    return self._connection.handle_request(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/conda/lib/python3.11/site-packages/httpcore/_sync/http11.py", line 136, in handle_request
+    raise exc
+  File "/opt/conda/lib/python3.11/site-packages/httpcore/_sync/http11.py", line 106, in handle_request
+    ) = self._receive_response_headers(**kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/conda/lib/python3.11/site-packages/httpcore/_sync/http11.py", line 177, in _receive_response_headers
+    event = self._receive_event(timeout=timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/conda/lib/python3.11/site-packages/httpcore/_sync/http11.py", line 231, in _receive_event
+    raise RemoteProtocolError(msg)
+httpcore.RemoteProtocolError: Server disconnected without sending a response.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/root/axon/axon/__main__.py", line 3, in <module>
+    main()
+  File "/root/axon/axon/cli.py", line 255, in main
+    a.fn(a)
+  File "/root/axon/axon/cli.py", line 111, in cmd_close_round
+    r = httpx.post(f"{CFG.vault_url}/models/{a.model}/close-round", json={"compute_provider": a.compute_provider},
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/conda/lib/python3.11/site-packages/httpx/_api.py", line 304, in post
+    return request(
+           ^^^^^^^^
+  File "/opt/conda/lib/python3.11/site-packages/httpx/_api.py", line 109, in request
+    return client.request(
+           ^^^^^^^^^^^^^^^
+  File "/opt/conda/lib/python3.11/site-packages/httpx/_client.py", line 825, in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/conda/lib/python3.11/site-packages/httpx/_client.py", line 914, in send
+    response = self._send_handling_auth(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/conda/lib/python3.11/site-packages/httpx/_client.py", line 942, in _send_handling_auth
+    response = self._send_handling_redirects(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/conda/lib/python3.11/site-packages/httpx/_client.py", line 979, in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/conda/lib/python3.11/site-packages/httpx/_client.py", line 1014, in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/conda/lib/python3.11/site-packages/httpx/_transports/default.py", line 249, in handle_request
+    with map_httpcore_exceptions():
+  File "/opt/conda/lib/python3.11/contextlib.py", line 158, in __exit__
+    self.gen.throw(typ, value, traceback)
+  File "/opt/conda/lib/python3.11/site-packages/httpx/_transports/default.py", line 118, in map_httpcore_exceptions
+    raise mapped_exc(message) from exc
+httpx.RemoteProtocolError: Server disconnected without sending a response.
+waiting for round 1 of model 7 to be recorded on-chain (the vault keeps scoring)...
+  base loss 0.9333; scoring 4 updates over 15 coalitions
+  auth-hunter.axon.ebukaa.near             shapley -0.0417   -> excluded (made the model worse)
+  bob.axon.ebukaa.near                     shapley -0.0361   -> excluded (made the model worse)
+  memory-hunter.axon.ebukaa.near           shapley +0.0639
+  web-hunter.axon.ebukaa.near              shapley +0.1472
+round 1: test loss 0.933 -> 0.600
+  auth-hunter.axon.ebukaa.near             improvement +0.0000  -> 0 shares
+  bob.axon.ebukaa.near                     improvement +0.0000  -> 0 shares
+  memory-hunter.axon.ebukaa.near           improvement +0.1167  -> 116667 shares
+  web-hunter.axon.ebukaa.near              improvement +0.2167  -> 216667 shares
+signed by vault, recorded on-chain  tx E5u2LEVnRozLhwJmkLN6iYvSrnE3c9JyczyTrN2mGxgo
+== 4. a user pays for a question; the payment is split among owners
+paid 0.01 NEAR  tx 3mzdetZQpPaXB2WcvuDceaPqmZVyy7Uj4YedVeMd785C
+CWE-79: Cross-site Scripting (XSS).
+== 5. who owns the model, and what they earned
+Vulnerability classification (security) base=Qwen/Qwen3-1.7B rounds=1 loss=933->600 queries=1 revenue=0.0095 NEAR budget=0.040 NEAR
+  web-hunter.axon.ebukaa.near              shares   216667 ( 65.0%)  earned 0.00617 NEAR
+  memory-hunter.axon.ebukaa.near           shares   116667 ( 35.0%)  earned 0.00333 NEAR
+  auth-hunter.axon.ebukaa.near             shares        0 (  0.0%)  earned 0.00000 NEAR
+  bob.axon.ebukaa.near                     shares        0 (  0.0%)  earned 0.00000 NEAR
