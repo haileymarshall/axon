@@ -162,7 +162,7 @@ async function pageHome() {
         <div class="eyebrow">Private AI, co-owned on NEAR</div>
         <h1 class="tagline"><b>Axon</b> builds specialized AI from private data. <span class="dim">The model is co-owned by its contributors, and they get paid on every inference.</span></h1>
         <div class="cta"><a class="btn" href="#/models">Browse models</a><a class="btn ghost" href="#/contribute">Contribute data</a></div>
-        <p class="newhere">New here? <a href="#/how">How it works</a>, in five steps.</p>
+        <p class="newhere"><a href="#/how">How it works in 5 steps</a></p>
       </div>
       <div class="term" id="term"></div>
       <div class="ticker"><div class="track" id="ticker"></div></div>
@@ -320,7 +320,7 @@ function marks(p, who) {
 }
 
 function howBlock() {
-  return `<div class="kicker">How it works</div><h2>Five steps. Your data stays home.</h2>
+  return `<div class="kicker">How it works</div><h2>How it works in 5 steps</h2>
     <p class="lead">Axon fine-tunes free open models (it does not train from scratch). Contributors own the part that makes the model an expert.</p>
     <div class="steps">
       <div class="step"><b>Join a model</b><p>Pick a niche model and register a device key on NEAR, so nobody can send updates in your name.</p></div>
