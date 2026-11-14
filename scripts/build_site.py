@@ -46,6 +46,13 @@ def main() -> None:
                        "commit": t["commit"], "cvm": t["cvm"], "round_txs": t.get("round_txs", {}),
                        "evidence": f"runs/{man.parent.name}/{t['evidence']}"})
     (ROOT / "web" / "tee.json").write_text(json.dumps({"vaults": vaults}))
+    # The whitepaper page (/whitepaper) is rendered from WHITEPAPER.md.
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("bw", ROOT / "scripts" / "build_whitepaper.py")
+        bw = importlib.util.module_from_spec(spec); spec.loader.exec_module(bw); bw.main()
+    except ImportError:
+        print("markdown not installed: web/whitepaper.html not rebuilt")
     print(f"web/site.json → {site}\nweb/runs.json → {len(runs)} runs")
 
 
