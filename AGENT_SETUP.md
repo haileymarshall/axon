@@ -109,7 +109,7 @@ export AXON_VAULT_URL=<vault address>      # see "Where is the vault?" below
 ```
 
 **Where is the vault?** The vault holds the models and scores contributions. Its address is shown on the
-website's model pages and in the README ("Live vault"). It is only online at certain times (it runs on a rented
+website's model pages (https://axon.surf) and in the README ("Live vault"). It is only online at certain times (it runs on a rented
 GPU). If it is offline, Paths A and B wait until it is back; Path D always works.
 
 ## Path A: contribute your data and earn a share
@@ -127,6 +127,19 @@ GPU). If it is offline, Paths A and B wait until it is back; Path D always works
 
    Help them convert what they have (CSV, notes, a spreadsheet) with a short local script. Use the **same
    question wording** as the examples above for that model. 100 to 600 good examples is a good size.
+
+   **Only free-text records (clinic notes, incident reports)?** Offer `axon prep`: it sends the records to an open
+   model that NEAR AI Cloud runs inside a TEE, **after** verifying the TEE's attestation with a fresh nonce, and writes
+   the pairs to their disk (patient details removed; nothing kept by NEAR AI Cloud or Axon). Tell them the records do
+   leave the machine (only into the attested TEE) and **ask before running it**. They need their own NEAR AI Cloud key
+   (https://cloud.near.ai or the NEAR Builders dashboard), saved by them in `~/.nearai_key` (never pasted in chat):
+
+   ```bash
+   .venv/bin/python -m axon prep ~/my-notes.txt --niche rare-diseases --out ~/my-axon-data.jsonl
+   ```
+
+   It stops and sends nothing if any check fails. Have them read the pairs before training. Try it first with the
+   fictional `samples/clinic-notes.txt`.
 3. **Train and send** (about 10 minutes on a GPU; the first run also downloads the base model):
 
    ```bash

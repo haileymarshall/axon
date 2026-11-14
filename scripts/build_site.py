@@ -30,6 +30,19 @@ def main() -> None:
     runs = [json.loads(f.read_text()) for f in sorted((ROOT / "runs").glob("*/summary.json"), reverse=True)]
     runs = [r for r in runs if r.get("contract")]
     (ROOT / "web" / "runs.json").write_text(json.dumps(runs))
+    # Serverless functions (web/api/) share the NEAR AI Cloud verifier with the CLI; fictional samples for the demo.
+    import shutil
+    shutil.copy(ROOT / "axon" / "nearai.py", ROOT / "web" / "api" / "_nearai.py")
+    (ROOT / "web" / "samples").mkdir(exist_ok=True)
+    for f in (ROOT / "samples").glob("*.txt"):
+        shutil.copy(f, ROOT / "web" / "samples" / f.name)
+    # Saved evidence of the TEE vault that model 4 is bound to, re-checked live by the model page.
+    ev = json.loads((ROOT / "runs" / "tee-mainnet" / "vault-info-20261113.json").read_text())
+    ev = ev.get("info", ev)
+    tee = {"model": 4, "combiner_key": ev["combiner_key"], "code_hash": ev["code_hash"], "quote": ev["attestation"]["quote"],
+           "commit": "af804dc", "rebind_tx": "6sD21iu8CTfvQTwgA6vvjMJZRMg6Gy99yUY4NAwk4xvr",
+           "round_tx": "HmeSHkg2encGsDZgfvzkAKweETp4NtVv2h5SJAd3voED", "cvm": "axon-vault-mainnet5 (Phala Cloud, dstack, Intel TDX)"}
+    (ROOT / "web" / "tee.json").write_text(json.dumps(tee))
     print(f"web/site.json → {site}\nweb/runs.json → {len(runs)} runs")
 
 

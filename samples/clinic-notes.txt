@@ -1,0 +1,36 @@
+FICTIONAL SAMPLE: every patient, clinician, date and place below is invented. Use it to try `axon prep` without real data.
+
+--- Note 1: Northfield Metabolic Clinic, record NMC-48213 ---
+Seen 03/09: Maria Okafor, 7 y/o girl, referred by Dr. Hensley for developmental delay and a musty body odour.
+Newborn screen was missed (home birth in Ashby). Plasma phenylalanine 1,420 umol/L. Diagnosis: phenylketonuria (PKU).
+Explained to parents that PKU is caused by mutations in the PAH gene, which makes phenylalanine hydroxylase, the enzyme
+that breaks down phenylalanine. Both parents are carriers; PKU is inherited in an autosomal recessive pattern, so each
+further pregnancy has a 1 in 4 chance of an affected child. Untreated it causes intellectual disability, seizures,
+eczema and lighter skin and hair. Started low-phenylalanine diet and amino-acid formula. Affects roughly 1 in 10,000 to
+15,000 newborns in the US. Follow-up in 4 weeks with dietitian (Ms. Grant).
+
+--- Note 2: Northfield Neurology, record NN-77105 ---
+James Whitlow, 34 y/o man, Hartley. Two-year history of clumsiness, involuntary jerking movements of the arms and mood
+changes; his late father had similar symptoms in his 40s. Genetic test: 44 CAG repeats in HTT. Diagnosis: Huntington
+disease. Counselled: Huntington disease is caused by an expanded CAG trinucleotide repeat in the HTT gene and is
+inherited in an autosomal dominant pattern; one altered copy is enough, so each of his two children has a 50% risk.
+Longer repeats tend to give earlier onset, and the repeat can grow when passed from a father (anticipation). Symptoms:
+chorea, loss of coordination, cognitive decline and psychiatric problems. Prevalence about 3 to 7 per 100,000 people of
+European ancestry. Referred to genetic counsellor Dr. Paz for the children.
+
+--- Note 3: Northfield Children's Hospital, record NCH-30388 ---
+Leo Brandt, 4 y/o boy, Kestrel Bay. Mother noticed trouble climbing stairs and enlarged calves; Gowers sign positive.
+Creatine kinase 18,000 U/L. Deletion of exons 45-50 in DMD. Diagnosis: Duchenne muscular dystrophy. Explained: caused by
+mutations in the DMD gene, which makes dystrophin, a protein that protects muscle fibres. Inherited in an X-linked
+recessive pattern, so it mostly affects boys; mother to be offered carrier testing, about a third of cases are new
+mutations. Progressive muscle weakness from early childhood, loss of walking usually by age 12, later heart
+(cardiomyopathy) and breathing problems. Affects about 1 in 3,500 to 5,000 newborn boys. Started steroids, cardiology
+review booked.
+
+--- Note 4: Northfield Haematology, record NH-56620 ---
+Amara Diallo, 19 y/o woman, college student in Ashby. Recurrent episodes of severe pain in chest and limbs, anaemia
+(Hb 7.9). Electrophoresis HbSS. Diagnosis: sickle cell disease. Explained: caused by a mutation in the HBB gene that
+makes haemoglobin S, which turns red blood cells rigid and sickle-shaped so they block small vessels. Autosomal
+recessive: both parents carry sickle cell trait. Complications include pain crises, infections, acute chest syndrome
+and stroke. Most common in people of African, Mediterranean, Middle Eastern and South Asian ancestry; about 1 in 365
+Black or African American births in the US. Started hydroxyurea, vaccinations updated.

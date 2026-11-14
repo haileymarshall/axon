@@ -22,6 +22,26 @@ def cmd_prepare(a):
         print(f"{k:<14} {v}")
 
 
+def cmd_prep(a):
+    """Turn raw private records into training pairs on NEAR AI Cloud, after verifying its TEE attestation."""
+    import json as _json
+    from . import nearai
+    records = Path(a.input).read_text()
+    print(f"verifying {a.model} on NEAR AI Cloud (fresh nonce) before sending anything...")
+    r = nearai.prep(records, niche=a.niche, model=a.model)
+    for c in r["attestation"]["checks"] + ((r["answer"] or {}).get("checks") or []):
+        print(f"  {'✅' if c['ok'] else '❌'} {c['check']}" + (f"  ({c['detail']})" if c["detail"] else ""))
+    if not r["pairs"]:
+        raise SystemExit(f"stopped: {r['error']}")
+    with open(a.out, "w") as f:
+        for p in r["pairs"]:
+            f.write(_json.dumps(p, ensure_ascii=False) + "\n")
+    print(f"{'verified' if r['ok'] else 'NOT fully verified'}: {len(r['pairs'])} training pairs written to {a.out} "
+          "(only on this machine; NEAR AI Cloud and Axon keep nothing)")
+    if not r["ok"]:
+        raise SystemExit(1)
+
+
 def cmd_vault(a):
     import uvicorn
     from .vault import create_app
@@ -152,6 +172,13 @@ def main(argv=None):
     sub = p.add_subparsers(dest="cmd", required=True)
 
     sub.add_parser("prepare-data", help="build the demo contributors' private datasets").set_defaults(fn=cmd_prepare)
+
+    s = sub.add_parser("prep", help="turn raw private records into training pairs in NEAR AI Cloud's attested TEE")
+    s.add_argument("input", help="text file with your raw records (e.g. samples/clinic-notes.txt)")
+    s.add_argument("--niche", default="rare-diseases", choices=["rare-diseases", "security", "basque"])
+    s.add_argument("--out", default="pairs.jsonl")
+    s.add_argument("--model", default="Qwen/Qwen3.8-27B", help="a model NEAR AI Cloud runs in its own TEE")
+    s.set_defaults(fn=cmd_prep)
 
     s = sub.add_parser("vault", help="run the sealed combiner (TEE service)")
     s.add_argument("--operator", help="NEAR account that relays signed results on-chain")

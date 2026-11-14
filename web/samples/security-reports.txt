@@ -1,0 +1,18 @@
+FICTIONAL SAMPLE: every company, host, person and date below is invented. Use it to try `axon prep --niche security`.
+
+--- Report SEC-2291, Brightwave Retail, found by K. Moreno ---
+The search page at https://shop.brightwave.example/search echoes the "q" parameter into the results heading without
+encoding it. Payload <script>alert(document.cookie)</script> runs in the victim's browser. Session cookie lacks HttpOnly.
+Fix: HTML-encode output, add CSP.
+
+--- Report SEC-2307, Brightwave Retail internal API (10.4.2.17) ---
+The /api/orders?id= endpoint builds its query as "SELECT * FROM orders WHERE id=" + id. Sending id=1 OR 1=1 returned every
+customer's orders. Fix: parameterised queries.
+
+--- Report SEC-2318, firmware of the Halden X2 router ---
+The ping diagnostics form passes the host field to /bin/sh -c "ping -c 3 <host>". Entering 8.8.8.8; cat /etc/shadow
+printed the password hashes. Unauthenticated on the LAN. Fix: no shell, validate the IP.
+
+--- Report SEC-2326, Brightwave image service ---
+Uploading a crafted 70,000-pixel-wide PNG makes the resize routine copy rows into a fixed 64 KB stack buffer without
+checking the length; the service crashes and a controlled overwrite of the return address looks possible. Fix: bounds check.

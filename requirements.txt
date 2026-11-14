@@ -10,3 +10,5 @@ fastapi>=0.110
 uvicorn>=0.29
 pytest>=8
 dstack-sdk>=0.5
+dcap-qvl>=0.7
+eth-account>=0.13

@@ -1,0 +1,19 @@
+verifying Qwen/Qwen3.8-27B on NEAR AI Cloud (fresh nonce) before sending anything...
+  ✅ gateway: answered with our nonce
+  ✅ gateway: genuine Intel TDX quote  (Intel status UpToDate)
+  ✅ gateway: quote binds its signing key and our fresh nonce  (key 0xb98a789cdc…, nonce cf15cab270df…)
+  ✅ gateway: not in debug mode  (TD attributes debug bit is 0)
+  ✅ gateway: app configuration matches the quote  (sha256(app_compose) 2643bc7ae47ecf4c…)
+  ✅ model: runs in NEAR AI Cloud's own TEE  (1 attested instance(s) of Qwen/Qwen3.8-27B)
+  ✅ model: answered with our nonce
+  ✅ model: genuine Intel TDX quote  (Intel status UpToDate)
+  ✅ model: quote binds its signing key and our fresh nonce  (key 0x835ab53d20…, nonce cf15cab270df…)
+  ✅ model: not in debug mode  (TD attributes debug bit is 0)
+  ✅ model: app configuration matches the quote  (sha256(app_compose) e8416a02d6f7ce47…)
+  ✅ GPU: evidence carries our nonce  (nonce cf15cab270df…)
+  ✅ GPU: genuine NVIDIA confidential-computing attestation  (NVIDIA NRAS verdict for 8 GPU(s))
+  ✅ GPU: NVIDIA's verdict is for our nonce
+  ✅ answer: signature available  (provider_tee)
+  ✅ answer: signed by the attested model key  (signer 0x835AB53d20…)
+  ✅ answer: signature covers our exact request and response  (sha256 8d0bac717a… / 577b34bec4…)
+verified: 20 training pairs written to runs/nearai-cloud/clinic-notes-pairs.jsonl (only on this machine; NEAR AI Cloud and Axon keep nothing)

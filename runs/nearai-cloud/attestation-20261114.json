@@ -1,0 +1,82 @@
+{
+ "ok": true,
+ "model": "Qwen/Qwen3.8-27B",
+ "nonce": "15e710f4740784d376da023bca53fb76b417d3861d4e44b1ee2cf5d6d95122b9",
+ "signing_address": "0x835ab53d20294ef795906dff21ae4c045336aa26",
+ "signers": [
+  "0x835ab53d20294ef795906dff21ae4c045336aa26"
+ ],
+ "checks": [
+  {
+   "check": "gateway: answered with our nonce",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "gateway: genuine Intel TDX quote",
+   "ok": true,
+   "detail": "Intel status UpToDate"
+  },
+  {
+   "check": "gateway: quote binds its signing key and our fresh nonce",
+   "ok": true,
+   "detail": "key 0xb98a789cdc\u2026, nonce 15e710f47407\u2026"
+  },
+  {
+   "check": "gateway: not in debug mode",
+   "ok": true,
+   "detail": "TD attributes debug bit is 0"
+  },
+  {
+   "check": "gateway: app configuration matches the quote",
+   "ok": true,
+   "detail": "sha256(app_compose) 2643bc7ae47ecf4c\u2026"
+  },
+  {
+   "check": "model: runs in NEAR AI Cloud's own TEE",
+   "ok": true,
+   "detail": "1 attested instance(s) of Qwen/Qwen3.8-27B"
+  },
+  {
+   "check": "model: answered with our nonce",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "model: genuine Intel TDX quote",
+   "ok": true,
+   "detail": "Intel status UpToDate"
+  },
+  {
+   "check": "model: quote binds its signing key and our fresh nonce",
+   "ok": true,
+   "detail": "key 0x835ab53d20\u2026, nonce 15e710f47407\u2026"
+  },
+  {
+   "check": "model: not in debug mode",
+   "ok": true,
+   "detail": "TD attributes debug bit is 0"
+  },
+  {
+   "check": "model: app configuration matches the quote",
+   "ok": true,
+   "detail": "sha256(app_compose) e8416a02d6f7ce47\u2026"
+  },
+  {
+   "check": "GPU: evidence carries our nonce",
+   "ok": true,
+   "detail": "nonce 15e710f47407\u2026"
+  },
+  {
+   "check": "GPU: genuine NVIDIA confidential-computing attestation",
+   "ok": true,
+   "detail": "NVIDIA NRAS verdict for 8 GPU(s)"
+  },
+  {
+   "check": "GPU: NVIDIA's verdict is for our nonce",
+   "ok": true,
+   "detail": ""
+  }
+ ],
+ "at": "2026-11-14T07:33:57Z"
+}

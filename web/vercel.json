@@ -1,5 +1,25 @@
 {
-  "cleanUrls": true,
-  "rewrites": [{ "source": "/static/:path*", "destination": "/:path*" }],
-  "headers": [{ "source": "/(.*).json", "headers": [{ "key": "Cache-Control", "value": "no-cache" }] }]
+ "cleanUrls": true,
+ "rewrites": [
+  {
+   "source": "/static/:path*",
+   "destination": "/:path*"
+  }
+ ],
+ "headers": [
+  {
+   "source": "/(.*).json",
+   "headers": [
+    {
+     "key": "Cache-Control",
+     "value": "no-cache"
+    }
+   ]
+  }
+ ],
+ "functions": {
+  "api/*.py": {
+   "maxDuration": 90
+  }
+ }
 }

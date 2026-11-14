@@ -1,0 +1,7 @@
+FICTIONAL SAMPLE: invented messages from a Basque speaker. Use it to try `axon prep --niche basque`.
+
+To my cousin: Gaur goizean merkatura joan naiz eta sagarrak erosi ditut. (This morning I went to the market and bought apples.)
+Note to self: Bihar euria egingo du, aterkia hartu. (It will rain tomorrow, take the umbrella.)
+To the neighbour: Zure txakurra gure lorategian dago berriro. (Your dog is in our garden again.)
+Diary: Liburu hau oso interesgarria da, baina luzeegia. (This book is very interesting, but too long.)
+To my teacher: Ez dut etxeko lana amaitu, gaixorik egon naizelako. (I have not finished the homework because I was ill.)

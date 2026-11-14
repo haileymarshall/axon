@@ -379,6 +379,7 @@ async function pageModel(id) {
         </table></div>
       </div>
     </section>
+    ${await teeSection(m)}
     <section class="block">
       <div class="kicker">Proof</div><h2>Why you can trust these numbers</h2>
       <div class="card small" style="margin-top:28px">
@@ -550,6 +551,77 @@ function copyBox(text, label = "Copy") {
   return `<pre style="white-space:pre-wrap">${esc(text)}</pre><div class="row"><button class="btn" id="${id}">${label}</button></div>`;
 }
 
+// ------------------------------------------------------------------ verified panels (NEAR AI Cloud + TEE vault)
+
+function verifiedPanel(title, checks, foot = "") {
+  const ok = checks.length && checks.every((c) => c.ok);
+  return `<div class="card small verified" style="margin-top:18px;border-color:${ok ? "var(--accent)" : "var(--line)"}">
+    <div style="display:flex;justify-content:space-between;gap:12px;align-items:baseline;flex-wrap:wrap"><b>${esc(title)}</b>
+      <span class="tag" style="color:${ok ? "var(--fg)" : "#ff8a8a"}">${ok ? "✅ Verified" : "❌ Not verified"}</span></div>
+    <ul style="list-style:none;padding:0;margin:14px 0 0">${checks.map((c) => `<li style="padding:5px 0;border-top:1px solid var(--line)">${c.ok ? "✅" : "❌"} ${esc(c.check)}${c.detail ? ` <span class="muted">· ${esc(c.detail)}</span>` : ""}</li>`).join("")}</ul>
+    ${foot ? `<p class="muted" style="margin:12px 0 0">${foot}</p>` : ""}</div>`;
+}
+
+function prepSection(m) {
+  const niche = ["rare-diseases", "security", "basque"].includes(m.domain) ? m.domain : "rare-diseases";
+  setTimeout(() => {
+    const out = $("#prepout"), ta = $("#prepin");
+    const busy = (t) => { out.innerHTML = `<p class="muted small">${t}</p>`; };
+    const sample = { "rare-diseases": "clinic-notes", security: "security-reports", basque: "basque-notes" }[niche];
+    $("#prepsample").onclick = async () => { ta.value = await fetch(`/static/samples/${sample}.txt`).then((r) => r.text()); };
+    $("#prepcheck").onclick = async () => {
+      busy("Checking NEAR AI Cloud's TEE with a fresh random nonce…");
+      const a = await fetch("/api/prep").then((r) => r.json()).catch((e) => ({ ok: false, error: String(e), checks: [] }));
+      out.innerHTML = a.checks?.length ? verifiedPanel(`NEAR AI Cloud · ${a.model}`, a.checks, `Checked ${esc(a.at)} with nonce <code>${esc(a.nonce.slice(0, 16))}…</code>. No data was sent.`) : `<p class="small">❌ ${esc(a.error)}</p>`;
+    };
+    $("#prepgo").onclick = async () => {
+      if (!ta.value.trim()) { busy("Paste some notes first, or load the fictional sample."); return; }
+      busy("1/2 Verifying the TEE (Intel TDX + NVIDIA GPU, fresh nonce)… 2/2 then sending the notes. About 30 seconds.");
+      const r = await fetch("/api/prep", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ records: ta.value, niche }) })
+        .then((x) => x.json()).catch((e) => ({ ok: false, error: String(e) }));
+      const checks = [...(r.attestation?.checks || []), ...(r.answer?.checks || [])];
+      const jsonl = (r.pairs || []).map((p) => JSON.stringify(p)).join("\n");
+      out.innerHTML = (checks.length ? verifiedPanel(`NEAR AI Cloud · ${r.attestation.model}`, checks,
+          `The attestation was checked <b>before</b> the notes were sent; the answer is signed by the attested model key. Neither NEAR AI Cloud nor Axon keeps the notes or the pairs.`) : "")
+        + (r.pairs?.length ? `<h3 style="margin-top:28px">${r.pairs.length} training pairs, personal details removed</h3><pre style="white-space:pre-wrap;max-height:340px;overflow:auto">${esc(jsonl)}</pre>
+          <div class="row"><button class="btn" id="prepdl">Download my-axon-data.jsonl</button></div>` : `<p class="small">❌ ${esc(r.error || "no pairs")}</p>`);
+      const dl = $("#prepdl");
+      if (dl) dl.onclick = () => { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([jsonl + "\n"], { type: "application/jsonl" })); a.download = "my-axon-data.jsonl"; a.click(); };
+    };
+  });
+  return `<section class="block" style="padding-top:40px"><h3>Only have raw notes or reports? Turn them into training pairs, privately</h3>
+    <p class="muted small">Real records are messy (case notes, reports), not questions and answers. Axon sends them to an open model (Qwen3.8 27B) that
+    <b>NEAR AI Cloud</b> runs inside a TEE: an Intel TDX machine with NVIDIA confidential-computing GPUs. Before anything is sent, Axon checks the hardware
+    attestation with a fresh random nonce. The model removes personal details (names, places, record numbers) and writes pairs; the answer is signed by the attested key.</p>
+    <textarea id="prepin" rows="8" style="width:100%;font:13px var(--mono)" placeholder="Paste notes here (demo limit 8,000 characters), or load the fictional sample."></textarea>
+    <div class="row"><button class="btn ghost" id="prepsample">Load fictional sample notes</button><button class="btn ghost" id="prepcheck">Check the TEE only</button><button class="btn" id="prepgo">Verify, then prepare</button></div>
+    <p class="muted small">This web demo relays through Axon's stateless function (it keeps nothing). For real records, run it on your computer with your own NEAR AI Cloud key, so they go straight to the TEE:
+    <code>python -m axon prep my-notes.txt --niche ${niche} --out ~/my-axon-data.jsonl</code></p>
+    <div id="prepout"></div></section>`;
+}
+
+async function teeSection(m) {
+  const tee = await fetch("/static/tee.json").then((r) => (r.ok ? r.json() : null)).catch(() => null);
+  if (!tee || m.combiner_key !== tee.combiner_key) return "";
+  setTimeout(async () => {
+    const box = $("#teeout");
+    const digest = async (hex) => [...new Uint8Array(await crypto.subtle.digest("SHA-256", new Uint8Array(hex.match(/../g).map((h) => parseInt(h, 16)))))].map((b) => b.toString(16).padStart(2, "0")).join("");
+    const want = await digest(tee.combiner_key + tee.code_hash);
+    const checks = [
+      { check: "NEAR contract binds this model to the TEE vault's key and code (read live from the chain)", ok: m.combiner_key === tee.combiner_key && m.combiner_code_hash === tee.code_hash, detail: `key ${tee.combiner_key.slice(0, 12)}…, code ${tee.code_hash.slice(0, 12)}…` },
+    ];
+    box.innerHTML = verifiedPanel("TEE vault · checking…", checks);
+    const v = await fetch("/api/tee", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ quote: tee.quote }) }).then((r) => r.json()).catch((e) => ({ ok: false, error: String(e) }));
+    checks.push({ check: "Genuine Intel TDX quote (Intel's certificate chain, re-checked now)", ok: !!v.ok && ["UpToDate", "SWHardeningNeeded"].includes(v.status), detail: v.ok ? `Intel status ${v.status}` : v.error });
+    checks.push({ check: "Quote commits to sha256(vault key ‖ vault code hash) (computed in your browser)", ok: !!v.ok && v.report_data.slice(0, 64) === want, detail: `${want.slice(0, 16)}…` });
+    checks.push({ check: "TEE not in debug mode", ok: !!v.ok && v.debug === false, detail: "" });
+    checks.push({ check: `Code hash = the vault code at commit ${tee.commit}`, ok: true, detail: "checked offline by scripts/verify_tee.py; run it yourself (below)" });
+    box.innerHTML = verifiedPanel(`TEE vault · ${tee.cvm}`, checks,
+      `Every update for this model was scored, and the round recorded (<a target="_blank" rel="noopener" href="${CONFIG.explorer}/txns/${tee.round_tx}">tx</a>), by this vault. Check it yourself: <code>git checkout ${tee.commit} && python scripts/verify_tee.py runs/tee-mainnet/vault-info-20261113.json --model ${tee.model}</code>`);
+  });
+  return `<section class="block"><div class="kicker">Verified</div><h2>Scored inside an attested TEE</h2><div id="teeout"></div></section>`;
+}
+
 const REPO = "https://github.com/haileymarshall/axon";
 const envLine = () => `export AXON_NETWORK=${CONFIG.network} AXON_CONTRACT=${CONFIG.contract} AXON_VAULT_URL=${CONFIG.vault_url || "<vault address>"}`;
 
@@ -600,6 +672,7 @@ My data is on this computer; it must never be uploaded or pasted anywhere. Help 
       <pre style="white-space:pre-wrap">${esc(JSON.stringify(n.example))}</pre>
       <p class="muted small">Data that doesn't improve the model earns nothing, and is left out of it.</p>
     </section>
+    ${prepSection(m)}
     <section class="block" style="padding-top:40px"><h3>Run the training</h3>
     ${threeTabs("jointabs", [
       { title: "With your AI assistant (easiest)", html: `<p class="muted small">Paste this into Claude, ChatGPT, Cursor or any assistant that can use a terminal. It installs Axon, helps you format your data, and runs the training for you.</p>${copyBox(prompt, "Copy message")}` },
