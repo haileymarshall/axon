@@ -1,5 +1,7 @@
 # Axon
 
+*The first private AI that its data contributors own.*
+
 **Axon builds specialized AI from private data. The model is co-owned by its contributors, and they get paid on every
 inference.**
 
