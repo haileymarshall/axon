@@ -231,3 +231,18 @@ a.card .tag:not(.live) { color: var(--mute); }
 .nearstrip { border: 1px solid var(--line); background: var(--fill); padding: 10px 14px; margin: 18px 0 22px; }
 .grid.g2 { grid-template-columns: repeat(2, 1fr); }
 @media (max-width: 760px) { .grid.g2 { grid-template-columns: 1fr; } }
+/* Header with six links: on narrower screens the wordmark moves left so links never collide with it. */
+.top nav a { white-space: nowrap; }
+@media (max-width: 1560px) and (min-width: 761px) {
+  .top { grid-template-columns: auto 1fr auto; column-gap: 26px; }
+  .brand { grid-column: 1; grid-row: 1; text-align: left; }
+  .top nav { grid-column: 2; grid-row: 1; justify-content: center; gap: clamp(12px, 1.6vw, 30px); }
+  .top nav a { font-size: 13px; letter-spacing: .1em; }
+  .top .right { grid-column: 3; grid-row: 1; }
+  .top .chip { display: none; }
+}
+@media (max-width: 1180px) and (min-width: 761px) {
+  .top nav a { font-size: 12px; letter-spacing: .06em; }
+  .top nav a[href$="#/how"] { display: none; }
+  .top .btn.top-cta { padding: 9px 12px; font-size: 12px; }
+}
