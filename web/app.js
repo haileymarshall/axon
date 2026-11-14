@@ -191,14 +191,8 @@ async function pageHome() {
   }
 }
 
-function ticker(models, t) {
-  const v = LIVE ? CONFIG.vault?.attestation?.mode || "unknown" : "offline · answers recorded";
-  const items = [
-    `Network <b>NEAR ${esc(CONFIG.network)}</b>`, `Contract <b>${esc(CONFIG.contract)}</b>`, `Models <b>${models.length}</b>`,
-    `Owners <b>${t.o}</b>`, `Paid questions <b>${t.q}</b>`, `Paid to owners <b>${near(t.r, 3)} Ⓝ</b>`,
-    `Split <b>95% owners · 5% Axon</b>`, `Vault <b>${esc(v)}</b>`, `Data <b>never leaves the device</b>`,
-    `Junk data <b>earns 0%</b>`, `Base models <b>open: Qwen · Llama · Gemma · Mistral</b>`,
-  ];
+function ticker() {
+  const items = Array(8).fill(`<b>Private AI built from private data</b>`);
   const html = items.map((i) => `<span>${i}</span>`).join("");
   $("#ticker").innerHTML = html + html;
 }
