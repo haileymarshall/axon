@@ -713,7 +713,7 @@ async function pageEarnings() {
   view.innerHTML = `<div class="wrap page">
     <div class="kicker">Earnings</div><h2>Your earnings</h2><p class="lead">Your ownership in every model, and what it has earned you. Withdraw any time.</p>
     <div class="card"><label style="margin-top:0">NEAR account</label><div class="row" style="margin-top:0"><input id="acct" value="${esc(saved)}" placeholder="${CONFIG.network === "mainnet" ? "itziar.axon.ebukaa.near" : "alice.testnet"}" style="flex:1"><button class="btn" id="go">Show</button></div>
-    ${W.account() ? "" : `<p class="small muted">Or <a href="#" id="econnect">connect your wallet</a> to see yours and withdraw with one click.</p>`}<div id="eout"></div></div></div>`;
+    <div id="eout"></div></div></div>`;
   const ec = $("#econnect");
   if (ec) ec.onclick = (e) => { e.preventDefault(); W.connect(); };
   const run = async () => {
