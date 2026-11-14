@@ -1,0 +1,733 @@
+== 1. create the model (bound to the vault's key + code hash)
+reusing model 9
+model id: 9
+== 2.1 contributors train locally and send sealed updates (round 1)
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[neuro-clinic.axon.ebukaa.near] joining model 9 on-chain with device key 6e5950075eff…
+[neuro-clinic.axon.ebukaa.near] training locally on 176 private examples (data stays on this machine)
+[neuro-clinic.axon.ebukaa.near] base model Qwen/Qwen2.5-1.5B-Instruct (from the chain), adapter rank 16
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]Loading weights:  15%|█▌        | 51/338 [00:00<00:00, 324.18it/s]Loading weights:  28%|██▊       | 95/338 [00:00<00:00, 372.24it/s]Loading weights:  43%|████▎     | 147/338 [00:00<00:00, 428.69it/s]Loading weights:  57%|█████▋    | 192/338 [00:00<00:00, 423.99it/s]Loading weights:  70%|██████▉   | 236/338 [00:00<00:00, 334.71it/s]Loading weights:  81%|████████  | 273/338 [00:00<00:00, 337.73it/s]Loading weights:  91%|█████████▏| 309/338 [00:00<00:00, 334.49it/s]Loading weights: 100%|██████████| 338/338 [00:00<00:00, 349.17it/s]
+/opt/conda/lib/python3.11/site-packages/transformers/modeling_utils.py:3195: FutureWarning: `gradient_checkpointing_enable` is deprecated and will be removed in v6. Use `activation_checkpointing_enable` instead.
+  warnings.warn(
+/opt/conda/lib/python3.11/site-packages/transformers/modeling_utils.py:3303: FutureWarning: `is_gradient_checkpointing` is deprecated and will be removed in v6. Use `is_activation_checkpointing` instead.
+  warnings.warn(
+[transformers] `use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`.
+[neuro-clinic.axon.ebukaa.near]   step   0  loss 1.653
+[neuro-clinic.axon.ebukaa.near]   step   4  loss 1.359
+[neuro-clinic.axon.ebukaa.near]   step   8  loss 1.512
+[neuro-clinic.axon.ebukaa.near]   step  12  loss 1.269
+[neuro-clinic.axon.ebukaa.near]   step  16  loss 1.303
+[neuro-clinic.axon.ebukaa.near]   step  20  loss 1.118
+[neuro-clinic.axon.ebukaa.near]   step  24  loss 1.331
+[neuro-clinic.axon.ebukaa.near]   step  28  loss 1.215
+[neuro-clinic.axon.ebukaa.near]   step  32  loss 1.319
+[neuro-clinic.axon.ebukaa.near]   step  36  loss 0.885
+[neuro-clinic.axon.ebukaa.near]   step  40  loss 1.033
+[neuro-clinic.axon.ebukaa.near]   step  44  loss 0.798
+[neuro-clinic.axon.ebukaa.near]   step  48  loss 0.861
+[neuro-clinic.axon.ebukaa.near]   step  52  loss 0.693
+[neuro-clinic.axon.ebukaa.near]   step  56  loss 0.661
+[neuro-clinic.axon.ebukaa.near]   step  60  loss 1.000
+[neuro-clinic.axon.ebukaa.near]   step  64  loss 1.407
+[neuro-clinic.axon.ebukaa.near]   step  68  loss 0.768
+[neuro-clinic.axon.ebukaa.near]   step  72  loss 0.430
+[neuro-clinic.axon.ebukaa.near]   step  76  loss 0.655
+[neuro-clinic.axon.ebukaa.near]   step  80  loss 1.292
+[neuro-clinic.axon.ebukaa.near]   step  84  loss 0.743
+[neuro-clinic.axon.ebukaa.near]   step  88  loss 0.698
+[neuro-clinic.axon.ebukaa.near]   step  92  loss 1.279
+[neuro-clinic.axon.ebukaa.near]   step  96  loss 0.672
+[neuro-clinic.axon.ebukaa.near]   step 100  loss 0.323
+[neuro-clinic.axon.ebukaa.near]   step 104  loss 0.563
+[neuro-clinic.axon.ebukaa.near]   step 108  loss 0.482
+[neuro-clinic.axon.ebukaa.near]   step 112  loss 0.674
+[neuro-clinic.axon.ebukaa.near]   step 116  loss 0.431
+[neuro-clinic.axon.ebukaa.near]   step 120  loss 0.418
+[neuro-clinic.axon.ebukaa.near]   step 124  loss 0.526
+[neuro-clinic.axon.ebukaa.near]   step 128  loss 0.697
+[neuro-clinic.axon.ebukaa.near]   step 132  loss 0.441
+[neuro-clinic.axon.ebukaa.near]   step 136  loss 0.410
+[neuro-clinic.axon.ebukaa.near]   step 140  loss 0.409
+[neuro-clinic.axon.ebukaa.near]   step 144  loss 0.153
+[neuro-clinic.axon.ebukaa.near]   step 148  loss 0.669
+[neuro-clinic.axon.ebukaa.near]   step 152  loss 0.264
+[neuro-clinic.axon.ebukaa.near]   step 156  loss 0.471
+[neuro-clinic.axon.ebukaa.near]   step 160  loss 0.323
+[neuro-clinic.axon.ebukaa.near]   step 164  loss 0.393
+[neuro-clinic.axon.ebukaa.near]   step 168  loss 0.193
+[neuro-clinic.axon.ebukaa.near]   step 172  loss 0.664
+[neuro-clinic.axon.ebukaa.near]   step 176  loss 0.380
+[neuro-clinic.axon.ebukaa.near]   step 180  loss 0.232
+[neuro-clinic.axon.ebukaa.near]   step 184  loss 0.207
+[neuro-clinic.axon.ebukaa.near]   step 188  loss 0.348
+[neuro-clinic.axon.ebukaa.near]   step 192  loss 0.048
+[neuro-clinic.axon.ebukaa.near]   step 196  loss 0.480
+[neuro-clinic.axon.ebukaa.near]   step 200  loss 0.070
+[neuro-clinic.axon.ebukaa.near]   step 204  loss 0.250
+[neuro-clinic.axon.ebukaa.near]   step 208  loss 0.324
+[neuro-clinic.axon.ebukaa.near]   step 212  loss 0.235
+[neuro-clinic.axon.ebukaa.near]   step 216  loss 0.212
+[neuro-clinic.axon.ebukaa.near]   step 220  loss 0.272
+[neuro-clinic.axon.ebukaa.near]   step 224  loss 0.131
+[neuro-clinic.axon.ebukaa.near]   step 228  loss 0.081
+[neuro-clinic.axon.ebukaa.near]   step 232  loss 0.194
+[neuro-clinic.axon.ebukaa.near]   step 236  loss 0.215
+[neuro-clinic.axon.ebukaa.near]   step 240  loss 0.351
+[neuro-clinic.axon.ebukaa.near]   step 244  loss 0.131
+[neuro-clinic.axon.ebukaa.near]   step 248  loss 0.084
+[neuro-clinic.axon.ebukaa.near]   step 252  loss 0.224
+[neuro-clinic.axon.ebukaa.near]   step 256  loss 0.134
+[neuro-clinic.axon.ebukaa.near]   step 260  loss 0.109
+[neuro-clinic.axon.ebukaa.near]   step 264  loss 0.102
+[neuro-clinic.axon.ebukaa.near]   step 268  loss 0.137
+[neuro-clinic.axon.ebukaa.near]   step 272  loss 0.521
+[neuro-clinic.axon.ebukaa.near]   step 276  loss 0.163
+[neuro-clinic.axon.ebukaa.near]   step 280  loss 0.050
+[neuro-clinic.axon.ebukaa.near]   step 284  loss 0.037
+[neuro-clinic.axon.ebukaa.near]   step 288  loss 0.045
+[neuro-clinic.axon.ebukaa.near]   step 292  loss 0.054
+[neuro-clinic.axon.ebukaa.near]   step 296  loss 0.023
+[neuro-clinic.axon.ebukaa.near]   step 299  loss 0.127
+[neuro-clinic.axon.ebukaa.near] sealed update (72178 KB) accepted for round 1
+[metabolic-clinic.axon.ebukaa.near] joining model 9 on-chain with device key a7390ec94374…
+[metabolic-clinic.axon.ebukaa.near] training locally on 175 private examples (data stays on this machine)
+[metabolic-clinic.axon.ebukaa.near] base model Qwen/Qwen2.5-1.5B-Instruct (from the chain), adapter rank 16
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]Loading weights:  10%|█         | 35/338 [00:00<00:00, 345.44it/s]Loading weights:  22%|██▏       | 75/338 [00:00<00:00, 369.48it/s]Loading weights:  33%|███▎      | 112/338 [00:00<00:00, 365.57it/s]Loading weights:  44%|████▍     | 149/338 [00:00<00:00, 359.49it/s]Loading weights:  55%|█████▍    | 185/338 [00:00<00:00, 354.78it/s]Loading weights:  65%|██████▌   | 221/338 [00:00<00:00, 282.47it/s]Loading weights:  75%|███████▍  | 252/338 [00:00<00:00, 289.55it/s]Loading weights:  84%|████████▎ | 283/338 [00:00<00:00, 295.10it/s]Loading weights:  93%|█████████▎| 314/338 [00:00<00:00, 298.77it/s]Loading weights: 100%|██████████| 338/338 [00:01<00:00, 333.42it/s]
+/opt/conda/lib/python3.11/site-packages/transformers/modeling_utils.py:3195: FutureWarning: `gradient_checkpointing_enable` is deprecated and will be removed in v6. Use `activation_checkpointing_enable` instead.
+  warnings.warn(
+/opt/conda/lib/python3.11/site-packages/transformers/modeling_utils.py:3303: FutureWarning: `is_gradient_checkpointing` is deprecated and will be removed in v6. Use `is_activation_checkpointing` instead.
+  warnings.warn(
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`.
+[metabolic-clinic.axon.ebukaa.near]   step   0  loss 1.376
+[metabolic-clinic.axon.ebukaa.near]   step   4  loss 1.436
+[metabolic-clinic.axon.ebukaa.near]   step   8  loss 1.340
+[metabolic-clinic.axon.ebukaa.near]   step  12  loss 1.219
+[metabolic-clinic.axon.ebukaa.near]   step  16  loss 1.351
+[metabolic-clinic.axon.ebukaa.near]   step  20  loss 1.018
+[metabolic-clinic.axon.ebukaa.near]   step  24  loss 1.285
+[metabolic-clinic.axon.ebukaa.near]   step  28  loss 0.663
+[metabolic-clinic.axon.ebukaa.near]   step  32  loss 0.966
+[metabolic-clinic.axon.ebukaa.near]   step  36  loss 0.802
+[metabolic-clinic.axon.ebukaa.near]   step  40  loss 0.898
+[metabolic-clinic.axon.ebukaa.near]   step  44  loss 0.849
+[metabolic-clinic.axon.ebukaa.near]   step  48  loss 0.220
+[metabolic-clinic.axon.ebukaa.near]   step  52  loss 1.056
+[metabolic-clinic.axon.ebukaa.near]   step  56  loss 0.546
+[metabolic-clinic.axon.ebukaa.near]   step  60  loss 0.810
+[metabolic-clinic.axon.ebukaa.near]   step  64  loss 0.787
+[metabolic-clinic.axon.ebukaa.near]   step  68  loss 0.302
+[metabolic-clinic.axon.ebukaa.near]   step  72  loss 0.638
+[metabolic-clinic.axon.ebukaa.near]   step  76  loss 0.771
+[metabolic-clinic.axon.ebukaa.near]   step  80  loss 0.975
+[metabolic-clinic.axon.ebukaa.near]   step  84  loss 0.809
+[metabolic-clinic.axon.ebukaa.near]   step  88  loss 0.649
+[metabolic-clinic.axon.ebukaa.near]   step  92  loss 1.037
+[metabolic-clinic.axon.ebukaa.near]   step  96  loss 0.810
+[metabolic-clinic.axon.ebukaa.near]   step 100  loss 0.234
+[metabolic-clinic.axon.ebukaa.near]   step 104  loss 0.102
+[metabolic-clinic.axon.ebukaa.near]   step 108  loss 0.374
+[metabolic-clinic.axon.ebukaa.near]   step 112  loss 0.558
+[metabolic-clinic.axon.ebukaa.near]   step 116  loss 0.377
+[metabolic-clinic.axon.ebukaa.near]   step 120  loss 0.281
+[metabolic-clinic.axon.ebukaa.near]   step 124  loss 0.199
+[metabolic-clinic.axon.ebukaa.near]   step 128  loss 0.474
+[metabolic-clinic.axon.ebukaa.near]   step 132  loss 0.517
+[metabolic-clinic.axon.ebukaa.near]   step 136  loss 0.088
+[metabolic-clinic.axon.ebukaa.near]   step 140  loss 0.292
+[metabolic-clinic.axon.ebukaa.near]   step 144  loss 0.103
+[metabolic-clinic.axon.ebukaa.near]   step 148  loss 0.453
+[metabolic-clinic.axon.ebukaa.near]   step 152  loss 0.074
+[metabolic-clinic.axon.ebukaa.near]   step 156  loss 0.671
+[metabolic-clinic.axon.ebukaa.near]   step 160  loss 0.259
+[metabolic-clinic.axon.ebukaa.near]   step 164  loss 0.325
+[metabolic-clinic.axon.ebukaa.near]   step 168  loss 0.150
+[metabolic-clinic.axon.ebukaa.near]   step 172  loss 0.326
+[metabolic-clinic.axon.ebukaa.near]   step 176  loss 0.357
+[metabolic-clinic.axon.ebukaa.near]   step 180  loss 0.508
+[metabolic-clinic.axon.ebukaa.near]   step 184  loss 0.326
+[metabolic-clinic.axon.ebukaa.near]   step 188  loss 0.711
+[metabolic-clinic.axon.ebukaa.near]   step 192  loss 0.044
+[metabolic-clinic.axon.ebukaa.near]   step 196  loss 0.056
+[metabolic-clinic.axon.ebukaa.near]   step 200  loss 0.055
+[metabolic-clinic.axon.ebukaa.near]   step 204  loss 0.262
+[metabolic-clinic.axon.ebukaa.near]   step 208  loss 0.377
+[metabolic-clinic.axon.ebukaa.near]   step 212  loss 0.390
+[metabolic-clinic.axon.ebukaa.near]   step 216  loss 0.191
+[metabolic-clinic.axon.ebukaa.near]   step 220  loss 0.249
+[metabolic-clinic.axon.ebukaa.near]   step 224  loss 0.092
+[metabolic-clinic.axon.ebukaa.near]   step 228  loss 0.183
+[metabolic-clinic.axon.ebukaa.near]   step 232  loss 0.053
+[metabolic-clinic.axon.ebukaa.near]   step 236  loss 0.226
+[metabolic-clinic.axon.ebukaa.near]   step 240  loss 0.319
+[metabolic-clinic.axon.ebukaa.near]   step 244  loss 0.131
+[metabolic-clinic.axon.ebukaa.near]   step 248  loss 0.080
+[metabolic-clinic.axon.ebukaa.near]   step 252  loss 0.103
+[metabolic-clinic.axon.ebukaa.near]   step 256  loss 0.155
+[metabolic-clinic.axon.ebukaa.near]   step 260  loss 0.142
+[metabolic-clinic.axon.ebukaa.near]   step 264  loss 0.130
+[metabolic-clinic.axon.ebukaa.near]   step 268  loss 0.158
+[metabolic-clinic.axon.ebukaa.near]   step 272  loss 0.169
+[metabolic-clinic.axon.ebukaa.near]   step 276  loss 0.063
+[metabolic-clinic.axon.ebukaa.near]   step 280  loss 0.076
+[metabolic-clinic.axon.ebukaa.near]   step 284  loss 0.155
+[metabolic-clinic.axon.ebukaa.near]   step 288  loss 0.036
+[metabolic-clinic.axon.ebukaa.near]   step 292  loss 0.099
+[metabolic-clinic.axon.ebukaa.near]   step 296  loss 0.048
+[metabolic-clinic.axon.ebukaa.near]   step 299  loss 0.122
+[metabolic-clinic.axon.ebukaa.near] sealed update (72178 KB) accepted for round 1
+[alice.axon.ebukaa.near] joining model 9 on-chain with device key 9c248da24378…
+[alice.axon.ebukaa.near] training locally on 200 private examples (data stays on this machine)
+[alice.axon.ebukaa.near] base model Qwen/Qwen2.5-1.5B-Instruct (from the chain), adapter rank 16
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]Loading weights:  13%|█▎        | 45/338 [00:00<00:00, 303.62it/s]Loading weights:  28%|██▊       | 96/338 [00:00<00:00, 403.22it/s]Loading weights:  43%|████▎     | 147/338 [00:00<00:00, 443.28it/s]Loading weights:  57%|█████▋    | 193/338 [00:00<00:00, 445.44it/s]Loading weights:  71%|███████   | 239/338 [00:00<00:00, 441.99it/s]Loading weights:  84%|████████▍ | 284/338 [00:00<00:00, 441.92it/s]Loading weights:  97%|█████████▋| 329/338 [00:00<00:00, 437.64it/s]Loading weights: 100%|██████████| 338/338 [00:00<00:00, 440.94it/s]
+/opt/conda/lib/python3.11/site-packages/transformers/modeling_utils.py:3195: FutureWarning: `gradient_checkpointing_enable` is deprecated and will be removed in v6. Use `activation_checkpointing_enable` instead.
+  warnings.warn(
+/opt/conda/lib/python3.11/site-packages/transformers/modeling_utils.py:3303: FutureWarning: `is_gradient_checkpointing` is deprecated and will be removed in v6. Use `is_activation_checkpointing` instead.
+  warnings.warn(
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`.
+[alice.axon.ebukaa.near]   step   0  loss 1.645
+[alice.axon.ebukaa.near]   step   4  loss 1.173
+[alice.axon.ebukaa.near]   step   8  loss 1.317
+[alice.axon.ebukaa.near]   step  12  loss 1.393
+[alice.axon.ebukaa.near]   step  16  loss 1.300
+[alice.axon.ebukaa.near]   step  20  loss 1.202
+[alice.axon.ebukaa.near]   step  24  loss 1.455
+[alice.axon.ebukaa.near]   step  28  loss 1.317
+[alice.axon.ebukaa.near]   step  32  loss 0.704
+[alice.axon.ebukaa.near]   step  36  loss 1.116
+[alice.axon.ebukaa.near]   step  40  loss 0.903
+[alice.axon.ebukaa.near]   step  44  loss 0.933
+[alice.axon.ebukaa.near]   step  48  loss 0.293
+[alice.axon.ebukaa.near]   step  52  loss 1.085
+[alice.axon.ebukaa.near]   step  56  loss 1.012
+[alice.axon.ebukaa.near]   step  60  loss 0.877
+[alice.axon.ebukaa.near]   step  64  loss 0.864
+[alice.axon.ebukaa.near]   step  68  loss 0.276
+[alice.axon.ebukaa.near]   step  72  loss 0.679
+[alice.axon.ebukaa.near]   step  76  loss 0.561
+[alice.axon.ebukaa.near]   step  80  loss 0.431
+[alice.axon.ebukaa.near]   step  84  loss 0.435
+[alice.axon.ebukaa.near]   step  88  loss 0.943
+[alice.axon.ebukaa.near]   step  92  loss 0.780
+[alice.axon.ebukaa.near]   step  96  loss 0.535
+[alice.axon.ebukaa.near]   step 100  loss 0.723
+[alice.axon.ebukaa.near]   step 104  loss 0.776
+[alice.axon.ebukaa.near]   step 108  loss 1.094
+[alice.axon.ebukaa.near]   step 112  loss 0.843
+[alice.axon.ebukaa.near]   step 116  loss 0.262
+[alice.axon.ebukaa.near]   step 120  loss 0.418
+[alice.axon.ebukaa.near]   step 124  loss 0.943
+[alice.axon.ebukaa.near]   step 128  loss 0.535
+[alice.axon.ebukaa.near]   step 132  loss 0.847
+[alice.axon.ebukaa.near]   step 136  loss 0.765
+[alice.axon.ebukaa.near]   step 140  loss 0.357
+[alice.axon.ebukaa.near]   step 144  loss 0.546
+[alice.axon.ebukaa.near]   step 148  loss 1.069
+[alice.axon.ebukaa.near]   step 152  loss 0.170
+[alice.axon.ebukaa.near]   step 156  loss 0.380
+[alice.axon.ebukaa.near]   step 160  loss 0.180
+[alice.axon.ebukaa.near]   step 164  loss 0.324
+[alice.axon.ebukaa.near]   step 168  loss 0.376
+[alice.axon.ebukaa.near]   step 172  loss 0.519
+[alice.axon.ebukaa.near]   step 176  loss 0.262
+[alice.axon.ebukaa.near]   step 180  loss 0.197
+[alice.axon.ebukaa.near]   step 184  loss 0.426
+[alice.axon.ebukaa.near]   step 188  loss 0.428
+[alice.axon.ebukaa.near]   step 192  loss 0.618
+[alice.axon.ebukaa.near]   step 196  loss 0.340
+[alice.axon.ebukaa.near]   step 200  loss 0.271
+[alice.axon.ebukaa.near]   step 204  loss 0.241
+[alice.axon.ebukaa.near]   step 208  loss 0.199
+[alice.axon.ebukaa.near]   step 212  loss 0.972
+[alice.axon.ebukaa.near]   step 216  loss 0.494
+[alice.axon.ebukaa.near]   step 220  loss 0.837
+[alice.axon.ebukaa.near]   step 224  loss 0.212
+[alice.axon.ebukaa.near]   step 228  loss 0.162
+[alice.axon.ebukaa.near]   step 232  loss 0.306
+[alice.axon.ebukaa.near]   step 236  loss 0.111
+[alice.axon.ebukaa.near]   step 240  loss 0.143
+[alice.axon.ebukaa.near]   step 244  loss 0.284
+[alice.axon.ebukaa.near]   step 248  loss 0.319
+[alice.axon.ebukaa.near]   step 252  loss 0.159
+[alice.axon.ebukaa.near]   step 256  loss 0.054
+[alice.axon.ebukaa.near]   step 260  loss 0.762
+[alice.axon.ebukaa.near]   step 264  loss 0.092
+[alice.axon.ebukaa.near]   step 268  loss 0.068
+[alice.axon.ebukaa.near]   step 272  loss 0.923
+[alice.axon.ebukaa.near]   step 276  loss 0.070
+[alice.axon.ebukaa.near]   step 280  loss 0.215
+[alice.axon.ebukaa.near]   step 284  loss 0.075
+[alice.axon.ebukaa.near]   step 288  loss 0.273
+[alice.axon.ebukaa.near]   step 292  loss 0.123
+[alice.axon.ebukaa.near]   step 296  loss 0.029
+[alice.axon.ebukaa.near]   step 299  loss 0.070
+[alice.axon.ebukaa.near] sealed update (72178 KB) accepted for round 1
+[bob.axon.ebukaa.near] joining model 9 on-chain with device key d6fe19e9c70a…
+[bob.axon.ebukaa.near] training locally on 200 private examples (data stays on this machine)
+[bob.axon.ebukaa.near] base model Qwen/Qwen2.5-1.5B-Instruct (from the chain), adapter rank 16
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]Loading weights:  14%|█▍        | 47/338 [00:00<00:00, 436.19it/s]Loading weights:  27%|██▋       | 91/338 [00:00<00:00, 423.71it/s]Loading weights:  40%|███▉      | 134/338 [00:00<00:00, 324.54it/s]Loading weights:  50%|█████     | 169/338 [00:00<00:00, 323.51it/s]Loading weights:  60%|██████    | 203/338 [00:00<00:00, 327.14it/s]Loading weights:  70%|███████   | 237/338 [00:00<00:00, 329.03it/s]Loading weights:  80%|████████  | 271/338 [00:00<00:00, 327.86it/s]Loading weights:  90%|█████████ | 305/338 [00:00<00:00, 325.01it/s]Loading weights: 100%|██████████| 338/338 [00:01<00:00, 337.25it/s]
+/opt/conda/lib/python3.11/site-packages/transformers/modeling_utils.py:3195: FutureWarning: `gradient_checkpointing_enable` is deprecated and will be removed in v6. Use `activation_checkpointing_enable` instead.
+  warnings.warn(
+/opt/conda/lib/python3.11/site-packages/transformers/modeling_utils.py:3303: FutureWarning: `is_gradient_checkpointing` is deprecated and will be removed in v6. Use `is_activation_checkpointing` instead.
+  warnings.warn(
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`.
+[bob.axon.ebukaa.near]   step   0  loss 5.341
+[bob.axon.ebukaa.near]   step   4  loss 3.483
+[bob.axon.ebukaa.near]   step   8  loss 1.766
+[bob.axon.ebukaa.near]   step  12  loss 1.021
+[bob.axon.ebukaa.near]   step  16  loss 0.455
+[bob.axon.ebukaa.near]   step  20  loss 0.472
+[bob.axon.ebukaa.near]   step  24  loss 0.487
+[bob.axon.ebukaa.near]   step  28  loss 0.439
+[bob.axon.ebukaa.near]   step  32  loss 0.306
+[bob.axon.ebukaa.near]   step  36  loss 0.303
+[bob.axon.ebukaa.near]   step  40  loss 0.329
+[bob.axon.ebukaa.near]   step  44  loss 0.291
+[bob.axon.ebukaa.near]   step  48  loss 0.340
+[bob.axon.ebukaa.near]   step  52  loss 0.314
+[bob.axon.ebukaa.near]   step  56  loss 0.326
+[bob.axon.ebukaa.near]   step  60  loss 0.346
+[bob.axon.ebukaa.near]   step  64  loss 0.319
+[bob.axon.ebukaa.near]   step  68  loss 0.412
+[bob.axon.ebukaa.near]   step  72  loss 0.361
+[bob.axon.ebukaa.near]   step  76  loss 0.227
+[bob.axon.ebukaa.near]   step  80  loss 0.383
+[bob.axon.ebukaa.near]   step  84  loss 0.275
+[bob.axon.ebukaa.near]   step  88  loss 0.284
+[bob.axon.ebukaa.near]   step  92  loss 0.366
+[bob.axon.ebukaa.near]   step  96  loss 0.328
+[bob.axon.ebukaa.near]   step 100  loss 0.377
+[bob.axon.ebukaa.near]   step 104  loss 0.285
+[bob.axon.ebukaa.near]   step 108  loss 0.270
+[bob.axon.ebukaa.near]   step 112  loss 0.282
+[bob.axon.ebukaa.near]   step 116  loss 0.317
+[bob.axon.ebukaa.near]   step 120  loss 0.275
+[bob.axon.ebukaa.near]   step 124  loss 0.317
+[bob.axon.ebukaa.near]   step 128  loss 0.334
+[bob.axon.ebukaa.near]   step 132  loss 0.287
+[bob.axon.ebukaa.near]   step 136  loss 0.238
+[bob.axon.ebukaa.near]   step 140  loss 0.329
+[bob.axon.ebukaa.near]   step 144  loss 0.247
+[bob.axon.ebukaa.near]   step 148  loss 0.337
+[bob.axon.ebukaa.near]   step 152  loss 0.237
+[bob.axon.ebukaa.near]   step 156  loss 0.265
+[bob.axon.ebukaa.near]   step 160  loss 0.288
+[bob.axon.ebukaa.near]   step 164  loss 0.263
+[bob.axon.ebukaa.near]   step 168  loss 0.382
+[bob.axon.ebukaa.near]   step 172  loss 0.250
+[bob.axon.ebukaa.near]   step 176  loss 0.311
+[bob.axon.ebukaa.near]   step 180  loss 0.292
+[bob.axon.ebukaa.near]   step 184  loss 0.190
+[bob.axon.ebukaa.near]   step 188  loss 0.269
+[bob.axon.ebukaa.near]   step 192  loss 0.229
+[bob.axon.ebukaa.near]   step 196  loss 0.173
+[bob.axon.ebukaa.near]   step 200  loss 0.259
+[bob.axon.ebukaa.near]   step 204  loss 0.160
+[bob.axon.ebukaa.near]   step 208  loss 0.173
+[bob.axon.ebukaa.near]   step 212  loss 0.238
+[bob.axon.ebukaa.near]   step 216  loss 0.218
+[bob.axon.ebukaa.near]   step 220  loss 0.170
+[bob.axon.ebukaa.near]   step 224  loss 0.121
+[bob.axon.ebukaa.near]   step 228  loss 0.263
+[bob.axon.ebukaa.near]   step 232  loss 0.201
+[bob.axon.ebukaa.near]   step 236  loss 0.256
+[bob.axon.ebukaa.near]   step 240  loss 0.132
+[bob.axon.ebukaa.near]   step 244  loss 0.283
+[bob.axon.ebukaa.near]   step 248  loss 0.288
+[bob.axon.ebukaa.near]   step 252  loss 0.177
+[bob.axon.ebukaa.near]   step 256  loss 0.081
+[bob.axon.ebukaa.near]   step 260  loss 0.157
+[bob.axon.ebukaa.near]   step 264  loss 0.235
+[bob.axon.ebukaa.near]   step 268  loss 0.079
+[bob.axon.ebukaa.near]   step 272  loss 0.228
+[bob.axon.ebukaa.near]   step 276  loss 0.132
+[bob.axon.ebukaa.near]   step 280  loss 0.135
+[bob.axon.ebukaa.near]   step 284  loss 0.111
+[bob.axon.ebukaa.near]   step 288  loss 0.189
+[bob.axon.ebukaa.near]   step 292  loss 0.142
+[bob.axon.ebukaa.near]   step 296  loss 0.121
+[bob.axon.ebukaa.near]   step 299  loss 0.167
+[bob.axon.ebukaa.near] sealed update (72178 KB) accepted for round 1
+== 3.1 vault merges, scores (Shapley) and records ownership on NEAR
+  base loss 1.4559; scoring 4 updates over 15 coalitions
+  alice.axon.ebukaa.near                   shapley +0.2567
+  bob.axon.ebukaa.near                     shapley -0.4165   -> excluded (made the model worse)
+  metabolic-clinic.axon.ebukaa.near        shapley +0.2980
+  neuro-clinic.axon.ebukaa.near            shapley +0.1902
+  neuro-clinic.axon.ebukaa.near            re-scored -0.0102 with the others   -> excluded (adds nothing on top of them)
+round 1: test loss 1.456 -> 1.228
+  alice.axon.ebukaa.near                   improvement +0.0870  -> 87010 shares
+  bob.axon.ebukaa.near                     improvement +0.0000  -> 0 shares
+  metabolic-clinic.axon.ebukaa.near        improvement +0.1409  -> 140931 shares
+  neuro-clinic.axon.ebukaa.near            improvement +0.0000  -> 0 shares
+signed by vault, recorded on-chain  tx 7rwzFf685GbR6NVUXRLf45pEm3PvQfom5nS7tXdR24T8
+== 2.2 contributors train locally and send sealed updates (round 2)
+[neuro-clinic.axon.ebukaa.near] training locally on 176 private examples (data stays on this machine)
+[neuro-clinic.axon.ebukaa.near] base model Qwen/Qwen2.5-1.5B-Instruct (from the chain), adapter rank 16
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]Loading weights:  14%|█▎        | 46/338 [00:00<00:00, 294.80it/s]Loading weights:  25%|██▌       | 86/338 [00:00<00:00, 345.00it/s]Loading weights:  36%|███▋      | 123/338 [00:00<00:00, 351.92it/s]Loading weights:  47%|████▋     | 159/338 [00:00<00:00, 347.69it/s]Loading weights:  58%|█████▊    | 195/338 [00:00<00:00, 351.70it/s]Loading weights:  68%|██████▊   | 231/338 [00:00<00:00, 354.09it/s]Loading weights:  79%|███████▉  | 267/338 [00:00<00:00, 352.75it/s]Loading weights:  90%|████████▉ | 303/338 [00:00<00:00, 348.63it/s]Loading weights: 100%|██████████| 338/338 [00:00<00:00, 348.39it/s]
+/opt/conda/lib/python3.11/site-packages/transformers/modeling_utils.py:3195: FutureWarning: `gradient_checkpointing_enable` is deprecated and will be removed in v6. Use `activation_checkpointing_enable` instead.
+  warnings.warn(
+/opt/conda/lib/python3.11/site-packages/transformers/modeling_utils.py:3303: FutureWarning: `is_gradient_checkpointing` is deprecated and will be removed in v6. Use `is_activation_checkpointing` instead.
+  warnings.warn(
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`.
+[neuro-clinic.axon.ebukaa.near]   step   0  loss 1.765
+[neuro-clinic.axon.ebukaa.near]   step   4  loss 1.217
+[neuro-clinic.axon.ebukaa.near]   step   8  loss 1.518
+[neuro-clinic.axon.ebukaa.near]   step  12  loss 1.108
+[neuro-clinic.axon.ebukaa.near]   step  16  loss 1.255
+[neuro-clinic.axon.ebukaa.near]   step  20  loss 0.923
+[neuro-clinic.axon.ebukaa.near]   step  24  loss 1.349
+[neuro-clinic.axon.ebukaa.near]   step  28  loss 1.202
+[neuro-clinic.axon.ebukaa.near]   step  32  loss 1.331
+[neuro-clinic.axon.ebukaa.near]   step  36  loss 0.752
+[neuro-clinic.axon.ebukaa.near]   step  40  loss 1.021
+[neuro-clinic.axon.ebukaa.near]   step  44  loss 0.736
+[neuro-clinic.axon.ebukaa.near]   step  48  loss 0.700
+[neuro-clinic.axon.ebukaa.near]   step  52  loss 0.650
+[neuro-clinic.axon.ebukaa.near]   step  56  loss 0.527
+[neuro-clinic.axon.ebukaa.near]   step  60  loss 0.965
+[neuro-clinic.axon.ebukaa.near]   step  64  loss 1.328
+[neuro-clinic.axon.ebukaa.near]   step  68  loss 0.634
+[neuro-clinic.axon.ebukaa.near]   step  72  loss 0.374
+[neuro-clinic.axon.ebukaa.near]   step  76  loss 0.586
+[neuro-clinic.axon.ebukaa.near]   step  80  loss 1.234
+[neuro-clinic.axon.ebukaa.near]   step  84  loss 0.657
+[neuro-clinic.axon.ebukaa.near]   step  88  loss 0.620
+[neuro-clinic.axon.ebukaa.near]   step  92  loss 1.187
+[neuro-clinic.axon.ebukaa.near]   step  96  loss 0.477
+[neuro-clinic.axon.ebukaa.near]   step 100  loss 0.165
+[neuro-clinic.axon.ebukaa.near]   step 104  loss 0.438
+[neuro-clinic.axon.ebukaa.near]   step 108  loss 0.338
+[neuro-clinic.axon.ebukaa.near]   step 112  loss 0.543
+[neuro-clinic.axon.ebukaa.near]   step 116  loss 0.316
+[neuro-clinic.axon.ebukaa.near]   step 120  loss 0.297
+[neuro-clinic.axon.ebukaa.near]   step 124  loss 0.413
+[neuro-clinic.axon.ebukaa.near]   step 128  loss 0.598
+[neuro-clinic.axon.ebukaa.near]   step 132  loss 0.350
+[neuro-clinic.axon.ebukaa.near]   step 136  loss 0.414
+[neuro-clinic.axon.ebukaa.near]   step 140  loss 0.336
+[neuro-clinic.axon.ebukaa.near]   step 144  loss 0.065
+[neuro-clinic.axon.ebukaa.near]   step 148  loss 0.672
+[neuro-clinic.axon.ebukaa.near]   step 152  loss 0.121
+[neuro-clinic.axon.ebukaa.near]   step 156  loss 0.389
+[neuro-clinic.axon.ebukaa.near]   step 160  loss 0.193
+[neuro-clinic.axon.ebukaa.near]   step 164  loss 0.294
+[neuro-clinic.axon.ebukaa.near]   step 168  loss 0.119
+[neuro-clinic.axon.ebukaa.near]   step 172  loss 0.492
+[neuro-clinic.axon.ebukaa.near]   step 176  loss 0.264
+[neuro-clinic.axon.ebukaa.near]   step 180  loss 0.095
+[neuro-clinic.axon.ebukaa.near]   step 184  loss 0.112
+[neuro-clinic.axon.ebukaa.near]   step 188  loss 0.262
+[neuro-clinic.axon.ebukaa.near]   step 192  loss 0.041
+[neuro-clinic.axon.ebukaa.near]   step 196  loss 0.396
+[neuro-clinic.axon.ebukaa.near]   step 200  loss 0.031
+[neuro-clinic.axon.ebukaa.near]   step 204  loss 0.172
+[neuro-clinic.axon.ebukaa.near]   step 208  loss 0.186
+[neuro-clinic.axon.ebukaa.near]   step 212  loss 0.114
+[neuro-clinic.axon.ebukaa.near]   step 216  loss 0.121
+[neuro-clinic.axon.ebukaa.near]   step 220  loss 0.153
+[neuro-clinic.axon.ebukaa.near]   step 224  loss 0.121
+[neuro-clinic.axon.ebukaa.near]   step 228  loss 0.053
+[neuro-clinic.axon.ebukaa.near]   step 232  loss 0.120
+[neuro-clinic.axon.ebukaa.near]   step 236  loss 0.144
+[neuro-clinic.axon.ebukaa.near]   step 240  loss 0.253
+[neuro-clinic.axon.ebukaa.near]   step 244  loss 0.100
+[neuro-clinic.axon.ebukaa.near]   step 248  loss 0.060
+[neuro-clinic.axon.ebukaa.near]   step 252  loss 0.196
+[neuro-clinic.axon.ebukaa.near]   step 256  loss 0.089
+[neuro-clinic.axon.ebukaa.near]   step 260  loss 0.029
+[neuro-clinic.axon.ebukaa.near]   step 264  loss 0.051
+[neuro-clinic.axon.ebukaa.near]   step 268  loss 0.094
+[neuro-clinic.axon.ebukaa.near]   step 272  loss 0.433
+[neuro-clinic.axon.ebukaa.near]   step 276  loss 0.091
+[neuro-clinic.axon.ebukaa.near]   step 280  loss 0.030
+[neuro-clinic.axon.ebukaa.near]   step 284  loss 0.028
+[neuro-clinic.axon.ebukaa.near]   step 288  loss 0.029
+[neuro-clinic.axon.ebukaa.near]   step 292  loss 0.017
+[neuro-clinic.axon.ebukaa.near]   step 296  loss 0.030
+[neuro-clinic.axon.ebukaa.near]   step 299  loss 0.061
+[neuro-clinic.axon.ebukaa.near] sealed update (72178 KB) accepted for round 2
+[metabolic-clinic.axon.ebukaa.near] training locally on 175 private examples (data stays on this machine)
+[metabolic-clinic.axon.ebukaa.near] base model Qwen/Qwen2.5-1.5B-Instruct (from the chain), adapter rank 16
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]Loading weights:   1%|          | 4/338 [00:00<00:08, 38.89it/s]Loading weights:  25%|██▍       | 83/338 [00:00<00:00, 463.08it/s]Loading weights:  38%|███▊      | 130/338 [00:00<00:00, 460.34it/s]Loading weights:  52%|█████▏    | 176/338 [00:00<00:00, 352.91it/s]Loading weights:  63%|██████▎   | 214/338 [00:00<00:00, 356.48it/s]Loading weights:  75%|███████▍  | 252/338 [00:00<00:00, 359.07it/s]Loading weights:  86%|████████▌ | 290/338 [00:00<00:00, 356.63it/s]Loading weights:  97%|█████████▋| 327/338 [00:00<00:00, 354.69it/s]Loading weights: 100%|██████████| 338/338 [00:00<00:00, 369.99it/s]
+/opt/conda/lib/python3.11/site-packages/transformers/modeling_utils.py:3195: FutureWarning: `gradient_checkpointing_enable` is deprecated and will be removed in v6. Use `activation_checkpointing_enable` instead.
+  warnings.warn(
+/opt/conda/lib/python3.11/site-packages/transformers/modeling_utils.py:3303: FutureWarning: `is_gradient_checkpointing` is deprecated and will be removed in v6. Use `is_activation_checkpointing` instead.
+  warnings.warn(
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`.
+[metabolic-clinic.axon.ebukaa.near]   step   0  loss 0.166
+[metabolic-clinic.axon.ebukaa.near]   step   4  loss 0.498
+[metabolic-clinic.axon.ebukaa.near]   step   8  loss 0.341
+[metabolic-clinic.axon.ebukaa.near]   step  12  loss 0.608
+[metabolic-clinic.axon.ebukaa.near]   step  16  loss 0.282
+[metabolic-clinic.axon.ebukaa.near]   step  20  loss 0.453
+[metabolic-clinic.axon.ebukaa.near]   step  24  loss 0.324
+[metabolic-clinic.axon.ebukaa.near]   step  28  loss 0.333
+[metabolic-clinic.axon.ebukaa.near]   step  32  loss 0.371
+[metabolic-clinic.axon.ebukaa.near]   step  36  loss 0.049
+[metabolic-clinic.axon.ebukaa.near]   step  40  loss 0.264
+[metabolic-clinic.axon.ebukaa.near]   step  44  loss 0.030
+[metabolic-clinic.axon.ebukaa.near]   step  48  loss 0.050
+[metabolic-clinic.axon.ebukaa.near]   step  52  loss 0.488
+[metabolic-clinic.axon.ebukaa.near]   step  56  loss 0.059
+[metabolic-clinic.axon.ebukaa.near]   step  60  loss 0.079
+[metabolic-clinic.axon.ebukaa.near]   step  64  loss 0.145
+[metabolic-clinic.axon.ebukaa.near]   step  68  loss 0.010
+[metabolic-clinic.axon.ebukaa.near]   step  72  loss 0.087
+[metabolic-clinic.axon.ebukaa.near]   step  76  loss 0.223
+[metabolic-clinic.axon.ebukaa.near]   step  80  loss 0.315
+[metabolic-clinic.axon.ebukaa.near]   step  84  loss 0.280
+[metabolic-clinic.axon.ebukaa.near]   step  88  loss 0.208
+[metabolic-clinic.axon.ebukaa.near]   step  92  loss 0.309
+[metabolic-clinic.axon.ebukaa.near]   step  96  loss 0.184
+[metabolic-clinic.axon.ebukaa.near]   step 100  loss 0.032
+[metabolic-clinic.axon.ebukaa.near]   step 104  loss 0.024
+[metabolic-clinic.axon.ebukaa.near]   step 108  loss 0.067
+[metabolic-clinic.axon.ebukaa.near]   step 112  loss 0.113
+[metabolic-clinic.axon.ebukaa.near]   step 116  loss 0.051
+[metabolic-clinic.axon.ebukaa.near]   step 120  loss 0.050
+[metabolic-clinic.axon.ebukaa.near]   step 124  loss 0.041
+[metabolic-clinic.axon.ebukaa.near]   step 128  loss 0.089
+[metabolic-clinic.axon.ebukaa.near]   step 132  loss 0.064
+[metabolic-clinic.axon.ebukaa.near]   step 136  loss 0.020
+[metabolic-clinic.axon.ebukaa.near]   step 140  loss 0.030
+[metabolic-clinic.axon.ebukaa.near]   step 144  loss 0.041
+[metabolic-clinic.axon.ebukaa.near]   step 148  loss 0.131
+[metabolic-clinic.axon.ebukaa.near]   step 152  loss 0.026
+[metabolic-clinic.axon.ebukaa.near]   step 156  loss 0.135
+[metabolic-clinic.axon.ebukaa.near]   step 160  loss 0.105
+[metabolic-clinic.axon.ebukaa.near]   step 164  loss 0.055
+[metabolic-clinic.axon.ebukaa.near]   step 168  loss 0.029
+[metabolic-clinic.axon.ebukaa.near]   step 172  loss 0.060
+[metabolic-clinic.axon.ebukaa.near]   step 176  loss 0.081
+[metabolic-clinic.axon.ebukaa.near]   step 180  loss 0.117
+[metabolic-clinic.axon.ebukaa.near]   step 184  loss 0.042
+[metabolic-clinic.axon.ebukaa.near]   step 188  loss 0.272
+[metabolic-clinic.axon.ebukaa.near]   step 192  loss 0.005
+[metabolic-clinic.axon.ebukaa.near]   step 196  loss 0.009
+[metabolic-clinic.axon.ebukaa.near]   step 200  loss 0.013
+[metabolic-clinic.axon.ebukaa.near]   step 204  loss 0.081
+[metabolic-clinic.axon.ebukaa.near]   step 208  loss 0.051
+[metabolic-clinic.axon.ebukaa.near]   step 212  loss 0.069
+[metabolic-clinic.axon.ebukaa.near]   step 216  loss 0.040
+[metabolic-clinic.axon.ebukaa.near]   step 220  loss 0.066
+[metabolic-clinic.axon.ebukaa.near]   step 224  loss 0.014
+[metabolic-clinic.axon.ebukaa.near]   step 228  loss 0.048
+[metabolic-clinic.axon.ebukaa.near]   step 232  loss 0.050
+[metabolic-clinic.axon.ebukaa.near]   step 236  loss 0.066
+[metabolic-clinic.axon.ebukaa.near]   step 240  loss 0.103
+[metabolic-clinic.axon.ebukaa.near]   step 244  loss 0.071
+[metabolic-clinic.axon.ebukaa.near]   step 248  loss 0.020
+[metabolic-clinic.axon.ebukaa.near]   step 252  loss 0.022
+[metabolic-clinic.axon.ebukaa.near]   step 256  loss 0.035
+[metabolic-clinic.axon.ebukaa.near]   step 260  loss 0.044
+[metabolic-clinic.axon.ebukaa.near]   step 264  loss 0.045
+[metabolic-clinic.axon.ebukaa.near]   step 268  loss 0.043
+[metabolic-clinic.axon.ebukaa.near]   step 272  loss 0.025
+[metabolic-clinic.axon.ebukaa.near]   step 276  loss 0.037
+[metabolic-clinic.axon.ebukaa.near]   step 280  loss 0.048
+[metabolic-clinic.axon.ebukaa.near]   step 284  loss 0.065
+[metabolic-clinic.axon.ebukaa.near]   step 288  loss 0.012
+[metabolic-clinic.axon.ebukaa.near]   step 292  loss 0.052
+[metabolic-clinic.axon.ebukaa.near]   step 296  loss 0.024
+[metabolic-clinic.axon.ebukaa.near]   step 299  loss 0.087
+[metabolic-clinic.axon.ebukaa.near] sealed update (72178 KB) accepted for round 2
+[alice.axon.ebukaa.near] training locally on 200 private examples (data stays on this machine)
+[alice.axon.ebukaa.near] base model Qwen/Qwen2.5-1.5B-Instruct (from the chain), adapter rank 16
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]Loading weights:   1%|          | 3/338 [00:00<00:12, 26.05it/s]Loading weights:  18%|█▊        | 61/338 [00:00<00:00, 327.46it/s]Loading weights:  29%|██▉       | 99/338 [00:00<00:00, 349.95it/s]Loading weights:  42%|████▏     | 141/338 [00:00<00:00, 288.66it/s]Loading weights:  51%|█████     | 173/338 [00:00<00:00, 297.63it/s]Loading weights:  65%|██████▍   | 219/338 [00:00<00:00, 341.47it/s]Loading weights:  76%|███████▌  | 257/338 [00:00<00:00, 348.57it/s]Loading weights:  90%|████████▉ | 303/338 [00:00<00:00, 381.27it/s]Loading weights: 100%|██████████| 338/338 [00:01<00:00, 336.49it/s]
+/opt/conda/lib/python3.11/site-packages/transformers/modeling_utils.py:3195: FutureWarning: `gradient_checkpointing_enable` is deprecated and will be removed in v6. Use `activation_checkpointing_enable` instead.
+  warnings.warn(
+/opt/conda/lib/python3.11/site-packages/transformers/modeling_utils.py:3303: FutureWarning: `is_gradient_checkpointing` is deprecated and will be removed in v6. Use `is_activation_checkpointing` instead.
+  warnings.warn(
+[transformers] `use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`.
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[alice.axon.ebukaa.near]   step   0  loss 0.631
+[alice.axon.ebukaa.near]   step   4  loss 0.731
+[alice.axon.ebukaa.near]   step   8  loss 0.486
+[alice.axon.ebukaa.near]   step  12  loss 0.729
+[alice.axon.ebukaa.near]   step  16  loss 0.381
+[alice.axon.ebukaa.near]   step  20  loss 0.498
+[alice.axon.ebukaa.near]   step  24  loss 0.329
+[alice.axon.ebukaa.near]   step  28  loss 0.467
+[alice.axon.ebukaa.near]   step  32  loss 0.293
+[alice.axon.ebukaa.near]   step  36  loss 0.339
+[alice.axon.ebukaa.near]   step  40  loss 0.085
+[alice.axon.ebukaa.near]   step  44  loss 0.191
+[alice.axon.ebukaa.near]   step  48  loss 0.050
+[alice.axon.ebukaa.near]   step  52  loss 0.301
+[alice.axon.ebukaa.near]   step  56  loss 0.310
+[alice.axon.ebukaa.near]   step  60  loss 0.263
+[alice.axon.ebukaa.near]   step  64  loss 0.328
+[alice.axon.ebukaa.near]   step  68  loss 0.050
+[alice.axon.ebukaa.near]   step  72  loss 0.048
+[alice.axon.ebukaa.near]   step  76  loss 0.022
+[alice.axon.ebukaa.near]   step  80  loss 0.073
+[alice.axon.ebukaa.near]   step  84  loss 0.033
+[alice.axon.ebukaa.near]   step  88  loss 0.220
+[alice.axon.ebukaa.near]   step  92  loss 0.121
+[alice.axon.ebukaa.near]   step  96  loss 0.080
+[alice.axon.ebukaa.near]   step 100  loss 0.202
+[alice.axon.ebukaa.near]   step 104  loss 0.173
+[alice.axon.ebukaa.near]   step 108  loss 0.362
+[alice.axon.ebukaa.near]   step 112  loss 0.263
+[alice.axon.ebukaa.near]   step 116  loss 0.087
+[alice.axon.ebukaa.near]   step 120  loss 0.072
+[alice.axon.ebukaa.near]   step 124  loss 0.306
+[alice.axon.ebukaa.near]   step 128  loss 0.126
+[alice.axon.ebukaa.near]   step 132  loss 0.231
+[alice.axon.ebukaa.near]   step 136  loss 0.077
+[alice.axon.ebukaa.near]   step 140  loss 0.085
+[alice.axon.ebukaa.near]   step 144  loss 0.077
+[alice.axon.ebukaa.near]   step 148  loss 0.407
+[alice.axon.ebukaa.near]   step 152  loss 0.022
+[alice.axon.ebukaa.near]   step 156  loss 0.144
+[alice.axon.ebukaa.near]   step 160  loss 0.019
+[alice.axon.ebukaa.near]   step 164  loss 0.046
+[alice.axon.ebukaa.near]   step 168  loss 0.078
+[alice.axon.ebukaa.near]   step 172  loss 0.111
+[alice.axon.ebukaa.near]   step 176  loss 0.065
+[alice.axon.ebukaa.near]   step 180  loss 0.029
+[alice.axon.ebukaa.near]   step 184  loss 0.109
+[alice.axon.ebukaa.near]   step 188  loss 0.106
+[alice.axon.ebukaa.near]   step 192  loss 0.126
+[alice.axon.ebukaa.near]   step 196  loss 0.094
+[alice.axon.ebukaa.near]   step 200  loss 0.079
+[alice.axon.ebukaa.near]   step 204  loss 0.052
+[alice.axon.ebukaa.near]   step 208  loss 0.078
+[alice.axon.ebukaa.near]   step 212  loss 0.413
+[alice.axon.ebukaa.near]   step 216  loss 0.120
+[alice.axon.ebukaa.near]   step 220  loss 0.192
+[alice.axon.ebukaa.near]   step 224  loss 0.074
+[alice.axon.ebukaa.near]   step 228  loss 0.052
+[alice.axon.ebukaa.near]   step 232  loss 0.160
+[alice.axon.ebukaa.near]   step 236  loss 0.054
+[alice.axon.ebukaa.near]   step 240  loss 0.035
+[alice.axon.ebukaa.near]   step 244  loss 0.046
+[alice.axon.ebukaa.near]   step 248  loss 0.149
+[alice.axon.ebukaa.near]   step 252  loss 0.044
+[alice.axon.ebukaa.near]   step 256  loss 0.037
+[alice.axon.ebukaa.near]   step 260  loss 0.289
+[alice.axon.ebukaa.near]   step 264  loss 0.026
+[alice.axon.ebukaa.near]   step 268  loss 0.029
+[alice.axon.ebukaa.near]   step 272  loss 0.611
+[alice.axon.ebukaa.near]   step 276  loss 0.034
+[alice.axon.ebukaa.near]   step 280  loss 0.072
+[alice.axon.ebukaa.near]   step 284  loss 0.039
+[alice.axon.ebukaa.near]   step 288  loss 0.051
+[alice.axon.ebukaa.near]   step 292  loss 0.046
+[alice.axon.ebukaa.near]   step 296  loss 0.038
+[alice.axon.ebukaa.near]   step 299  loss 0.051
+[alice.axon.ebukaa.near] sealed update (72178 KB) accepted for round 2
+[bob.axon.ebukaa.near] training locally on 200 private examples (data stays on this machine)
+[bob.axon.ebukaa.near] base model Qwen/Qwen2.5-1.5B-Instruct (from the chain), adapter rank 16
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]Loading weights:  15%|█▌        | 52/338 [00:00<00:00, 509.52it/s]Loading weights:  30%|███       | 103/338 [00:00<00:00, 481.97it/s]Loading weights:  45%|████▍     | 152/338 [00:00<00:00, 357.32it/s]Loading weights:  57%|█████▋    | 191/338 [00:00<00:00, 364.74it/s]Loading weights:  68%|██████▊   | 231/338 [00:00<00:00, 373.82it/s]Loading weights:  80%|███████▉  | 270/338 [00:00<00:00, 375.40it/s]Loading weights:  92%|█████████▏| 311/338 [00:00<00:00, 377.63it/s]Loading weights: 100%|██████████| 338/338 [00:00<00:00, 378.72it/s]
+/opt/conda/lib/python3.11/site-packages/transformers/modeling_utils.py:3195: FutureWarning: `gradient_checkpointing_enable` is deprecated and will be removed in v6. Use `activation_checkpointing_enable` instead.
+  warnings.warn(
+/opt/conda/lib/python3.11/site-packages/transformers/modeling_utils.py:3303: FutureWarning: `is_gradient_checkpointing` is deprecated and will be removed in v6. Use `is_activation_checkpointing` instead.
+  warnings.warn(
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`.
+[bob.axon.ebukaa.near]   step   0  loss 6.444
+[bob.axon.ebukaa.near]   step   4  loss 3.187
+[bob.axon.ebukaa.near]   step   8  loss 1.565
+[bob.axon.ebukaa.near]   step  12  loss 0.918
+[bob.axon.ebukaa.near]   step  16  loss 0.389
+[bob.axon.ebukaa.near]   step  20  loss 0.431
+[bob.axon.ebukaa.near]   step  24  loss 0.475
+[bob.axon.ebukaa.near]   step  28  loss 0.389
+[bob.axon.ebukaa.near]   step  32  loss 0.282
+[bob.axon.ebukaa.near]   step  36  loss 0.276
+[bob.axon.ebukaa.near]   step  40  loss 0.324
+[bob.axon.ebukaa.near]   step  44  loss 0.239
+[bob.axon.ebukaa.near]   step  48  loss 0.324
+[bob.axon.ebukaa.near]   step  52  loss 0.297
+[bob.axon.ebukaa.near]   step  56  loss 0.332
+[bob.axon.ebukaa.near]   step  60  loss 0.358
+[bob.axon.ebukaa.near]   step  64  loss 0.316
+[bob.axon.ebukaa.near]   step  68  loss 0.386
+[bob.axon.ebukaa.near]   step  72  loss 0.298
+[bob.axon.ebukaa.near]   step  76  loss 0.198
+[bob.axon.ebukaa.near]   step  80  loss 0.353
+[bob.axon.ebukaa.near]   step  84  loss 0.204
+[bob.axon.ebukaa.near]   step  88  loss 0.277
+[bob.axon.ebukaa.near]   step  92  loss 0.285
+[bob.axon.ebukaa.near]   step  96  loss 0.298
+[bob.axon.ebukaa.near]   step 100  loss 0.353
+[bob.axon.ebukaa.near]   step 104  loss 0.254
+[bob.axon.ebukaa.near]   step 108  loss 0.254
+[bob.axon.ebukaa.near]   step 112  loss 0.255
+[bob.axon.ebukaa.near]   step 116  loss 0.253
+[bob.axon.ebukaa.near]   step 120  loss 0.228
+[bob.axon.ebukaa.near]   step 124  loss 0.317
+[bob.axon.ebukaa.near]   step 128  loss 0.237
+[bob.axon.ebukaa.near]   step 132  loss 0.226
+[bob.axon.ebukaa.near]   step 136  loss 0.140
+[bob.axon.ebukaa.near]   step 140  loss 0.189
+[bob.axon.ebukaa.near]   step 144  loss 0.213
+[bob.axon.ebukaa.near]   step 148  loss 0.219
+[bob.axon.ebukaa.near]   step 152  loss 0.119
+[bob.axon.ebukaa.near]   step 156  loss 0.157
+[bob.axon.ebukaa.near]   step 160  loss 0.160
+[bob.axon.ebukaa.near]   step 164  loss 0.232
+[bob.axon.ebukaa.near]   step 168  loss 0.198
+[bob.axon.ebukaa.near]   step 172  loss 0.173
+[bob.axon.ebukaa.near]   step 176  loss 0.154
+[bob.axon.ebukaa.near]   step 180  loss 0.125
+[bob.axon.ebukaa.near]   step 184  loss 0.104
+[bob.axon.ebukaa.near]   step 188  loss 0.239
+[bob.axon.ebukaa.near]   step 192  loss 0.179
+[bob.axon.ebukaa.near]   step 196  loss 0.162
+[bob.axon.ebukaa.near]   step 200  loss 0.139
+[bob.axon.ebukaa.near]   step 204  loss 0.084
+[bob.axon.ebukaa.near]   step 208  loss 0.047
+[bob.axon.ebukaa.near]   step 212  loss 0.218
+[bob.axon.ebukaa.near]   step 216  loss 0.141
+[bob.axon.ebukaa.near]   step 220  loss 0.098
+[bob.axon.ebukaa.near]   step 224  loss 0.151
+[bob.axon.ebukaa.near]   step 228  loss 0.151
+[bob.axon.ebukaa.near]   step 232  loss 0.218
+[bob.axon.ebukaa.near]   step 236  loss 0.044
+[bob.axon.ebukaa.near]   step 240  loss 0.071
+[bob.axon.ebukaa.near]   step 244  loss 0.142
+[bob.axon.ebukaa.near]   step 248  loss 0.129
+[bob.axon.ebukaa.near]   step 252  loss 0.216
+[bob.axon.ebukaa.near]   step 256  loss 0.036
+[bob.axon.ebukaa.near]   step 260  loss 0.123
+[bob.axon.ebukaa.near]   step 264  loss 0.147
+[bob.axon.ebukaa.near]   step 268  loss 0.066
+[bob.axon.ebukaa.near]   step 272  loss 0.103
+[bob.axon.ebukaa.near]   step 276  loss 0.094
+[bob.axon.ebukaa.near]   step 280  loss 0.058
+[bob.axon.ebukaa.near]   step 284  loss 0.041
+[bob.axon.ebukaa.near]   step 288  loss 0.127
+[bob.axon.ebukaa.near]   step 292  loss 0.161
+[bob.axon.ebukaa.near]   step 296  loss 0.103
+[bob.axon.ebukaa.near]   step 299  loss 0.083
+[bob.axon.ebukaa.near] sealed update (72178 KB) accepted for round 2
+== 3.2 vault merges, scores (Shapley) and records ownership on NEAR
+  base loss 1.2279; scoring 4 updates over 15 coalitions
+  alice.axon.ebukaa.near                   shapley +0.0228
+  bob.axon.ebukaa.near                     shapley -0.2146   -> excluded (made the model worse)
+  metabolic-clinic.axon.ebukaa.near        shapley -0.0128   -> excluded (made the model worse)
+  neuro-clinic.axon.ebukaa.near            shapley +0.1874
+  alice.axon.ebukaa.near                   re-scored -0.1299 with the others   -> excluded (adds nothing on top of them)
+  neuro-clinic.axon.ebukaa.near            re-scored -0.3775 with the others   -> excluded (adds nothing on top of them)
+round 2: test loss 1.228 -> 1.228
+  alice.axon.ebukaa.near                   improvement +0.0000  -> 0 shares
+  bob.axon.ebukaa.near                     improvement +0.0000  -> 0 shares
+  metabolic-clinic.axon.ebukaa.near        improvement +0.0000  -> 0 shares
+  neuro-clinic.axon.ebukaa.near            improvement +0.0000  -> 0 shares
+signed by vault, recorded on-chain  tx Fq34bkEix9YEhybUhyPKQCNQtJ1QHVzEQvUPruTCDfMv
+== 4. a user pays for a question; the payment is split among owners
+paid 0.01 NEAR  tx 7Xsr9VBuEHaYC8ibC46m4bXMvVx12c5EzVHxaX5S2wad
+Laing distal myopathy is caused by mutations in the DMD gene, which provides instructions for making dystrophin, an important protein that helps provide structural support within muscle cells (sarcoplasmic reticulum). Mutations in this gene result in the production of an abnormally short or nonfunctional version of dystrophin. Without functional dystrophin to help maintain the structure of muscle cells, muscles weaken and begin to break down over time. The severity of the condition can vary greatly among individuals with mutations affecting different parts of the DMD gene.
+== 5. who owns the model, and what they earned
+Inheritance pattern and genes for rare diseases (rare-diseases) base=Qwen/Qwen2.5-1.5B-Instruct rounds=2 loss=1456->1228 queries=1 revenue=0.0095 NEAR budget=0.020 NEAR
+  neuro-clinic.axon.ebukaa.near            shares        0 (  0.0%)  earned 0.00000 NEAR
+  metabolic-clinic.axon.ebukaa.near        shares   140931 ( 61.8%)  earned 0.00587 NEAR
+  alice.axon.ebukaa.near                   shares    87010 ( 38.2%)  earned 0.00363 NEAR
+  bob.axon.ebukaa.near                     shares        0 (  0.0%)  earned 0.00000 NEAR

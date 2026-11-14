@@ -1,0 +1,46 @@
+== 1. create the model (bound to the vault's key + code hash)
+reusing model 5
+model id: 5
+== 2.1 contributors train locally and send sealed updates (round 1)
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[web-hunter.axon.ebukaa.near] joining model 5 on-chain with device key 3a5f3cddbee6…
+[web-hunter.axon.ebukaa.near] training locally on 220 private examples (data stays on this machine)
+[web-hunter.axon.ebukaa.near] base model HuggingFaceTB/SmolLM2-135M-Instruct (from the chain), adapter rank 16
+Loading weights:   0%|          | 0/272 [00:00<?, ?it/s]Loading weights: 100%|██████████| 272/272 [00:00<00:00, 3450.61it/s]
+/opt/conda/lib/python3.11/site-packages/transformers/modeling_utils.py:3195: FutureWarning: `gradient_checkpointing_enable` is deprecated and will be removed in v6. Use `activation_checkpointing_enable` instead.
+  warnings.warn(
+/opt/conda/lib/python3.11/site-packages/transformers/modeling_utils.py:3303: FutureWarning: `is_gradient_checkpointing` is deprecated and will be removed in v6. Use `is_activation_checkpointing` instead.
+  warnings.warn(
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/root/axon/axon/__main__.py", line 3, in <module>
+    main()
+  File "/root/axon/axon/cli.py", line 255, in main
+    a.fn(a)
+  File "/root/axon/axon/cli.py", line 105, in cmd_contribute
+    contribute(a.model, a.account, Path(a.data))
+  File "/root/axon/axon/contribute.py", line 47, in contribute
+    adapter = engine.train(rows, start, seed=seed, log=lambda s, l: log(f"[{account}]   step {s:>3}  loss {l:.3f}"))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/axon/axon/ml.py", line 92, in train
+    exs = [self.encode(r["q"], r["a"]) for r in rows]
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/axon/axon/ml.py", line 92, in <listcomp>
+    exs = [self.encode(r["q"], r["a"]) for r in rows]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/axon/axon/ml.py", line 71, in encode
+    prompt = self.tok.apply_chat_template([{"role": "user", "content": q}], tokenize=False, add_generation_prompt=True, enable_thinking=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/conda/lib/python3.11/site-packages/transformers/tokenization_utils_base.py", line 3161, in apply_chat_template
+    rendered_chat, generation_indices = render_jinja_template(
+                                        ^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/conda/lib/python3.11/site-packages/transformers/utils/chat_template_utils.py", line 743, in render_jinja_template
+    compiled_template = _compile_jinja_template(chat_template)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/conda/lib/python3.11/site-packages/transformers/utils/chat_template_utils.py", line 563, in _compile_jinja_template
+    return _cached_compile_jinja_template(chat_template)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/conda/lib/python3.11/site-packages/transformers/utils/chat_template_utils.py", line 617, in _cached_compile_jinja_template
+    raise ImportError(
+ImportError: apply_chat_template requires jinja2>=3.1.6 to be installed. Your version is 3.1.4. You can upgrade it with `pip install -U jinja2`.

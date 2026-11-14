@@ -1,0 +1,100 @@
+== 1. create the model (bound to the vault's key + code hash)
+reusing model 5
+model id: 5
+== 2.1 contributors train locally and send sealed updates (round 1)
+[web-hunter.axon.ebukaa.near] training locally on 220 private examples (data stays on this machine)
+[web-hunter.axon.ebukaa.near] base model HuggingFaceTB/SmolLM2-135M-Instruct (from the chain), adapter rank 16
+Loading weights:   0%|          | 0/272 [00:00<?, ?it/s]Loading weights:  54%|█████▎    | 146/272 [00:00<00:00, 1457.41it/s]Loading weights: 100%|██████████| 272/272 [00:00<00:00, 2141.44it/s]
+/opt/conda/lib/python3.11/site-packages/transformers/modeling_utils.py:3195: FutureWarning: `gradient_checkpointing_enable` is deprecated and will be removed in v6. Use `activation_checkpointing_enable` instead.
+  warnings.warn(
+/opt/conda/lib/python3.11/site-packages/transformers/modeling_utils.py:3303: FutureWarning: `is_gradient_checkpointing` is deprecated and will be removed in v6. Use `is_activation_checkpointing` instead.
+  warnings.warn(
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`.
+[web-hunter.axon.ebukaa.near]   step   0  loss 2.622
+[web-hunter.axon.ebukaa.near]   step   4  loss 1.809
+[web-hunter.axon.ebukaa.near]   step   8  loss 0.791
+[web-hunter.axon.ebukaa.near]   step  12  loss 0.638
+[web-hunter.axon.ebukaa.near]   step  16  loss 0.522
+[web-hunter.axon.ebukaa.near]   step  20  loss 0.310
+[web-hunter.axon.ebukaa.near]   step  24  loss 0.470
+[web-hunter.axon.ebukaa.near]   step  28  loss 0.370
+[web-hunter.axon.ebukaa.near]   step  32  loss 0.135
+[web-hunter.axon.ebukaa.near]   step  36  loss 0.164
+[web-hunter.axon.ebukaa.near]   step  40  loss 0.548
+[web-hunter.axon.ebukaa.near]   step  44  loss 0.829
+[web-hunter.axon.ebukaa.near]   step  48  loss 0.042
+[web-hunter.axon.ebukaa.near]   step  52  loss 0.173
+[web-hunter.axon.ebukaa.near]   step  56  loss 0.028
+[web-hunter.axon.ebukaa.near]   step  60  loss 0.096
+[web-hunter.axon.ebukaa.near]   step  64  loss 0.204
+[web-hunter.axon.ebukaa.near]   step  68  loss 0.162
+[web-hunter.axon.ebukaa.near]   step  72  loss 0.123
+[web-hunter.axon.ebukaa.near]   step  76  loss 0.141
+[web-hunter.axon.ebukaa.near]   step  80  loss 0.034
+[web-hunter.axon.ebukaa.near]   step  84  loss 0.009
+[web-hunter.axon.ebukaa.near]   step  88  loss 0.012
+[web-hunter.axon.ebukaa.near]   step  92  loss 0.175
+[web-hunter.axon.ebukaa.near]   step  96  loss 0.327
+[web-hunter.axon.ebukaa.near]   step 100  loss 0.042
+[web-hunter.axon.ebukaa.near]   step 104  loss 0.015
+[web-hunter.axon.ebukaa.near]   step 108  loss 0.002
+[web-hunter.axon.ebukaa.near]   step 112  loss 0.205
+[web-hunter.axon.ebukaa.near]   step 116  loss 0.143
+[web-hunter.axon.ebukaa.near]   step 120  loss 0.005
+[web-hunter.axon.ebukaa.near]   step 124  loss 0.133
+[web-hunter.axon.ebukaa.near]   step 128  loss 0.002
+[web-hunter.axon.ebukaa.near]   step 132  loss 0.124
+[web-hunter.axon.ebukaa.near]   step 136  loss 0.053
+[web-hunter.axon.ebukaa.near]   step 140  loss 0.087
+[web-hunter.axon.ebukaa.near]   step 144  loss 0.051
+[web-hunter.axon.ebukaa.near]   step 148  loss 0.066
+[web-hunter.axon.ebukaa.near]   step 152  loss 0.042
+[web-hunter.axon.ebukaa.near]   step 156  loss 0.027
+[web-hunter.axon.ebukaa.near]   step 160  loss 0.016
+[web-hunter.axon.ebukaa.near]   step 164  loss 0.073
+[web-hunter.axon.ebukaa.near]   step 168  loss 0.099
+[web-hunter.axon.ebukaa.near]   step 172  loss 0.001
+[web-hunter.axon.ebukaa.near]   step 176  loss 0.014
+[web-hunter.axon.ebukaa.near]   step 180  loss 0.035
+[web-hunter.axon.ebukaa.near]   step 184  loss 0.017
+[web-hunter.axon.ebukaa.near]   step 188  loss 0.001
+[web-hunter.axon.ebukaa.near]   step 192  loss 0.070
+[web-hunter.axon.ebukaa.near]   step 196  loss 0.282
+[web-hunter.axon.ebukaa.near]   step 200  loss 0.001
+[web-hunter.axon.ebukaa.near]   step 204  loss 0.002
+[web-hunter.axon.ebukaa.near]   step 208  loss 0.001
+[web-hunter.axon.ebukaa.near]   step 212  loss 0.011
+[web-hunter.axon.ebukaa.near]   step 216  loss 0.037
+[web-hunter.axon.ebukaa.near]   step 220  loss 0.003
+[web-hunter.axon.ebukaa.near]   step 224  loss 0.002
+[web-hunter.axon.ebukaa.near]   step 228  loss 0.004
+[web-hunter.axon.ebukaa.near]   step 232  loss 0.027
+[web-hunter.axon.ebukaa.near]   step 236  loss 0.047
+[web-hunter.axon.ebukaa.near]   step 240  loss 0.002
+[web-hunter.axon.ebukaa.near]   step 244  loss 0.003
+[web-hunter.axon.ebukaa.near]   step 248  loss 0.002
+[web-hunter.axon.ebukaa.near]   step 252  loss 0.093
+[web-hunter.axon.ebukaa.near]   step 256  loss 0.000
+[web-hunter.axon.ebukaa.near]   step 260  loss 0.001
+[web-hunter.axon.ebukaa.near]   step 264  loss 0.001
+[web-hunter.axon.ebukaa.near]   step 268  loss 0.016
+[web-hunter.axon.ebukaa.near]   step 272  loss 0.003
+[web-hunter.axon.ebukaa.near]   step 276  loss 0.004
+[web-hunter.axon.ebukaa.near]   step 280  loss 0.001
+[web-hunter.axon.ebukaa.near]   step 284  loss 0.001
+[web-hunter.axon.ebukaa.near]   step 288  loss 0.000
+[web-hunter.axon.ebukaa.near]   step 292  loss 0.002
+[web-hunter.axon.ebukaa.near]   step 296  loss 0.001
+[web-hunter.axon.ebukaa.near]   step 299  loss 0.000
+[web-hunter.axon.ebukaa.near] sealed update (19133 KB) accepted for round 1
+[memory-hunter.axon.ebukaa.near] joining model 5 on-chain with device key 749c31663e5a…
+[memory-hunter.axon.ebukaa.near] training locally on 220 private examples (data stays on this machine)
+[memory-hunter.axon.ebukaa.near] base model HuggingFaceTB/SmolLM2-135M-Instruct (from the chain), adapter rank 16
+Loading weights:   0%|          | 0/272 [00:00<?, ?it/s]Loading weights: 100%|██████████| 272/272 [00:00<00:00, 3418.09it/s]
+/opt/conda/lib/python3.11/site-packages/transformers/modeling_utils.py:3195: FutureWarning: `gradient_checkpointing_enable` is deprecated and will be removed in v6. Use `activation_checkpointing_enable` instead.
+  warnings.warn(
+/opt/conda/lib/python3.11/site-packages/transformers/modeling_utils.py:3303: FutureWarning: `is_gradient_checkpointing` is deprecated and will be removed in v6. Use `is_activation_checkpointing` instead.
+  warnings.warn(
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`.

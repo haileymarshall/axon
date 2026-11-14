@@ -43,7 +43,7 @@ async function rpcView(method, args = {}) {
 const LABELS = {
   "axon.ebukaa.near": {
     // Showcase: the three cases, each scored and recorded inside an attested TEE.
-    9: { n: 1, area: "Clinical", topic: "Inheritance pattern and genes for rare diseases", grade: "" },
+    9: { n: 1, area: "Clinical", topic: "Inheritance pattern and genes for rare diseases", grade: "inheritance right 3/12 → 10/12, gene 3/12 → 5/12" },
     7: { n: 2, area: "Cybersecurity", topic: "Vulnerability classification", grade: "right bug type 2/24 → 12/24" },
     8: { n: 3, area: "Language", topic: "Basque native", grade: "translation score 17.8 → 27.7" },
     4: { n: 4, area: "Clinical", topic: "Inheritance pattern and genes for rare diseases (small test model)", grade: "hidden-test loss 1.891 → 1.647" },
@@ -61,7 +61,7 @@ const SHOWCASE = { "axon.ebukaa.near": [9, 7, 8] };
 // On-chain proof for each showcased run (rounds recorded by the TEE vault, the paid question it answered).
 const PROOF = {
   "axon.ebukaa.near": {
-    9: { rounds: ["7rwzFf685GbR6NVUXRLf45pEm3PvQfom5nS7tXdR24T8"], paid: "", vault: "axon-vault-tee2" },
+    9: { rounds: ["7rwzFf685GbR6NVUXRLf45pEm3PvQfom5nS7tXdR24T8", "Fq34bkEix9YEhybUhyPKQCNQtJ1QHVzEQvUPruTCDfMv"], paid: "7Xsr9VBuEHaYC8ibC46m4bXMvVx12c5EzVHxaX5S2wad", vault: "axon-vault-tee2" },
     7: { rounds: ["E5u2LEVnRozLhwJmkLN6iYvSrnE3c9JyczyTrN2mGxgo"], paid: "3mzdetZQpPaXB2WcvuDceaPqmZVyy7Uj4YedVeMd785C", vault: "axon-vault-tee2" },
     8: { rounds: ["Fk6wrM2eUU21nV6mzEtdsydfbTgjQgegEoqE6Tk3Gd1w"], paid: "FfpuWi8DopHaWmQtou5xqYcJhnTAix1SeTZBUxPRWBAq", vault: "axon-vault-tee2" },
     4: { rounds: ["HmeSHkg2encGsDZgfvzkAKweETp4NtVv2h5SJAd3voED"], paid: "7FSBVoWS24ps4jPeMyms6SvfYL51MKXsv3Av6x2p6wXr", vault: "axon-vault-mainnet5" },
