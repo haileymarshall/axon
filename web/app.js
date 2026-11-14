@@ -38,14 +38,32 @@ async function rpcView(method, args = {}) {
   return JSON.parse(new TextDecoder().decode(new Uint8Array(r.result.result)));
 }
 
+// How the mainnet showcase models are presented: area, topic within it, grade (base model -> Axon-trained).
+// On-chain names stay as created; models 0 (earlier run) and 4 (small TEE run) are kept off the listings.
+const LABELS = {
+  "axon.ebukaa.near": {
+    1: { area: "Clinical", topic: "Inheritance pattern and genes for rare diseases", grade: "inheritance right 3/12 → 10/12, gene 3/12 → 5/12" },
+    2: { area: "Cybersecurity", topic: "Vulnerability classification", grade: "right bug type 2/24 → 12/24" },
+    3: { area: "Language", topic: "Basque native", grade: "translation score 17.8 → 30.7" },
+    4: { area: "Clinical", topic: "Inheritance pattern and genes for rare diseases (TEE round)", grade: "hidden-test loss 1.891 → 1.647, scored inside an attested TEE", hidden: true },
+    0: { area: "Clinical", topic: "Inheritance pattern and genes for rare diseases (earlier run)", grade: "", hidden: true },
+  },
+};
+function label(m) {
+  const l = (LABELS[CONFIG.contract] || {})[m.id];
+  m.area = l ? l.area : m.domain;
+  if (l) { m.name = l.topic; m.grade = l.grade; m._hidden = !!l.hidden; }
+  return m;
+}
+
 const db = {
-  models: () => (LIVE ? api("/api/models") : rpcView("get_models", { limit: 50 })),
+  models: async () => (await (LIVE ? api("/api/models") : rpcView("get_models", { limit: 50 }))).map(label).filter((m) => !m._hidden),
   async model(id) {
-    if (LIVE) return api(`/api/models/${id}`);
+    if (LIVE) return label(await api(`/api/models/${id}`));
     const m = await rpcView("get_model", { model_id: id });
     if (!m) throw new Error("no such model");
     m.rounds_detail = await rpcView("get_rounds", { model_id: id });
-    return m;
+    return label(m);
   },
   async runs() {
     if (LIVE) return api("/api/runs");
@@ -53,12 +71,12 @@ const db = {
     return all.filter((r) => r.contract === CONFIG.contract);
   },
   async earnings(account) {
-    if (LIVE) return api(`/api/earnings/${encodeURIComponent(account)}`);
+    if (LIVE) return (await api(`/api/earnings/${encodeURIComponent(account)}`)).map((r) => ({ ...r, name: label({ id: r.model_id, name: r.name }).name }));
     const out = [];
     for (const m of await rpcView("get_models", { limit: 50 })) {
       const c = m.contributors.find((c) => c.account === account);
       if (c || m.creator === account) {
-        out.push({ model_id: m.id, name: m.name, shares: c ? c.shares : "0", total_shares: m.total_shares, earnings: await rpcView("earnings_of", { model_id: m.id, account }) });
+        out.push({ model_id: m.id, name: label(m).name, shares: c ? c.shares : "0", total_shares: m.total_shares, earnings: await rpcView("earnings_of", { model_id: m.id, account }) });
       }
     }
     return out;
@@ -216,9 +234,9 @@ function modelCard(m) {
   const improved = m.base_eval_loss_milli && m.eval_loss_milli ? ((1 - m.eval_loss_milli / m.base_eval_loss_milli) * 100).toFixed(1) : null;
   const o = owners(m);
   return `<a class="card" href="#/model/${m.id}">
-    ${m._earlier ? `<span class="tag">${esc(m.domain)} · earlier run, scoring bug fixed in the next model</span>` : `<span class="tag live">${esc(m.domain)} · live</span>`}
+    ${m._earlier ? `<span class="tag">${esc(m.area)} · earlier run, scoring bug fixed in the next model</span>` : `<span class="tag live">${esc(m.area)} · live</span>`}
     <h3>${esc(m.name)}</h3>
-    <p class="muted small">${esc(m.description)}</p>
+    ${m.grade ? `<p class="small"><span class="muted">Grade:</span> ${esc(m.grade)}</p>` : `<p class="muted small">${esc(m.description)}</p>`}
     <div class="minibar">${o.map((c, i) => `<span style="width:${pct(c.shares, m.total_shares)};background:${COLORS[i % 5]}"></span>`).join("")}</div>
     <div class="meta"><span>${o.filter((c) => Number(c.shares) > 0).length} owners</span><span>${m.rounds} rounds</span><span>${m.queries} paid questions</span>${improved ? `<span style="color:var(--accent)">${improved}% better</span>` : ""}</div>
   </a>`;
@@ -232,7 +250,7 @@ const COMPARE_HEAD = `<div class="kicker">Base model vs Axon-trained</div>
 async function nicheBlock(models, f) {
   const all = await runs();
   const shown = models.filter((m) => all.some((r) => r.model_id === m.id && !r.note && r.probes?.length))
-    .sort((a, b) => b.id - a.id).filter((m, i, arr) => arr.findIndex((x) => x.domain === m.domain) === i);
+    .sort((a, b) => b.id - a.id).filter((m, i, arr) => arr.findIndex((x) => x.domain === m.domain) === i).sort((a, b) => a.id - b.id);
   if (shown.length < 2) return compareBlock(shown[0] || f);
   setTimeout(() => {
     const pick = async (i) => {
@@ -242,7 +260,7 @@ async function nicheBlock(models, f) {
     document.querySelectorAll("#nichetabs button").forEach((b, i) => (b.onclick = () => pick(i)));
     pick(0);
   });
-  return COMPARE_HEAD + `<div class="tabs" id="nichetabs" style="margin-bottom:26px">${shown.map((m) => `<button style="font-size:13px;padding:10px 16px">${esc(m.name)}</button>`).join("")}</div><div id="niche"></div>`;
+  return COMPARE_HEAD + `<div class="tabs" id="nichetabs" style="margin-bottom:26px">${shown.map((m) => `<button style="font-size:13px;padding:10px 16px">${esc(m.area)}</button>`).join("")}</div><div id="niche"></div>`;
 }
 
 async function compareBlock(m, withHead = true) {
@@ -289,7 +307,7 @@ async function compareBlock(m, withHead = true) {
   return head + score + `
     <div class="tabs" id="cmptabs">${groups.map((g) => `<button>${esc(g.disease)}</button>`).join("")}</div>
     <div class="cmp" id="cmpbox"></div>
-    <p class="small muted" style="margin-top:14px">Not cherry-picked: every showcase question of run <a href="https://github.com/haileymarshall/axon/blob/main/runs/${esc(run.run_id)}/summary.md">${esc(run.run_id)}</a> is shown and graded automatically (exact answer match, no human judging). On the vault's hidden test set (questions nobody trained on), loss went ${L.before.toFixed(3)} → ${L.after.toFixed(3)} (lower is better). Not medical advice.</p>`;
+    <p class="small muted" style="margin-top:14px">Not cherry-picked: every showcase question of run <a href="https://github.com/haileymarshall/axon/blob/main/runs/${esc(run.run_id)}/summary.md">${esc(run.run_id)}</a> is shown and graded automatically (exact answer match, no human judging). On the vault's hidden test set (questions nobody trained on), loss went ${L.before.toFixed(3)} → ${L.after.toFixed(3)} (lower is better).${m && m.domain === "rare-diseases" ? " Not medical advice." : ""}</p>`;
 }
 
 function marks(p, who) {
@@ -338,8 +356,8 @@ async function pageModel(id) {
     <section class="mhead">
       <canvas class="art" id="art"></canvas><div class="labels" id="labels"></div>
       <div class="copy"><a href="#/models" class="small muted">← All models</a>
-        <div class="eyebrow" style="margin:14px 0 0">${esc(m.domain)} · model ${m.id}</div>
-        <h1>${esc(m.name)}</h1><p class="muted">${esc(m.description)}</p>
+        <div class="eyebrow" style="margin:14px 0 0">${esc(m.area)} · model ${m.id}</div>
+        <h1>${esc(m.name)}</h1>${m.grade ? `<p><span class="muted">Grade:</span> ${esc(m.grade)}</p>` : `<p class="muted">${esc(m.description)}</p>`}
         ${m.status !== "Closed" ? `<div class="row"><a class="btn" href="#/model/${m.id}/join">Join this model</a><a class="btn ghost" href="#ask" onclick="event.preventDefault();document.getElementById('q')?.focus()">Ask it</a></div>` : ""}</div>
     </section>
     <div class="wrap">
@@ -642,7 +660,7 @@ async function pageContribute() {
   view.innerHTML = `<div class="wrap page">
     <div class="kicker">Contribute</div><h2>Contribute your data. Keep it.</h2>
     <p class="lead">Pick a model in your niche. The website prepares everything; the training runs on your own computer, so your data never leaves it. Only what the model learned is sent, sealed so only the vault can open it.</p>
-    <div class="grid">${open.map((m) => `<div class="card"><span class="tag live">${esc(m.domain)}</span><h3>${esc(m.name)}</h3>
+    <div class="grid">${open.map((m) => `<div class="card"><span class="tag live">${esc(m.area)}</span><h3>${esc(m.name)}</h3>
       <p class="muted small">${esc(nicheOf(m).needs)}</p><div class="row"><a class="btn" href="#/model/${m.id}/join">Join this model</a></div></div>`).join("") || `<p class="muted">No open models yet. <a href="#/create">Start one</a>.</p>`}</div>
     <section class="block">${howBlock()}</section></div>`;
 }
