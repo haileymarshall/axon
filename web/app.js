@@ -45,7 +45,7 @@ const LABELS = {
     1: { area: "Clinical", topic: "Inheritance pattern and genes for rare diseases", grade: "inheritance right 3/12 → 10/12, gene 3/12 → 5/12" },
     2: { area: "Cybersecurity", topic: "Vulnerability classification", grade: "right bug type 2/24 → 12/24" },
     3: { area: "Language", topic: "Basque native", grade: "translation score 17.8 → 30.7" },
-    4: { area: "Clinical", topic: "Inheritance pattern and genes for rare diseases (TEE round)", grade: "hidden-test loss 1.891 → 1.647, scored inside an attested TEE", hidden: true },
+    4: { area: "Clinical", topic: "Inheritance pattern and genes for rare diseases (TEE round)", grade: "hidden-test loss 1.891 → 1.647, scored inside an attested TEE" },
     0: { area: "Clinical", topic: "Inheritance pattern and genes for rare diseases (earlier run)", grade: "", hidden: true },
   },
 };
