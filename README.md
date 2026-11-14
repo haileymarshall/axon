@@ -1,80 +1,142 @@
 # Axon
 
-**Your private data trains models in a specific niche. Contributors own the model and get paid on what it earns.**
+**Axon builds specialized AI from private data. The model is co-owned by its contributors, and they get paid on every
+inference.**
 
-Axon lets individuals and small companies turn a free open-source AI model into an expert in one niche, using their
-private data **without revealing it**. Contributors whose records are messy notes turn them into training examples with
-a model that **NEAR AI Cloud** runs inside a verified TEE. Each contributor then fine-tunes the model on their own
-computer and sends only a sealed update. A vault running in a TEE merges the updates and measures how much each one
-improved the model. A NEAR contract records who owns what share and splits every paid question: **95% to the owners,
-5% to Axon**.
+Axon fine-tunes free open-source AI models into experts in one niche, using private data from the people who hold it.
+**The resulting model is private too:** its weights are never published, and anyone who wants to use it pays per
+question on NEAR. Contributors train on their own machines and send only a sealed update. A vault running inside an
+attested TEE scores how much each update improved the model, and a **NEAR smart contract** records who owns what and
+pays the owners every time the model answers: **95% to the owners by share, 5% to Axon**. Contributors whose records
+are messy notes turn them into training examples first, with an open model that **NEAR AI Cloud** runs inside a
+verified TEE. Ownership, payments, payouts, sign-in and data prep all run on **NEAR**.
 
-> Built at NEAR HACKATHON (1 to 14 Nov 2026). Tracks: `privacy`, `open`.
+> Built at NEAR HACKATHON (November 2026). Tracks: `privacy`, `open`.
 
 | | |
 |---|---|
-| **Live site** | https://axon.surf (reads the mainnet contract straight from your browser) |
-| **Contract (mainnet)** | [`axon.ebukaa.near`](https://nearblocks.io/address/axon.ebukaa.near) |
-| **Every training run** | [`RUNS.md`](RUNS.md), with logs, transactions, base-vs-trained answers and terminal recordings in [`runs/`](runs/) |
-| **Set it up with your AI assistant** | [`AGENT_SETUP.md`](AGENT_SETUP.md): give it to Claude, ChatGPT or Cursor and it walks you through |
+| **Live site** | https://axon.surf |
+| **Try the models** | https://axon.surf/#/demo: ask each model a question next to the open-source model it started from |
+| **Whitepaper** | https://axon.surf/whitepaper: everything about the project, every run, every decision |
+| **Contract address (NEAR mainnet)** | [`axon.ebukaa.near`](https://nearblocks.io/address/axon.ebukaa.near) (on NEAR, a contract lives at an account name) |
+| **Run records** | [`runs/`](runs/): logs, transactions, base-vs-trained answers and terminal recordings |
+| **Set it up with your AI assistant** | [`AGENT_SETUP.md`](AGENT_SETUP.md) |
 
 ---
 
-## 1. Why
+## 1. Who it is for, and why
 
-Free open models (Qwen, Llama, Gemma, Mistral…) learned the public internet. On specialist knowledge, such as how a rare
-disease is inherited, what weakness type a new vulnerability is, or how to say something in Basque, they guess. That
-knowledge sits with clinics, patient families, security researchers and native speakers. They can't share it (privacy,
-competition, trust), each has too little alone, and it usually lives in case notes, reports and messages rather than
-in a form a model can learn from. When big companies do collect such data, the people it came from own none of the
-result.
+**Contributors** are people and small organisations with valuable knowledge they can't share: hospitals that see
+patients every day, where each patient is a nuanced case; security researchers; native speakers of a small language.
+**Users** are anyone who needs a specialist answer that general AI gets wrong. **Creators** are anyone who wants an
+expert model for their niche: they start one, and others join.
 
-Axon lets those people pool what they know **without sharing it**, build the expert together, and **own it**.
+Free open models learned the public internet. On specialist knowledge, such as how a rare disease is inherited, which
+weakness type a new vulnerability is, or how to say something in Basque, they guess. The people who know can't hand
+their data over, each of them has too little to build a good model alone, and when large companies do collect such
+data, the people it came from own none of the result. Axon lets them pool what they know without sharing it, build
+the expert together, and own it.
 
-## 2. Results on NEAR mainnet
+## 2. Proof: the demo, and the runs we have done with Axon on NEAR, scored inside a TEE
 
-Every number below is from a published run. Questions are graded automatically (exact gene symbol, inheritance pattern,
-CWE id, or chrF translation score): nothing is picked by hand, and every question of each run is shown.
+Four models, each trained by its contributors, scored and recorded on **NEAR mainnet** by a vault inside an attested
+Intel TDX TEE. Answers are graded automatically (exact gene symbol, inheritance pattern, first CWE named, or chrF
+translation score), and every test question of each run is published.
 
-| Model (mainnet id) | Niche and contributors | Base model | Original model → Axon-trained | Ownership | Run |
+**See and re-check the results yourself on the Demo page: https://axon.surf/#/demo.** Pick any test question (or ask
+your own) and both the original open-source model and the Axon-trained model answer it live, graded with the same
+rules as the runs. Each question is a real payment on NEAR mainnet, split by the contract. Every round, payment and
+binding below is a NEAR transaction you can open on nearblocks.
+
+| Model | Area · topic | Base model | Original → Axon-trained | Owners | Proof |
 |---|---|---|---|---|---|
-| **Rare Disease Expert** (1) | clinics + a patient family: `neuro-clinic`, `metabolic-clinic`, `alice`; `bob` sends spam | Qwen2.5-1.5B-Instruct | **inheritance pattern right 3/12 → 10/12**, gene right 3/12 → 5/12, hidden-test loss 1.468 → 1.227 | metabolic-clinic 60.7%, alice 39.3%, bob 0% | [record](runs/20261113-mainnet-model1-rtx4090-qwen1.5b/summary.md) |
-| **Vulnerability Classifier** (2) | independent security researchers `web-hunter`, `memory-hunter`, `auth-hunter`; `bob` submits reports with random wrong labels | Qwen3-1.7B | **weakness type (CWE) right 2/24 → 12/24**, hidden-test accuracy 2/30 → 12/30 | web-hunter 60%, memory-hunter 40%, bob 0% | [record](runs/20261113-mainnet-model2-cyber-qwen3/summary.md) |
-| **Basque Translator** (3) | Basque speakers `ane`, `mikel`, `itziar`; `bob` pastes the English back | Qwen3-1.7B | **translation score (chrF) 17.8 → 30.7** on 24 unseen sentences | itziar 64.9%, ane 35.1%, bob 0% | [record](runs/20261113-mainnet-model3-basque-qwen3/summary.md) |
-| **Rare Disease Expert (TEE)** (4) | same as model 1 | SmolLM2-135M-Instruct | hidden-test loss 1.891 → 1.647; **scored and recorded by a vault inside an attested Intel TDX TEE** | alice 45.8%, neuro-clinic 28.3%, metabolic-clinic 25.9%, bob 0% | [record](runs/20261113-mainnet-model4-tee-smollm135m/summary.md), [TEE evidence](runs/tee-mainnet/) |
+| **1** (on-chain 9) | Clinical · inheritance pattern and genes for rare diseases | Qwen2.5-1.5B-Instruct | **inheritance right 3/12 → 10/12**, gene 3/12 → 5/12; hidden-test loss 1.456 → 1.228 | metabolic-clinic 61.8%, alice 38.2% (neuro-clinic 0%, bob 0%) | rounds [`7rwzFf68…`](https://nearblocks.io/txns/7rwzFf685GbR6NVUXRLf45pEm3PvQfom5nS7tXdR24T8), [`Fq34bkEi…`](https://nearblocks.io/txns/Fq34bkEix9YEhybUhyPKQCNQtJ1QHVzEQvUPruTCDfMv) · [record](runs/20261114-mainnet-model9-clinical-tee/summary.md) |
+| **2** (on-chain 7) | Cybersecurity · vulnerability classification | Qwen3-1.7B | **right weakness type 2/24 → 12/24**; hidden-test accuracy 2/30 → 12/30 | web-hunter 65%, memory-hunter 35% (auth-hunter 0%, bob 0%) | round [`E5u2LEVn…`](https://nearblocks.io/txns/E5u2LEVnRozLhwJmkLN6iYvSrnE3c9JyczyTrN2mGxgo) · [record](runs/20261114-mainnet-model7-cyber-tee/summary.md) |
+| **3** (on-chain 8) | Language · Basque native | Qwen3-1.7B | **translation score (chrF) 17.8 → 27.7** on 24 sentences nobody trained on | itziar 63.4%, ane 19.6%, mikel 17.0% (bob 0%) | round [`Fk6wrM2e…`](https://nearblocks.io/txns/Fk6wrM2eUU21nV6mzEtdsydfbTgjQgegEoqE6Tk3Gd1w) · [record](runs/20261114-mainnet-model8-basque-tee/summary.md) |
+| **4** (on-chain 4) | Clinical · same topic, small test model | SmolLM2-135M-Instruct | hidden-test loss 1.891 → 1.647 | alice 45.8%, neuro-clinic 28.3%, metabolic-clinic 25.9% (bob 0%) | round [`HmeSHkg2…`](https://nearblocks.io/txns/HmeSHkg2encGsDZgfvzkAKweETp4NtVv2h5SJAd3voED) · [record](runs/20261113-mainnet-model4-tee-smollm135m/summary.md) |
 
-Models 1 to 3 were trained on a rented RTX 4090 (all contributors simulated on that machine); model 4's contributors
-trained on a laptop CPU and sent their sealed updates to the TEE. In every model the cheater earned nothing. Each model
-answered one paid question; 0.0095 NEAR of each went to its owners. Model 0 is an earlier run of model 1 that found a
-scoring bug (fixed, see §8); it is kept as history.
+In every run a deliberate cheater (`bob`: spam answers, wrong labels, or English pasted back as "Basque") earned 0%.
+Each model answered paid questions on mainnet, and every payment was split by the contract. Per question, the original
+model was right where the Axon model was wrong once in 24 questions for model 1 and never for models 2 and 3; the Axon
+model was right where the original was wrong 10 times for models 1 and 2.
 
-Example transactions: model 1 round [`8bKWgqqZ…`](https://nearblocks.io/txns/8bKWgqqZswa8ZM8upZg66NYEuKJarMe6LmnzpoJR2chd),
-model 2 round [`EbxgVM6m…`](https://nearblocks.io/txns/EbxgVM6mYZhwX4fJQxwMZJdGhB5oAd6R5LrVa94psfGE),
-model 3 round [`BPFjRDMu…`](https://nearblocks.io/txns/BPFjRDMuZ2Y3tk9RjSv6XkKvtHwRSiSzfmvBSNiZ3mSA),
-model 4 round signed inside the TEE [`HmeSHkg2…`](https://nearblocks.io/txns/HmeSHkg2encGsDZgfvzkAKweETp4NtVv2h5SJAd3voED),
-model 4 paid question answered by the TEE [`7FSBVoWS…`](https://nearblocks.io/txns/7FSBVoWS24ps4jPeMyms6SvfYL51MKXsv3Av6x2p6wXr).
+**NEAR AI Cloud, proven separately.** The data-prep step runs on NEAR AI Cloud: on fictional clinic notes it produced 16
+to 20 training pairs in about 25 seconds, with every name, place and record number removed, and all 17 attestation and
+signature checks passed ([evidence](runs/nearai-cloud/)). Try it live on any model's Join page on https://axon.surf,
+which shows a **Verified** panel with every check. The mainnet runs above used public data that was already in
+question/answer form, so they did not need this step.
 
-Data preparation on NEAR AI Cloud, tried with the fictional clinic notes in [`samples/`](samples/): 4 notes became 16 to
-20 training pairs in about 25 seconds, with every name, place and record number removed and all 17 checks passing
-([evidence](runs/nearai-cloud/)).
+## 3. Why NEAR
 
-## 3. How it works
+Axon needs four things from a chain, and NEAR provides all of them:
+
+* **Micro-payments on every question.** Each inference is paid on-chain (0.01 NEAR in the demos) and split among the
+  owners in the same transaction. NEAR's low fees and fast finality make paying per question practical: a
+  `pay_for_query` on mainnet burned 0.00024 NEAR of gas (2.6 Tgas) and settled in seconds.
+* **A contract that checks signatures itself.** The contract verifies the vault's ed25519 signature on every round
+  (`env::ed25519_verify`), so ownership can only change through results signed inside the TEE.
+* **Readable accounts and keys.** Owners are named accounts (`itziar.axon.ebukaa.near`), organisations get
+  sub-accounts, contributors register device keys, and creators authorise actions with NEP-413 signed messages, with no
+  transaction or fee. Sign-in is a NEAR wallet (Meteor, MyNEARWallet, HOT).
+* **Private AI in the same ecosystem.** **NEAR AI Cloud** runs open models inside TEEs (Intel TDX + NVIDIA confidential
+  GPUs) with per-request attestation and signed answers. Axon uses it to turn contributors' raw notes into training
+  data without exposing them, and its scoring vault runs on **dstack**, the same open TEE stack NEAR AI Cloud is built
+  on. **NEAR Intents** lets users pay with any token on any chain and settles to NEAR for the owners.
+
+## 4. How it works
 
 | Step | What happens | Where in the code |
 |---|---|---|
-| 1. Create a model | A creator picks a niche and a free open base model, funds a small compute budget, and binds the model on-chain to the vault's signing key and code hash. They hand the vault a hidden test set, sealed in their browser and signed by their wallet (NEP-413). | `contract` `create_model`, `web/app.js` `createModel`, `axon/vault.py` `set_test` |
+| 1. Create a model | A creator picks a niche and a free open base model, funds a small compute budget, and binds the model on-chain to the vault's signing key and code hash. They hand the vault a hidden test set, sealed in their browser and signed by their wallet (NEP-413). | `contract` `create_model`, `web/app.js`, `axon/vault.py` `set_test` |
 | 2. Join | Each contributor registers a device key on NEAR. | `contract` `join_model`, `axon/contribute.py` |
-| 3. Prepare the data | Contributors whose data is already question/answer pairs skip this. Others send their raw records (case notes, incident reports, messages) to an open model (Qwen3.8-27B) running in **NEAR AI Cloud's TEE**, which removes personal details and writes training pairs. Axon verifies the TEE's attestation with a fresh nonce **before** sending anything, checks the answer's signature, and stores nothing. | `axon/nearai.py`, `axon prep` |
-| 4. Train locally | The contributor fine-tunes a small LoRA adapter **on their own machine**. The training data never leaves it. The base model and adapter shape are read from the chain and the vault, so there is nothing to configure. | `axon/ml.py` `Engine.train` |
-| 5. Send a sealed update | Only the adapter is sent: signed by the device key and encrypted (X25519 sealed box) so only the vault can open it. | `axon/crypto.py`, `axon/contribute.py` |
-| 6. Merge and score | The vault averages the adapters (FedAvg) and scores each contributor by **Shapley value**: their average marginal improvement on the hidden test across every group of contributors. Updates that make the model worse, or add nothing next to the others, are left out of the merge and earn nothing. A round that does not improve the model is rejected. | `axon/ml.py` `score_round` |
-| 7. Record ownership | The vault signs the result. The contract checks the ed25519 signature against the model's registered vault key, rejects replays and unknown accounts, and mints shares equal to measured improvement. Compute providers get a fixed fee, never ownership. | `contract` `submit_round` |
-| 8. Ask and pay | Anyone pays to ask a question (from their wallet, or any token via NEAR Intents). The payment carries `sha256(question)`, so it buys one answer to that one question. The contract takes 5% for Axon and splits 95% to owners by share in O(1). Optionally, the same question is also answered by the original open model (adapter switched off), free, side by side. | `contract` `pay_for_query`, `axon/vault.py` `answer` |
+| 3. Prepare the data | Contributors whose data is already question/answer pairs skip this. Others send raw records (case notes, incident reports, messages) to an open model (Qwen3.8-27B) running in **NEAR AI Cloud's TEE**, which removes personal details and writes training pairs. Axon verifies the TEE's attestation with a fresh nonce **before** sending anything, checks the answer's signature, and stores nothing. | `axon/nearai.py`, `axon prep` |
+| 4. Train locally | The contributor fine-tunes a small LoRA adapter **on their own machine**. The training data never leaves it. The base model and adapter shape are read from the chain and the vault. | `axon/ml.py` `Engine.train` |
+| 5. Send a sealed update | Only the adapter is sent, signed by the device key and encrypted (X25519 sealed box) so only the vault can open it. | `axon/crypto.py`, `axon/contribute.py` |
+| 6. Merge and score | Inside the TEE, the vault averages the adapters (FedAvg) and scores each contributor by **Shapley value**: their average marginal improvement on the hidden test across every group of contributors. Updates that make the model worse, or add nothing next to the others, are left out and earn nothing. | `axon/ml.py` `score_round` |
+| 7. Record ownership | The vault signs the result inside the TEE. The contract checks the ed25519 signature against the model's registered vault key, rejects replays and unknown accounts, and mints shares equal to measured improvement. Compute providers get a fixed fee, never ownership. | `contract` `submit_round` |
+| 8. Ask and pay | Anyone pays to ask a question. The payment carries `sha256(question)`, so it buys one answer to that one question. The contract takes 5% for Axon and splits 95% to owners by share. The same question can also be answered by the original open model, side by side. | `contract` `pay_for_query`, `axon/vault.py` `answer` |
 | 9. Withdraw | Owners withdraw their earnings any time, from the site or the CLI. | `contract` `withdraw` |
 
-**Scoring per niche.** Health uses answer-token loss on the hidden test. For classification and translation, loss turned
-out to reward answer *format* (a cheater with wrong labels scored highest in a tuning run), so those niches are scored by
-what matters: hidden-test **accuracy** (cyber) and **chrF** (Basque). See `axon/data.py` `metric_fn`.
+**Scoring per niche.** Clinical uses answer-token loss on the hidden test. For classification and translation, loss
+rewarded answer *format* (a cheater with wrong labels scored highest in a tuning run), so those niches are scored by
+hidden-test **accuracy** (cybersecurity) and **chrF** (Basque). See `axon/data.py` `metric_fn`.
+
+## 5. Privacy: what is protected, and how
+
+| Stage | Protection | Technology |
+|---|---|---|
+| Preparing raw records (optional) | Records go only to an attested TEE, which removes personal details and keeps nothing; the answer is signed by the attested key | **NEAR AI Cloud**: Intel TDX + NVIDIA confidential-computing GPUs, attestation verified with a fresh nonce before sending |
+| Training | The training data never leaves the contributor's machine; only a sealed adapter does | Federated fine-tuning (LoRA), X25519 sealed boxes, ed25519 device keys |
+| Scoring and the hidden test | Done inside sealed hardware nobody can look into, including us; anyone can verify which code runs there | **TEE: Intel TDX with dstack** (the open TEE stack NEAR AI Cloud also runs on), hosted on Phala Cloud; production OS, image pinned by digest and built by CI from this repo; training settings written into the measured configuration |
+| Ownership | Only results signed by the model's registered vault key count | NEAR contract, `env::ed25519_verify` |
+| Hidden test hand-over | Only the creator can set it, once, sealed so only the TEE can read it | NEP-413 signed message + on-chain access-key check |
+| Using the model | Weights are never published; the model answers only paid questions; the question itself never goes on-chain, only its hash | Vault access rules below, `pay_for_query` |
+
+**What Axon checks before NEAR AI Cloud sees any data** (`axon/nearai.py`, following
+[docs.near.ai/cloud/verification](https://docs.near.ai/cloud/verification)). If any check fails, nothing is sent.
+
+| Check | How |
+|---|---|
+| The gateway and the model run in genuine Intel TDX | both hardware quotes verified against Intel's certificate chain (`dcap-qvl`); neither is in debug mode |
+| The quotes are fresh and belong to the keys that sign answers | each quote's report_data = its signing address ‖ our random 32-byte nonce |
+| The software inside is the published one | sha256(app_compose) equals the quote's MRCONFIGID |
+| The GPUs are genuine NVIDIA confidential-computing GPUs | NVIDIA's attestation service (NRAS) verdict, for our nonce |
+| The answer came from that model, unaltered | ECDSA signature by the attested model key over sha256(our exact request) and sha256(the exact response) |
+
+**Check the scoring TEE yourself.** `scripts/verify_tee.py` checks that (1) the vault's code hash equals this repo's
+code at the commit it ran, (2) Intel's hardware quote binds the vault's signing key to that code hash, (3) the quote is
+genuine Intel TDX, and (4) the NEAR model accepts only that key. It works offline from the saved evidence:
+
+```bash
+git worktree add /tmp/axon-tee 1012ba3        # the exact commit the TEE ran for models 1-3 (on-chain 9, 7, 8)
+cd /tmp/axon-tee && AXON_NETWORK=mainnet AXON_CONTRACT=axon.ebukaa.near \
+  python scripts/verify_tee.py <this repo>/runs/tee-mainnet2/vault-info-20261114.json --model 9
+# 1. code hash -> OK   2. quote binds key + code hash -> OK   3. genuine Intel TDX -> OK   4. model 9 -> OK
+# Model 4: commit af804dc with runs/tee-mainnet/vault-info-20261113.json --model 4
+```
+
+Each model page on the site has a **Verified** panel that re-checks the vault's Intel quote now, recomputes the
+key-and-code binding in the browser, and reads the model's binding live from NEAR.
 
 ### Vault access rules
 
@@ -83,48 +145,10 @@ what matters: hidden-test **accuracy** (cyber) and **chrF** (Basque). See `axon/
 | `POST /models/{id}/updates` | joined contributors | device-key signature checked against the key registered on-chain |
 | `GET /models/{id}/global` (shared adapter, for local training) | joined contributors only | device-key signature over `model:account:timestamp`, valid 5 minutes |
 | `POST /models/{id}/test` (hidden test set) | the model's creator, once, before round 1 | NEP-413 wallet signature over the model id and the sealed file's sha256; key must be a full-access key of the creator |
-| `POST /models/{id}/close-round` | the vault operator | bearer token (`AXON_VAULT_TOKEN`; sealed into the TEE when the vault runs there) |
+| `POST /models/{id}/close-round` | the vault operator | bearer token, sealed into the TEE |
 | `POST /models/{id}/ask` | anyone with a payment | on-chain `pay_for_query`: signed by the payer, to this contract and model, with this question's hash, never used before |
 
-## 4. Privacy: what is protected, and how
-
-| Stage | Protection | Technology | Status |
-|---|---|---|---|
-| Preparing raw records | Records go only to an attested TEE, which removes personal details and keeps nothing; the answer is signed by the attested key | **NEAR AI Cloud**: Intel TDX + NVIDIA confidential-computing GPUs, verified with a fresh nonce before sending | CLI and website |
-| Training | The training data never leaves the contributor's machine; only a sealed adapter does | Federated fine-tuning (LoRA), X25519 sealed boxes, ed25519 device keys | Every model |
-| Scoring and the hidden test | Done inside sealed hardware nobody can look into; anyone can verify which code runs there | **TEE: Intel TDX** with dstack (the same open TEE stack NEAR AI Cloud runs on), hosted on Phala Cloud; production OS, image pinned by digest and built by CI from this repo | Model 4 on mainnet; models 1–3 were scored by the vault on a rented GPU |
-| Ownership | Only results signed by the model's registered vault key count | NEAR contract, `env::ed25519_verify` | Every model |
-| Hidden test hand-over | Only the creator can set it, once | NEP-413 signed message + on-chain access-key check | Every model created from the site/CLI |
-| Payments | Any token on any chain; optional private payment trail | NEAR Intents (1Click), Confidential Intents when a partner key is set | Built; demo payments were plain NEAR |
-
-**What Axon checks before NEAR AI Cloud sees any data** (`axon/nearai.py`, following
-[docs.near.ai/cloud/verification](https://docs.near.ai/cloud/verification)). If any check fails, nothing is sent.
-
-| Check | How |
-|---|---|
-| The gateway and the model run in genuine Intel TDX | both hardware quotes verified against Intel's certificate chain (`dcap-qvl`); neither is in debug mode |
-| The quotes are fresh and belong to the keys that sign answers | each quote's report_data = its signing address ‖ **our random 32-byte nonce** |
-| The software inside is the published one | sha256(app_compose) equals the quote's MRCONFIGID |
-| The GPUs are genuine NVIDIA confidential-computing GPUs | NVIDIA's attestation service (NRAS) verdict, for our nonce |
-| The answer came from that model, unaltered | ECDSA signature by the attested model key over sha256(our exact request) and sha256(the exact response) |
-
-On the website, each model's **Join** page runs this flow with a **Verified panel** that lists every check; the demo
-relays through a stateless function (`web/api/prep.py`: no storage, no request logging). Model 4's page has a second
-Verified panel for the scoring vault: it re-checks the vault's Intel quote now, recomputes the key and code binding in
-your browser, and reads the model's binding live from the chain.
-
-**Check the scoring TEE yourself.** `scripts/verify_tee.py` checks that (1) the vault's code hash equals this repo's
-code, (2) Intel's hardware quote binds the vault's signing key to that code hash, (3) the quote is genuine Intel TDX, and
-(4) the NEAR model accepts only that key. The TEE is stopped between demos, so the saved evidence works offline:
-
-```bash
-git worktree add /tmp/axon-tee af804dc        # the exact commit the TEE ran
-cd /tmp/axon-tee && AXON_NETWORK=mainnet AXON_CONTRACT=axon.ebukaa.near \
-  python scripts/verify_tee.py <this repo>/runs/tee-mainnet/vault-info-20261113.json --model 4
-# 1. code hash -> OK   2. quote binds key + code hash -> OK   3. genuine Intel TDX -> OK   4. model 4 -> OK
-```
-
-## 5. How NEAR is used
+## 6. How NEAR is used
 
 | NEAR technology | Role in Axon | Code |
 |---|---|---|
@@ -134,35 +158,34 @@ cd /tmp/axon-tee && AXON_NETWORK=mainnet AXON_CONTRACT=axon.ebukaa.near \
 | **Named accounts + sub-accounts** | Owners are readable accounts (`itziar.axon.ebukaa.near`); device keys bind updates to them. | `join_model` |
 | **NEAR Wallet Selector** (Meteor, MyNEARWallet, HOT) | Sign-up, paying for questions, withdrawing, creating models from the browser. | `web/wallet.js` |
 | **NEP-413 signed messages** | The creator's wallet authorises the hidden-test hand-over, with no transaction or fee. | `axon/crypto.py` `verify_nep413` |
-| **NEAR Intents (1Click)** | Pay for a question with USDC, SOL, ETH, BTC… it settles to NEAR for the owners. Confidential mode supported. | `axon/intents.py`, `axon/app.py` |
-| **TEE (Intel TDX, dstack)** | The scoring vault runs in a confidential VM on the same open stack as NEAR AI Cloud; its key is derived inside the TEE and bound to its code by the hardware quote. | `axon/tee.py`, `deploy/phala.sh`, `Dockerfile` |
+| **NEAR Intents (1Click)** | Pay for a question with USDC, SOL, ETH, BTC; it settles to NEAR for the owners. Built; the demo payments were made in NEAR. | `axon/intents.py`, `axon/app.py` |
+| **TEE (Intel TDX, dstack)** | The scoring vault runs in a confidential VM on the same open stack as NEAR AI Cloud; its key is derived inside the TEE and bound to its code by the hardware quote. | `axon/tee.py`, `deploy/phala.sh`, `docker-compose.yml`, `Dockerfile` |
 
-## 6. Use it
+## 7. Use it
 
-- **Website:** browse models, compare answers, connect a wallet, create a model, join one (including preparing raw
-  notes on NEAR AI Cloud), see and withdraw earnings. Asking and creating need the vault online (it runs on a rented GPU
-  during judging); otherwise the site shows the recorded answers.
+- **Website:** browse the models, try them on the Demo page, connect a wallet, see and withdraw earnings, prepare raw
+  notes on NEAR AI Cloud from a model's Join page.
 - **With your AI assistant:** hand it [`AGENT_SETUP.md`](AGENT_SETUP.md). It never asks for keys in chat and keeps your
   data on your machine.
-- **Contribute (CLI):** needs an NVIDIA GPU with 12 GB+ for the 1.5B to 1.7B models.
+- **CLI:** contributing needs an NVIDIA GPU with 12 GB+ for the 1.5B to 1.7B models.
 
 ```bash
 git clone https://github.com/haileymarshall/axon.git && cd axon
 python3 -m venv .venv && .venv/bin/pip install torch && .venv/bin/pip install -r requirements.txt
 export AXON_NETWORK=mainnet AXON_CONTRACT=axon.ebukaa.near AXON_VAULT_URL=<vault address>
-.venv/bin/python -m axon status --model 1
+.venv/bin/python -m axon status --model 9
 .venv/bin/python -m axon prep ~/my-notes.txt --niche rare-diseases --out ~/my-axon-data.jsonl   # only if you have raw notes
-.venv/bin/python -m axon contribute --model 1 --account <you>.near --data ~/my-axon-data.jsonl
-.venv/bin/python -m axon ask --model 3 --account <you>.near "Translate into Basque: Good morning."
-.venv/bin/python -m axon withdraw --model 1 --account <you>.near
+.venv/bin/python -m axon contribute --model 9 --account <you>.near --data ~/my-axon-data.jsonl
+.venv/bin/python -m axon ask --model 8 --account <you>.near "Translate into Basque: Good morning."
+.venv/bin/python -m axon withdraw --model 9 --account <you>.near
 ```
 
-Training data: one JSON object per line, `{"q": "...", "a": "..."}`, read locally and never uploaded. `axon prep` writes
-this format; it needs your NEAR AI Cloud key in `~/.nearai_key` or `NEARAI_API_KEY`. Try it with
-`samples/clinic-notes.txt`, `samples/security-reports.txt` or `samples/basque-notes.txt` (all fictional), and read the
-pairs before training on them.
+Training data: one JSON object per line, `{"q": "...", "a": "..."}`, read locally and never uploaded. `axon prep`
+writes this format; it needs your NEAR AI Cloud key in `~/.nearai_key` or `NEARAI_API_KEY`. Try it with the fictional
+`samples/clinic-notes.txt`, `samples/security-reports.txt` or `samples/basque-notes.txt`, and read the pairs before
+training on them.
 
-## 7. Run and check it yourself
+## 8. Run and check it yourself
 
 ```bash
 .venv/bin/python -m pytest -q tests     # 26 tests: aggregation, Shapley, exclusion rules, sealing, signatures, NEP-413, grading, leakage, NEAR AI Cloud checks
@@ -179,19 +202,18 @@ source .env.testnet
 .venv/bin/python -m axon app --demo-payer user.$AXON_PARENT     # web app on http://127.0.0.1:8800
 ```
 
-**Reproduce the mainnet runs:** `scripts/mainnet_run.sh` (vault + full loop, terminal recorded) with the settings in each
-run's `env.json`; `scripts/tune.py --domain {rare-diseases,security,basque}` runs the same training and scoring offline;
-`scripts/runs_index.py` rebuilds `RUNS.md`. Demo data is rebuilt deterministically by `python -m axon prepare-data`
-(health) and `axon.data.prepare_security()` / `prepare_basque()`.
+**Reproduce a TEE run:** deploy the vault with `deploy/phala.sh <image@sha256:digest>`, create the model with
+`axon create-model --base-model …`, seal its hidden test with `axon set-test`, then run `scripts/demo.sh` against the
+TEE vault's URL with the settings in the run's `env.json`. `scripts/fetch_adapter.py` downloads a trained adapter the
+way a contributor does and checks it against the on-chain hash.
 
-## 8. Found and fixed during the mainnet runs
+## 9. Found and fixed
 
-Running for real exposed problems no unit test had. Each fix is in the code, with tests, and every failed attempt is
-published in [`RUNS.md`](RUNS.md).
+Running for real exposed problems no unit test had. Each fix is in the code, with tests where possible.
 
 | Problem | Fix |
 |---|---|
-| GPU out of memory: vault and training on one 24 GB card | Vault holds the base model in bf16; training uses gradient checkpointing |
+| Vault and training on one 24 GB GPU ran out of memory | Vault holds the base model in bf16; training uses gradient checkpointing |
 | Vault dropped the updates and advanced its model before the chain accepted the round | The vault's model only moves forward once the round is on-chain; updates are kept on failure |
 | A contributor was merged into the model but got a 0% share | Re-score among the kept updates and drop the least useful one until every merged update owns a share |
 | Rounds that made the model worse were accepted | Rejected: model unchanged, no shares |
@@ -199,30 +221,34 @@ published in [`RUNS.md`](RUNS.md).
 | Duplicate descriptions in NVD leaked test questions into training | De-duplicated, disjoint splits, a leakage test |
 | `rpc.mainnet.near.org` deprecated; FastNEAR rate-limits the TEE's shared IP; py-near's HTTP client fails inside the TEE | Endpoint rotation; transactions are signed locally and broadcast over HTTPS, resending the same signed bytes so nothing executes twice |
 | The test-set upload trusted the claimed creator | NEP-413 wallet signature + on-chain full-access-key check |
-| Data prep took 2 minutes (the model reasons before answering) and sometimes covered only the first note | Reasoning off for this task (about 25 s); the prompt requires pairs for every record; pairs reuse each model's training question wording |
+| Training settings lived outside the TEE's measurement | Written as literals into the measured compose file |
+| `create-model` took the vault's default base model | `--base-model` flag; two models created on the wrong base were closed |
+| Scoring a 1.7B model on TEE CPUs outlasts the gateway's request timeout | The vault finishes and records the round itself; `axon round-result` waits for it on-chain |
+| Data prep took 2 minutes and sometimes covered only the first note | Reasoning off for this task (about 25 s); the prompt requires pairs for every record |
 
-## 9. Limitations
+## 10. Limitations
 
-- **Only model 4 was scored inside the TEE.** Models 1–3, with the larger models, were scored by the vault on a rented
-  GPU; running large models in a GPU TEE is the next step.
-- **Demo data is public data standing in for private data** (NIH MedQuAD, NIST NVD, Tatoeba), already in
-  question/answer form, and all contributors of a run were simulated on one machine. NEAR AI Cloud data prep was tried
-  on fictional notes, not used in the mainnet runs. All demo accounts are sub-accounts of `axon.ebukaa.near`.
-- **Gains are real but modest**, and the models are small (1.5B–1.7B): they still make mistakes. Health answers are not
-  medical advice.
+- **Demo data is public data standing in for private data** (NIH MedQuAD, NIST NVD, Tatoeba), and all contributors of a
+  run were simulated on one machine. All demo accounts are sub-accounts of `axon.ebukaa.near`.
+- **Live answers on the Demo page are served from a GPU server during judging,** not from the TEE, to keep costs low.
+  It serves exactly the model the TEE recorded: each adapter's sha256 equals the hash on NEAR.
+- **Gains are real but modest**, and the models are small (1.5B to 1.7B): they still make mistakes. Clinical answers are
+  not medical advice.
 - **Data prep sends raw records out of the machine**, into NEAR AI Cloud's attested TEE. Contributors who write their
-  own pairs send nothing. The website demo relays through Axon's stateless function, which is not itself a TEE: use it
-  with the fictional samples, and `axon prep` with your own key for real records. The GPU check relies on NVIDIA's
-  attestation service. The pairs are written by a model and can contain mistakes, so review them before training.
+  own pairs send nothing. The website demo relays through a stateless function that is not itself a TEE: use it with
+  the fictional samples, and `axon prep` with your own key for real records. The pairs are written by a model, so
+  review them before training.
 - **Contributors download the shared adapter** to train on it, so a contributor could copy it. Training inside the TEE
   would remove this.
 - **Model updates can leak some information** about training data; differential privacy and secure aggregation are next.
-- **Exact Shapley** needs 2^n evaluations (up to 8 contributors per round); larger rounds need sampling. Hidden tests in
-  the demos are small (24–30 questions), so scores are noisy.
+- **Exact Shapley** needs 2^n evaluations (up to 8 contributors per round); larger rounds need sampling. Hidden tests are
+  small (24 to 30 questions), so scores are noisy.
 - **Contributing needs an NVIDIA GPU and a terminal** today; `AGENT_SETUP.md` helps, a desktop app would help more.
-- The contract is not audited, and its wasm build is not reproducible (no Docker build). Built from commit `87a3d74`: wasm sha256 `b85179386605769bcf9735298902180a6078724d728cea9578fa5370a8adca18`, on-chain code hash `DQW5B93EWpx1X3CRiDw8FkxcdLiY5QFC6xA55o2yRacf`.
+- The contract is not audited, and its wasm build is not reproducible (no Docker build). Built from commit `87a3d74`:
+  wasm sha256 `b85179386605769bcf9735298902180a6078724d728cea9578fa5370a8adca18`, on-chain code hash
+  `DQW5B93EWpx1X3CRiDw8FkxcdLiY5QFC6xA55o2yRacf`.
 
-## 10. Repository map
+## 11. Repository map
 
 ```
 contract/            NEAR contract (Rust): models, device keys, signed rounds, shares, 5% fee, revenue split, withdrawals + 21 tests
@@ -232,20 +258,19 @@ axon/vault.py        the vault: decrypt + verify updates, score, sign, sealed te
 axon/contribute.py   contributor client: join on-chain, train locally, sign + seal the update
 axon/crypto.py       ed25519 / X25519, sealed boxes, NEP-413 verification
 axon/chain.py        NEAR RPC with endpoint rotation; local signing and safe re-broadcast
-axon/data.py         the three demo niches (rare diseases, cyber, Basque), probes, grading, per-niche metrics
+axon/data.py         the three demo niches (rare diseases, cyber, Basque), test questions, grading, per-niche metrics
 axon/tee.py          TEE key derivation and attestation (dstack)
 axon/intents.py      NEAR Intents 1Click quotes and status
-axon/app.py          web backend; web/ is the site (no build step): wallet.js, app.js, neuron art, designs B (/) and A (/a)
-web/api/             stateless functions: data prep on NEAR AI Cloud (prep.py), live check of the vault's TEE quote (tee.py)
-axon/runs.py         run records (runs/, RUNS.md)
-scripts/             setup.sh, demo.sh, run.sh, mainnet_run.sh, tune.py, verify_tee.py, build_site.py, runs_index.py
+axon/app.py          web backend (paid and free demo questions); web/ is the site
+web/api/             stateless functions: data prep on NEAR AI Cloud (prep.py), live check of a vault's TEE quote (tee.py)
+scripts/             setup, demo, runs, verify_tee.py, fetch_adapter.py, build_site.py
 deploy/, Dockerfile  TEE deployment (Phala, image pinned by digest; built by .github/workflows/vault-image.yml)
-samples/             fictional raw records (clinic notes, security reports, Basque messages) for trying `axon prep`
-runs/, RUNS.md       every run, published (runs/nearai-cloud: data prep evidence; runs/tee-mainnet: TEE vault evidence)
+samples/             fictional raw records for trying `axon prep`
+runs/                every run's record; runs/tee-mainnet*/ hold the TEE evidence
 AGENT_SETUP.md       setup guide for AI assistants
 ```
 
-## 11. Credits and licences
+## 12. Credits and licences
 
 Base models: Qwen2.5-1.5B-Instruct and Qwen3-1.7B (Alibaba, Apache-2.0), SmolLM2-135M-Instruct (Hugging Face,
 Apache-2.0). Data prep model: Qwen3.8-27B on NEAR AI Cloud. Data: MedQuAD (NIH, CC BY 4.0), National Vulnerability
@@ -253,9 +278,9 @@ Database (NIST, public domain), Tatoeba (CC BY 2.0 FR). Libraries: PyTorch, Hugg
 py-near, FastAPI, near-sdk, NEAR Wallet Selector, libsodium, dcap-qvl, eth-account. TEE: dstack on Phala Cloud. GPUs:
 Vast.ai.
 
-## 12. Hackathon disclosure
+## 13. Hackathon disclosure
 
-All code in this repository was written during the NEAR HACKATHON window (November 2026). AI coding tools were used.
+All code in this repository was written during the NEAR HACKATHON window (November 2026).
 
 ## License
 
