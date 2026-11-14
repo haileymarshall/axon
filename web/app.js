@@ -444,7 +444,7 @@ function askCard(m, demo) {
     <select id="asset">
       <option value="wallet">My NEAR wallet${W.account() ? " · " + esc(W.account()) : " (connect)"}</option>
       ${demo ? `<option value="demo">Free demo question (Axon pays, ${CONFIG.demo_per_day} a day)</option>` : ""}
-      ${CONFIG.tokens.map((t) => `<option value="${t.id}">${esc(t.label)} · via NEAR Intents</option>`).join("")}
+      ${CONFIG.treasury ? CONFIG.tokens.map((t) => `<option value="${t.id}">${esc(t.label)} · via NEAR Intents</option>`).join("") : ""}
     </select>
     <div id="refund-wrap" style="display:none"><label>Your refund address on that chain</label><input id="refund" placeholder="0x… / So1… / bc1…"></div>
     <label class="check"><input type="checkbox" id="compare" checked> Compare with the original open model (${esc(m.base_model.split("/").pop())}, free)</label>
@@ -689,12 +689,16 @@ async function pageContribute() {
 async function pageJoin(id) {
   const m = await db.model(id);
   const n = nicheOf(m);
+  const tees = await fetch("/static/tee.json").then((r) => (r.ok ? r.json() : null)).catch(() => null);
+  const tee = (tees?.vaults || []).find((v) => v.combiner_key === m.combiner_key);
+  const vaultUrl = tee?.url || "see the Axon website";
+  const envJoin = `export AXON_NETWORK=${CONFIG.network} AXON_CONTRACT=${CONFIG.contract} AXON_VAULT_URL=${vaultUrl}`;
   const acct = W.account() || (CONFIG.network === "mainnet" ? "<your-account>.near" : "<your-account>.testnet");
-  const cmd = `${envLine()}\n.venv/bin/python -m axon contribute --model ${m.id} --account ${acct} --data ~/my-axon-data.jsonl`;
+  const cmd = `${envJoin}\n.venv/bin/python -m axon contribute --model ${m.id} --account ${acct} --data ~/my-axon-data.jsonl`;
   const prompt = `Help me contribute my private data to an Axon model, so I co-own it and earn from it. Follow the guide at ${REPO}/blob/master/AGENT_SETUP.md (Path A).
 Model: ${m.id} ("${m.name}", niche: ${m.domain}) on NEAR ${CONFIG.network}, contract ${CONFIG.contract}.
 My NEAR account: ${acct}.
-Vault: ${CONFIG.vault_url || "see the Axon website"}.
+Vault (this model's TEE vault): ${vaultUrl}.
 My data is on this computer; it must never be uploaded or pasted anywhere. Help me turn it into the right format, then run the training.`;
   view.innerHTML = `<div class="wrap page">
     <a href="#/model/${m.id}" class="small muted">← ${esc(m.name)}</a>
@@ -713,6 +717,7 @@ My data is on this computer; it must never be uploaded or pasted anywhere. Help 
     </section>
     ${prepSection(m)}
     <section class="block" style="padding-top:40px"><h3>Run the training</h3>
+    ${tee ? `<p class="small notice">This model is scored by its TEE vault (${esc(tee.cvm.split(" (")[0])}). The TEE is paused during judging to save costs, so new rounds open again after judging. Everything below already points at it.</p>` : ""}
     ${threeTabs("jointabs", [
       { title: "With your AI assistant (easiest)", html: `<p class="muted small">Paste this into Claude, ChatGPT, Cursor or any assistant that can use a terminal. It installs Axon, helps you format your data, and runs the training for you.</p>${copyBox(prompt, "Copy message")}` },
       { title: "Copy one command", html: `<p class="muted small">Needs Axon installed (<a href="${REPO}/blob/master/AGENT_SETUP.md" target="_blank" rel="noopener">2-minute install</a>), your NEAR account imported, and an NVIDIA GPU (12 GB+).</p>${copyBox(cmd)}` },

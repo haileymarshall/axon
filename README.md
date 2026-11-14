@@ -282,7 +282,11 @@ Vast.ai.
 
 ## 13. Hackathon disclosure
 
-All code in this repository was written during the NEAR HACKATHON window (November 2026).
+All code in this repository was written during the NEAR HACKATHON window (November 2026). There is no pre-hackathon
+code: the first commit is [`1e72603`](https://github.com/haileymarshall/axon/commit/1e72603) (12 November 2026), tagged
+`pre-hackathon`; the submitted state is tagged `hackathon-submission`
+([full diff](https://github.com/haileymarshall/axon/compare/pre-hackathon...hackathon-submission)). AI coding assistants
+were used during development. Libraries and data used are listed in section 12.
 
 ## License
 

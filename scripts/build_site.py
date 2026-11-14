@@ -44,7 +44,8 @@ def main() -> None:
         ev = ev.get("info", ev)
         vaults.append({"combiner_key": ev["combiner_key"], "code_hash": ev["code_hash"], "quote": ev["attestation"]["quote"],
                        "commit": t["commit"], "cvm": t["cvm"], "round_txs": t.get("round_txs", {}),
-                       "evidence": f"runs/{man.parent.name}/{t['evidence']}"})
+                       "evidence": f"runs/{man.parent.name}/{t['evidence']}",
+                       "url": (man.parent / "vault-url.txt").read_text().strip() if (man.parent / "vault-url.txt").exists() else ""})
     (ROOT / "web" / "tee.json").write_text(json.dumps({"vaults": vaults}))
     # The whitepaper page (/whitepaper) is rendered from WHITEPAPER.md.
     try:
