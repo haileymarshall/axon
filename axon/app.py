@@ -70,6 +70,10 @@ def _save_orders(o: dict) -> None:
 def create_app(treasury: str | None, demo_payer: str | None) -> FastAPI:
     """`treasury` receives Intents payments and records them on-chain; `demo_payer` pays a few demo questions."""
     app = FastAPI(title="Axon app")
+    # The static site (e.g. axon.surf) calls this backend from the browser.
+    from fastapi.middleware.cors import CORSMiddleware
+    origins = [o for o in os.environ.get("AXON_SITE_ORIGINS", "https://axon.surf,https://www.axon.surf").split(",") if o]
+    app.add_middleware(CORSMiddleware, allow_origins=origins, allow_methods=["GET", "POST"], allow_headers=["Content-Type"])
     near = Near()
     demo_lock = threading.Lock()
 
