@@ -19,7 +19,7 @@
  ],
  "functions": {
   "api/*.py": {
-   "maxDuration": 90
+   "maxDuration": 300
   }
  }
 }
