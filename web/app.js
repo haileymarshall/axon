@@ -67,6 +67,7 @@ const PROOF = {
     4: { rounds: ["HmeSHkg2encGsDZgfvzkAKweETp4NtVv2h5SJAd3voED"], paid: "7FSBVoWS24ps4jPeMyms6SvfYL51MKXsv3Av6x2p6wXr", vault: "axon-vault-mainnet5" },
   },
 };
+const lastHash = (m) => ((m.rounds_detail || []).slice(-1)[0] || {}).adapter_hash || "";
 // Shown name of a model: its showcase number, else its on-chain id.
 const mnum = (m) => m.n ?? m.id;
 const byNumber = (a, b) => (a.n ?? 100 + a.id) - (b.n ?? 100 + b.id);
@@ -87,7 +88,6 @@ const db = {
     return label(m);
   },
   async runs() {
-    if (LIVE) return api("/api/runs");
     const all = await fetch("/static/runs.json").then((r) => (r.ok ? r.json() : [])).catch(() => []);
     return all.filter((r) => r.contract === CONFIG.contract);
   },
@@ -419,8 +419,7 @@ async function pageModel(id) {
       <div class="kicker">Proof</div><h2>Why you can trust these numbers</h2>
       <div class="card small" style="margin-top:28px">
         <p>Round results are signed by the vault key <code>${esc(m.combiner_key.slice(0, 16))}…</code>, bound to vault code hash <code>${esc(m.combiner_code_hash.slice(0, 16))}…</code>. The contract rejects anything else.</p>
-        <p>${!LIVE ? "The vault is offline right now; the model stays bound on-chain to the key and code hash above." : keyOk ? "✅ The running vault's key and code hash match what is registered on-chain." : "⚠️ The vault currently online is not the one this model is bound to (answers need the vault that trained it)."}
-        ${LIVE ? `Attestation mode: <b>${esc(vault?.attestation?.mode || "unknown")}</b>.` : ""}</p>
+        <p>${!LIVE ? "The vault is offline right now; the model stays bound on-chain to the key and code hash above." : keyOk ? "✅ The running vault's key and code hash match what is registered on-chain." : `Live answers during judging come from a demo GPU server, not the TEE. It serves exactly the model the TEE recorded: adapter sha256 <code>${esc(lastHash(m).slice(0, 16))}…</code>, the hash on NEAR for round ${m.rounds}.`}</p>
         <p style="margin-bottom:0">Base model <code>${esc(m.base_model)}</code> (open, free). Compute providers get a fixed fee per round (${near(m.compute_fee, 3)} Ⓝ), never ownership. Training budget left: ${near(m.budget, 3)} Ⓝ. Creator ${acctLink(m.creator)}.</p>
       </div>
     </section>
@@ -723,34 +722,110 @@ ${esc(cmd)}</pre><p class="small"><a href="${REPO}/blob/master/AGENT_SETUP.md" t
   if (jc) jc.onclick = (e) => { e.preventDefault(); W.connect(); };
 }
 
-async function pageRuns() {
+// ------------------------------------------------------------------ demo: the four models, live, with their proof
+
+// Same grading as the published runs (axon/data.py grade, chrf): gene symbol, inheritance pattern, first CWE, chrF.
+function chrfJS(hyp, ref, n = 6, beta = 2) {
+  const h = hyp.replace(/ /g, ""), r = ref.replace(/ /g, "");
+  const grams = (t, k) => { const c = new Map(); for (let i = 0; i + k <= t.length; i++) { const g = t.slice(i, i + k); c.set(g, (c.get(g) || 0) + 1); } return c; };
+  const P = [], R = [];
+  for (let k = 1; k <= n; k++) {
+    const hg = grams(h, k), rg = grams(r, k);
+    if (!hg.size || !rg.size) continue;
+    let m = 0; hg.forEach((v, g) => (m += Math.min(v, rg.get(g) || 0)));
+    P.push(m / [...hg.values()].reduce((a, b) => a + b, 0)); R.push(m / [...rg.values()].reduce((a, b) => a + b, 0));
+  }
+  if (!P.length) return 0;
+  const p = P.reduce((a, b) => a + b, 0) / P.length, rr = R.reduce((a, b) => a + b, 0) / R.length;
+  return p + rr === 0 ? 0 : (100 * (1 + beta ** 2) * p * rr) / (beta ** 2 * p + rr);
+}
+const firstLine = (t) => (String(t || "").split("\n").find((l) => l.trim()) || "").trim();
+function gradeJS(answer, p) {
+  if (!p) return null;
+  if (p.kind === "chrf") { const c = chrfJS(firstLine(answer), p.answer); return { ok: c >= 50, label: `chrF ${c.toFixed(1)}` }; }
+  if (p.kind === "cwe") { const f = String(answer).match(/CWE-\d+/); return { ok: !!f && f[0] === p.answer, label: f ? f[0] : "no CWE named" }; }
+  if (p.kind === "gene") return { ok: new RegExp(`\\b${p.gene.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`).test(answer), label: "" };
+  if (p.kind === "inheritance") return { ok: String(answer).toLowerCase().includes(p.inheritance), label: "" };
+  return null;
+}
+const rightAnswer = (p) => (p.kind === "gene" ? `gene ${p.gene}` : p.kind === "inheritance" ? p.inheritance : p.answer_label || p.answer || "");
+
+// What the showcase questions are, per niche (axon/data.py probes).
+const TESTQ = {
+  "rare-diseases": "Pick a question: reworded questions about facts in the contributors' private notes (which gene, how it is inherited)",
+  security: "Pick a question: new vulnerabilities from July 2026 that the model never saw, after the base model was trained",
+  basque: "Pick a sentence: none of these were in anyone's training data",
+};
+async function pageDemo() {
   const proof = PROOF[CONFIG.contract] || {};
   const ids = Object.keys(proof).map(Number);
   const [models, all] = await Promise.all([Promise.all(ids.map((id) => db.model(id))), runs()]);
   models.sort(byNumber);
-  const row = (m) => {
+  const free = LIVE && CONFIG.demo_payer;
+  const section = (m) => {
     const p = proof[m.id];
-    const run = all.find((r) => r.model_id === m.id && !r.note);
-    const o = owners(m);
-    const who = o.map((c) => `${acctLink(c.account)} <b>${pct(c.shares, m.total_shares)}</b>`).join("<br>");
-    return `<tr>
-      <td><a href="#/model/${m.id}"><b>Model ${mnum(m)}</b></a><div class="small muted">on-chain id ${m.id}</div></td>
-      <td><b>${esc(m.area)}</b><div class="small">${esc(m.name)}</div><div class="small muted">${esc(m.base_model.split("/").pop())}</div></td>
-      <td class="small">${m.grade ? esc(m.grade) : "<span class=\"muted\">being scored in the TEE…</span>"}${run ? `<div class="muted">${run.wall_minutes} min</div>` : ""}</td>
-      <td class="small">${who}</td>
-      <td class="small">${p.rounds.map((t, i) => `Round ${i + 1}: ${txLink(t)}`).join("<br>")}${p.paid ? `<br>Paid question: ${txLink(p.paid)}` : ""}
-        <br><a href="#/model/${m.id}">TEE verified ✅</a>${run ? `<br><a target="_blank" rel="noopener" href="${REPO}/blob/master/runs/${esc(run.run_id)}/summary.md">Run record</a> · <a target="_blank" rel="noopener" href="${REPO}/blob/master/runs/${esc(run.run_id)}/terminal.cast">recording</a>` : ""}</td>
-    </tr>`;
+    const run = all.find((r) => r.model_id === m.id && !r.note) || { probes: [] };
+    const o = owners(m).filter((c) => Number(c.shares) > 0);
+    const qs = run.probes.map((q, i) => `<button class="qbtn" data-m="${m.id}" data-i="${i}">${esc(q.kind === "chrf" ? q.disease : q.question.split("\n\n")[0] === q.question ? q.question : (q.disease || q.question.slice(0, 60)))}</button>`).join("");
+    return `<section class="block demo-model" id="demo-${m.id}">
+      <div class="kicker">Model ${mnum(m)} · ${esc(m.area)}</div><h2>${esc(m.name)}</h2>
+      <div class="demo-meta small">
+        <span><span class="muted">Starts from</span> ${esc(m.base_model)} <span class="muted">(open source)</span></span>
+        <span><span class="muted">Result</span> <b>${esc(m.grade || "")}</b></span>
+        <span><span class="muted">Owners</span> ${o.map((c) => `${acctLink(c.account)} ${pct(c.shares, m.total_shares)}`).join(" · ")}</span>
+      </div>
+      <div class="demo-proof small">
+        <a href="#/model/${m.id}">Scored inside a TEE ✅</a>
+        ${p.rounds.map((t, i) => `<span>Round ${i + 1} ${txLink(t)}</span>`).join("")}
+        ${p.paid ? `<span>Paid question ${txLink(p.paid)}</span>` : ""}
+        ${run.run_id ? `<a target="_blank" rel="noopener" href="${REPO}/blob/master/runs/${esc(run.run_id)}/summary.md">Run record</a>` : ""}
+        <span class="muted">on-chain id ${m.id}</span>
+      </div>
+      <p class="small muted" style="margin:22px 0 10px">${esc(TESTQ[m.domain] || "Pick a question it was tested on")}, or ask your own. Both models answer it.</p>
+      <div class="qlist">${qs}</div>
+      <div class="row" style="margin-top:12px"><input class="qown" data-m="${m.id}" placeholder="Or ask your own question…" style="flex:1"><button class="btn qask" data-m="${m.id}">Ask both</button></div>
+      <div class="demo-out" id="out-${m.id}"></div>
+    </section>`;
   };
   view.innerHTML = `<div class="wrap page">
-    <div class="kicker">Runs</div><h2>Every run, scored inside a TEE</h2>
-    <p class="lead">Each model was trained by its contributors on their own machines. Their sealed updates were scored inside an attested Intel TDX TEE, and the result was signed there and recorded on NEAR mainnet. Every number below links to its proof.</p>
-    <div class="tablewrap"><table>
-      <tr><th>Model</th><th>Area · topic · base model</th><th>Result (base → Axon-trained)</th><th>Owners</th><th>Proof</th></tr>
-      ${models.map(row).join("")}
-    </table></div>
-    <p class="small muted" style="margin-top:18px">Results are graded automatically on questions nobody trained on. A contributor whose data did not help (including a deliberate cheater in every run) gets 0%.</p>
+    <div class="kicker">Demo</div><h2>Four models, trained on private data, scored inside a TEE</h2>
+    <p class="lead">Each model is a free open-source model fine-tuned by people who hold specialist knowledge, without sharing their data. Ask it the questions it was tested on, next to the open-source model it started from.</p>
+    <p class="small muted">${free ? `Answers are generated live. Each question is a real 0.01 Ⓝ payment on NEAR, split among the owners (free questions are paid by Axon's demo account, ${CONFIG.demo_per_day} a day). During judging, answers come from a demo GPU server that serves exactly the model the TEE recorded (its sha256 matches the hash on NEAR).` : "The live demo server is offline right now; each question shows the answer recorded during the model's run."}</p>
+    ${models.map(section).join("")}
   </div>`;
+  const byId = Object.fromEntries(models.map((m) => [m.id, m]));
+  const probeOf = (mid, i) => (all.find((r) => r.model_id === mid && !r.note) || { probes: [] }).probes[i];
+  const show = (mid, question, probe, res) => {
+    const m = byId[mid];
+    const g = (a) => { const x = gradeJS(a, probe); return x ? `<span class="${x.ok ? "ok" : "bad"}">${x.ok ? "✅" : "❌"} ${esc(x.label)}</span>` : ""; };
+    $(`#out-${mid}`).innerHTML = `<h3 style="margin-top:24px">${esc(question.split("\n\n").pop())}</h3>
+      <div class="cmp2">
+        <div class="card"><span class="tag">Original open-source model · ${esc(m.base_model.split("/").pop())}</span> ${g(res.base_answer)}<p>${esc(res.base_answer || "")}</p></div>
+        <div class="card hl"><span class="tag">Axon-trained (Model ${mnum(m)})</span> ${g(res.answer)}<p>${esc(res.answer || "")}</p></div>
+      </div>
+      ${probe ? `<p class="small"><span class="muted">Right answer:</span> <b>${esc(rightAnswer(probe))}</b></p>` : ""}
+      ${res.payment_tx ? `<p class="small muted">Paid on NEAR: ${txLink(res.payment_tx)} · 95% to the owners, 5% to Axon.</p>` : res.recorded ? `<p class="small muted">Answer recorded during the run (the live server is offline).</p>` : ""}`;
+  };
+  const ask = async (mid, question, probe) => {
+    const out = $(`#out-${mid}`);
+    if (!free) { if (probe) show(mid, question, probe, { base_answer: probe.base_model, answer: probe.axon_trained, recorded: true }); else out.innerHTML = `<p class="small">The live demo server is offline right now.</p>`; return; }
+    out.innerHTML = `<p class="small"><span class="spin"></span>Paying 0.01 Ⓝ on NEAR, then both models answer… (about 20 seconds)</p>`;
+    try {
+      const res = await api("/api/ask-demo", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ model_id: mid, question, compare: true }) });
+      show(mid, question, probe, res);
+    } catch (e) {
+      out.innerHTML = `<p class="small">${esc(e.message)}. You can also <a href="#/model/${mid}">ask from your own wallet</a>.</p>`;
+    }
+  };
+  document.querySelectorAll(".qbtn").forEach((b) => (b.onclick = () => {
+    const mid = Number(b.dataset.m), p = probeOf(mid, Number(b.dataset.i));
+    document.querySelectorAll(`#demo-${mid} .qbtn`).forEach((x) => x.classList.toggle("on", x === b));
+    ask(mid, p.question, p);
+  }));
+  document.querySelectorAll(".qask").forEach((b) => (b.onclick = () => {
+    const mid = Number(b.dataset.m), q = document.querySelector(`.qown[data-m="${mid}"]`).value.trim();
+    if (q) ask(mid, q, null);
+  }));
 }
 
 async function pageEarnings() {
@@ -912,7 +987,7 @@ async function route() {
     else if (h.startsWith("#/model/")) await pageModel(Number(h.split("/")[2]));
     else if (h === "#/contribute") await pageContribute();
     else if (h === "#/earnings") await pageEarnings();
-    else if (h === "#/runs") await pageRuns();
+    else if (h === "#/demo" || h === "#/runs") await pageDemo();
     else if (h === "#/create") pageCreate();
     else await pageHome();
   } catch (e) {

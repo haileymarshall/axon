@@ -216,3 +216,14 @@ a.card .tag:not(.live) { color: var(--mute); }
 .tablewrap { overflow-x: auto; margin-top: 28px; }
 .tablewrap table { min-width: 860px; }
 .tablewrap td { vertical-align: top; }
+.demo-model { border-top: 1px solid var(--line); padding-top: 48px; }
+.demo-meta, .demo-proof { display: flex; flex-wrap: wrap; gap: 8px 26px; margin-top: 14px; }
+.demo-proof { padding: 12px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.qlist { display: flex; flex-wrap: wrap; gap: 6px; max-height: 148px; overflow-y: auto; }
+.qbtn { font: 500 12px var(--mono); color: var(--ink); background: var(--fill); border: 1px solid var(--line); padding: 7px 10px; cursor: pointer; text-align: left; }
+.qbtn:hover, .qbtn.on { background: var(--ink); color: var(--bg); }
+.cmp2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin-top: 12px; }
+.cmp2 .card p { white-space: pre-wrap; margin: 12px 0 0; }
+.cmp2 .card.hl { background: rgba(255, 255, 255, .12); border-color: var(--line2); }
+.ok { color: #b9ffcf; font-weight: 600; } .bad { color: var(--warn); font-weight: 600; }
+@media (max-width: 760px) { .cmp2 { grid-template-columns: 1fr; } }
