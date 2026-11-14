@@ -19,7 +19,7 @@ verified TEE. Ownership, payments, payouts, sign-in and data prep all run on **N
 |---|---|
 | **Live site** | https://axon.surf |
 | **Try the models** | https://axon.surf/#/demo: ask each model a question next to the open-source model it started from |
-| **Whitepaper** | https://axon.surf/whitepaper: everything about the project, every run, every decision |
+| **Whitepaper** | https://axon.surf/whitepaper ([PDF](https://axon.surf/axon-whitepaper.pdf)): everything about the project, every run, every decision |
 | **Contract address (NEAR mainnet)** | [`axon.ebukaa.near`](https://nearblocks.io/address/axon.ebukaa.near) (on NEAR, a contract lives at an account name) |
 | **Run records** | [`runs/`](runs/): logs, transactions, base-vs-trained answers and terminal recordings |
 | **Set it up with your AI assistant** | [`AGENT_SETUP.md`](AGENT_SETUP.md) |

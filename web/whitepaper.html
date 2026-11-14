@@ -22,6 +22,24 @@
   .paper hr { border: 0; border-top: 1px solid var(--line); margin: 36px 0; }
   .paper code { word-break: break-word; }
   .paper .back { font: 600 12px var(--mono); letter-spacing: .1em; text-transform: uppercase; text-decoration: none; }
+  .paper .pdf { display: inline-block; margin: 18px 0 6px; }
+  @media print {
+    @page { size: A4; margin: 16mm 15mm 18mm; }
+    html, body { background: #fff !important; color: #0b0f2e !important; font-size: 10.5pt; }
+    header.top, footer.foot, .paper .back, .paper .pdf { display: none !important; }
+    .paper { max-width: none; padding: 0; }
+    .paper h1 { font-size: 34pt; color: #1b3bff; }
+    .paper h2 { font-size: 19pt; color: #1b3bff; border-top: 1px solid #c9cff5; margin-top: 26pt; page-break-after: avoid; }
+    .paper h3 { font-size: 13pt; color: #0b0f2e; page-break-after: avoid; }
+    .paper p, .paper li, .paper td, .paper th { color: #1a1f3d !important; }
+    .paper strong, .paper b, .paper a { color: #0b0f2e !important; }
+    .paper th { color: #4a5490 !important; border-bottom: 1px solid #c9cff5; }
+    .paper td { border-bottom: 1px solid #e3e6fa; }
+    .paper table { display: table; width: 100%; font-size: 9pt; page-break-inside: auto; }
+    .paper tr { page-break-inside: avoid; }
+    .paper pre { background: #f3f5ff; border: 1px solid #d6dbf7; color: #0b0f2e; white-space: pre-wrap; font-size: 8.5pt; }
+    .paper code { background: #eef1ff; border-color: #d6dbf7; color: #0b0f2e; }
+  }
 </style>
 </head>
 <body>
@@ -40,7 +58,9 @@
 <a class="back" href="/">← axon.surf</a>
 <h1 id="axon-whitepaper">Axon Whitepaper</h1>
 <p><strong>Specialized AI built from private data, co-owned by its contributors, paid on every inference.</strong></p>
+
 <p>Version 1.0 · 14 November 2026 · NEAR mainnet contract <code>axon.ebukaa.near</code> · https://axon.surf</p>
+<p><a class="btn pdf" href="/axon-whitepaper.pdf" download>Download PDF</a></p>
 <hr />
 <h2 id="contents">Contents</h2>
 <ol><li><a href="#1-summary">Summary</a></li><li><a href="#2-the-problem">The problem</a></li><li><a href="#3-who-axon-is-for">Who Axon is for</a></li><li><a href="#4-what-axon-is">What Axon is</a></li><li><a href="#5-design-principles">Design principles</a></li><li><a href="#6-system-overview">System overview</a></li><li><a href="#7-the-life-of-a-model">The life of a model</a></li><li><a href="#8-preparing-private-data-on-near-ai-cloud">Preparing private data on NEAR AI Cloud</a></li><li><a href="#9-training-on-the-contributors-own-machine">Training on the contributor's own machine</a></li><li><a href="#10-the-vault-inside-a-tee">The vault inside a TEE</a></li><li><a href="#11-scoring-who-improved-the-model-and-by-how-much">Scoring: who improved the model, and by how much</a></li><li><a href="#12-the-near-contract">The NEAR contract</a></li><li><a href="#13-paying-for-answers">Paying for answers</a></li><li><a href="#14-privacy-and-threat-model">Privacy and threat model</a></li><li><a href="#15-the-runs-on-near-mainnet">The runs on NEAR mainnet</a></li><li><a href="#16-verifying-everything-yourself">Verifying everything yourself</a></li><li><a href="#17-the-demo-during-judging">The demo during judging</a></li><li><a href="#18-engineering-log-what-we-found-and-fixed">Engineering log: what we found and fixed</a></li><li><a href="#19-economics">Economics</a></li><li><a href="#20-limitations">Limitations</a></li><li><a href="#21-roadmap">Roadmap</a></li><li><a href="#22-appendix">Appendix: accounts, transactions, hashes, settings, glossary</a></li></ol>
